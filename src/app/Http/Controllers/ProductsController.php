@@ -24,9 +24,13 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
+        $allCarts = collect( $this->api2cart->getCartsList()['result']['supported_carts'] );
+
         $carts = $this->api2cart->getCartList();
         $stores = ($carts['result']['carts_count']) ? collect( $carts['result']['carts'] ) : collect([]);
-        $storeInfo = $stores->where('store_key', $store_id)->first();
+
+        $storeInfo      = $stores->where('store_key', $store_id)->first();
+        $info           = $this->api2cart->getCart( $store_id )['result']['stores_info'][0];
 
         $totalProducts = $this->api2cart->getProductCount( $store_id )['result']['products_count'];
 
@@ -44,7 +48,10 @@ class ProductsController extends Controller
         if ( $newProducts->count() ){
             foreach ($newProducts as $item){
                 $newItem = $item;
-                $newItem['cart_id'] = $storeInfo['cart_id'];
+
+                $newItem['stores_info']   = $info;
+                $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
+
                 $products->push( $newItem );
             }
         }
@@ -61,7 +68,8 @@ class ProductsController extends Controller
                 if ( $newProducts->count() ){
                     foreach ($newProducts as $item){
                         $newItem = $item;
-                        $newItem['cart_id'] = $storeInfo['cart_id'];
+                        $newItem['stores_info']   = $info;
+                        $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
                         $products->push( $newItem );
                     }
                 }
@@ -73,7 +81,7 @@ class ProductsController extends Controller
 
         }
 
-
+//        Log::debug( print_r($products->forPage(1,2),1) );
 
 
         $data = [

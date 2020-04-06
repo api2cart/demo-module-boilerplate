@@ -67,7 +67,10 @@ class Api2Cart
         try{
 
             $response = $this->client->request('GET', url($this->host) . "/v1.1/account.cart.list.json" , [
-                'query' => ['api_key' => $this->apiKey]
+                'query' => [
+                    'api_key'   => $this->apiKey,
+                    'params'    => 'force_all'
+                ]
             ]);
 
             $body = $response->getBody();
@@ -89,8 +92,37 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1//cart.info.json" , [
-                'query' => ['api_key' => $this->apiKey, 'store_id' => $store_id ]
+            $response = $this->client->request('GET', url($this->host) . "/v1.1/cart.info.json" , [
+                'query' => [
+                    'api_key'   => $this->apiKey,
+                    'store_key' => $store_id,
+                    'params'    => 'store_name,store_url,stores_info'
+                ]
+            ]);
+
+            $body = $response->getBody();
+
+            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+
+
+        } catch (\Exception $e){
+
+            Log::debug( $e->getMessage() );
+
+            return false;
+        }
+    }
+
+    public function getCartsList()
+    {
+        $this->setApiKey();
+
+        try{
+
+            $response = $this->client->request('GET', url($this->host) . "/v1.1/cart.list.json" , [
+                'query' => [
+                    'api_key'   => $this->apiKey,
+                ]
             ]);
 
             $body = $response->getBody();
@@ -227,7 +259,8 @@ class Api2Cart
                     'api_key'   => $this->apiKey,
                     'store_key' => $store_id,
                     'start'     => $from,
-                    'count'     => $numOrders
+                    'count'     => $numOrders,
+                    'params'    => 'force_all'
                 ]
             ]);
 
@@ -255,6 +288,7 @@ class Api2Cart
                     'api_key'       => $this->apiKey,
                     'store_key'     => $store_id,
                     'page_cursor'   => $page_cursor,
+                    'params'        => 'force_all'
                 ]
             ]);
 

@@ -30,32 +30,31 @@ class StoresController extends Controller
         $search = ($request->get('search')) ? $request->get('search')['value'] : null;
         $carts = $this->api2cart->getCartList();
 
+        $allCarts = collect( $this->api2cart->getCartsList()['result']['supported_carts'] );
+
+
+
         $stores = ($carts['result']['carts_count']) ? collect( $carts['result']['carts'] ) : collect([]);
 
-        if ( $search ){
-
-            $stores = $stores->filter(function($value, $key) use( $search ){
-                // add more search fields if needed
-                $a1 = ( stripos( $value['cart_id'], $search ) !== false  ) ? true : false;
-                $a2 = ( stripos( $value['url'], $search ) !== false ) ? true : false;
-                return ( $a1 || $a2);
-            });
-
-        }
-
-        $perPage = ($request->get('length')) ? $request->get('length') : 10;
+        $perPage = ($request->get('length')) ? $request->get('length') : 100;
         $totalPages = $stores->count() / $perPage;
-        $currPage   = $request->get('start') ? ($request->get('start')/$perPage)+1 : 1;
 
 
-        $chunk = array_merge($stores->forPage($currPage,$perPage)->toArray());
+        $stores = $stores->map(function ($store) use ($allCarts) {
+            $info = $this->api2cart->getCart( $store['store_key'] )['result']['stores_info'][0];
+            $store['stores_info']   = $info;
+            $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
+            return $store;
+        });
+
+
 
         $data = [
-            "recordsTotal"      => $carts['result']['carts_count'],
+            "recordsTotal"      => $stores->count(),
             "recordsFiltered"   => $stores->count(),
             "start"             => 0,
             "length"            => $perPage,
-            "data"              => $chunk
+            "data"              => $stores
 
         ];
 
