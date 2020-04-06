@@ -93,7 +93,7 @@
 
             loadData();
 
-            $.unblockUI();
+            // $.unblockUI();
 
             // console.log( items );
 
