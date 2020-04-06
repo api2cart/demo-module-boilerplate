@@ -51,6 +51,7 @@ class ProductsController extends Controller
 
                 $newItem['stores_info']   = $info;
                 $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
+                $newItem['cart_id']       = $stores->where('store_key', $store_id)->first();
 
                 $products->push( $newItem );
             }
@@ -70,6 +71,7 @@ class ProductsController extends Controller
                         $newItem = $item;
                         $newItem['stores_info']   = $info;
                         $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
+                        $newItem['cart_id']       = $stores->where('store_key', $store_id)->first();
                         $products->push( $newItem );
                     }
                 }

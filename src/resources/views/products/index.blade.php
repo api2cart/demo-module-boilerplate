@@ -143,9 +143,11 @@
                             return data.stores_info.store_owner_info.owner+'<br><small>'+data.stores_info.store_owner_info.email+'</small>';
                      }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return '<a href="'+data.stores_info.multi_store_url+'">'+data.stores_info.multi_store_url+'</a><br>'+data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
+                            return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
                     }},
-                    { data: null, render: 'price' },
+                    { data: null, render: function ( data, type, row, meta ){
+                            return data.price + ' ' + data.stores_info.currency.iso3;
+                        } },
                     {
                         data: null, render: function ( data, type, row, meta ){
                             return '<a href="#" aria-disabled="true" class="text-secondary disabled"><ion-icon name="open-outline"></ion-icon></a> ' +
