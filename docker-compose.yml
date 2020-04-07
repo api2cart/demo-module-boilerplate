@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "33061:3306"
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: homestead
       MYSQL_USER: homestead
@@ -37,10 +37,6 @@ services:
     networks:
       - laravel
 
-  memcached:
-    image: memcached:1.4
-    ports:
-      - "11212:11211"
   php:
     build:
       context: .
