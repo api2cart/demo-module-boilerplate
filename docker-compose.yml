@@ -36,7 +36,6 @@ services:
       - dbdata:/var/lib/mysql
     networks:
       - laravel
-
   php:
     build:
       context: .
