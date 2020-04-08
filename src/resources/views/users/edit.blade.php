@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             @include('parts.sidebar')
 
@@ -25,7 +25,8 @@
                             'method' => 'PATCH',
                             'url' => ['/users', $user->id],
                             'class' => 'form-horizontal',
-                            'files' => true
+                            'files' => true,
+                            'autocomplete' => "off"
                         ]) !!}
 
                         @include ('users.form', ['formMode' => 'edit'])

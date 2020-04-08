@@ -33,6 +33,23 @@
     <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery.blockUI.js') }}"></script>
+    <script type="text/javascript" >
+        function blockUiStyled(message){
+            $.blockUI({
+                message: message,
+                css: {
+                    border: 'none',
+                    padding: '15px',
+                    backgroundColor: '#000',
+                    '-webkit-border-radius': '10px',
+                    '-moz-border-radius': '10px',
+                    opacity: .5,
+                    color: '#fff',
+                    left: '0px;',
+                    width: '100%'
+                } });
+        }
+    </script>
     <script type="module" src="https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.esm.js"></script>
 
     <!-- Fonts -->
@@ -111,8 +128,9 @@
                 </div>
             </div>
         </nav>
-
         <main class="py-4">
+            @include('parts.messages')
+
             @yield('content')
         </main>
     </div>

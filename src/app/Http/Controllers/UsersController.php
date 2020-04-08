@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\User;
 use App\Services\Api2Cart;
@@ -125,7 +126,7 @@ class UsersController extends Controller
 
         $user->update($requestData);
 
-        return redirect('users')->with('flash_message', 'User updated!');
+        return redirect()->route('home')->with('success','User information updated successfully!');
     }
 
     /**

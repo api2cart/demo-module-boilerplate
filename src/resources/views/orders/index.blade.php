@@ -4,19 +4,6 @@
     <script type="text/javascript">
         let items = new Array();
 
-        function blockUiStyled(message){
-            $.blockUI({
-                message: message,
-                css: {
-                    border: 'none',
-                    padding: '15px',
-                    backgroundColor: '#000',
-                    '-webkit-border-radius': '10px',
-                    '-moz-border-radius': '10px',
-                    opacity: .5,
-                    color: '#fff',
-                } });
-        }
 
 
         function loadData(){
@@ -36,7 +23,7 @@
 
                 for (let i=0; i<stores.length; i++){
 
-                    blockUiStyled('<h3>Loading '+ stores[i].cart_id +' information.</h3>');
+                    blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
 
                     axios({
                         method: 'post',
@@ -49,7 +36,7 @@
 
                         let orders = rep.data.data;
 
-                        blockUiStyled('<h3>Adding '+ stores[i].cart_id +' orders.</h3>');
+                        blockUiStyled('<h3>Adding '+ stores[i].url +' orders.</h3>');
 
                         for (let j=0; j<orders.length; j++){
                             items.push( orders[j] );
@@ -66,7 +53,7 @@
 
                         $.unblockUI();
 
-                        $.growlUI('Notification', stores[i].cart_id + ' data loaded successfull!');
+                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!');
 
                     });
 
@@ -103,24 +90,20 @@
                 serverSide: false,
                 // ordering: false,
                 data: items,
-                dom: 'B<lf<t>ip>',
+                dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col">p>',
                 buttons: [
                     {
                         text: 'Reload',
                         action: function ( e, dt, node, config ) {
 
-                            // $.blockUI({ message: '<h2>Loading All Orders from store. <br>It can takes some time, so please keep calm.</h2>' });
-                            //
-                            // dt.clear();
-                            // dt.draw();
-                            // dt.ajax.reload(function(){
-                            //     $.unblockUI();
-                            // });
-                            loadData();
+                            window.location.reload();
 
                         }
                     }
                 ],
+                initComplete: function () {
+                    $('#dtable_filter input').focus();
+                },
                 columns: [
                     { data: null, render: 'order_id' },
                     { data: null, render: 'cart_id' },
@@ -160,7 +143,7 @@
 @endsection
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             @include('parts.sidebar')
 
