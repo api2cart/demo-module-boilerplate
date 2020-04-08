@@ -41,8 +41,11 @@ class StoresController extends Controller
 
 
         $stores = $stores->map(function ($store) use ($allCarts) {
-            $info = $this->api2cart->getCart( $store['store_key'] )['result']['stores_info'][0];
-            $store['stores_info']   = $info;
+
+//            Log::debug( print_r($this->api2cart->getCart( $store['store_key'] ),1) );
+
+            $info = $this->api2cart->getCart( $store['store_key'] );
+            $store['stores_info']   = (isset($info['result']['stores_info'][0]))  ? $info : [];
             $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
             return $store;
         });

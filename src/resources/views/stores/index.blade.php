@@ -66,7 +66,8 @@
                 // serverSide: true,
                 // ordering: false,
                 data: items,
-                dom: 'B<lf<t>ip>',
+                // dom: 'B<lf<t>ip>',
+                dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col">p>',
                 buttons: [
                     {
                         text: 'Reload',
@@ -75,6 +76,9 @@
                         }
                     }
                 ],
+                initComplete: function () {
+                    $('#dtable_filter input').focus();
+                },
                 columns: [
                     { data: null, render: function ( data, type, row, meta ){
                             return '<a href="'+data.url+'">'+data.url+'</a><br><small>'+data.store_key+'</small>';
@@ -83,7 +87,12 @@
                         return data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
                     }  },
                     { data: null, render: function ( data, type, row, meta ){
+                        if ( data.stores_info.length ){
                             return data.stores_info.store_owner_info.owner+'<br><small>'+data.stores_info.store_owner_info.email+'</small>';
+                        } else {
+                            return 'Not avialable';
+                        }
+
                         }  },
                     {
                         data: null, render: function ( data, type, row, meta ){
@@ -99,7 +108,7 @@
 @endsection
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             @include('parts.sidebar')
 
