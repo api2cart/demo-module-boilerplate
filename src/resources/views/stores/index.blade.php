@@ -5,20 +5,6 @@
 
         let items = new Array();
 
-        function blockUiStyled(message){
-            $.blockUI({
-                message: message,
-                css: {
-                    border: 'none',
-                    padding: '15px',
-                    backgroundColor: '#000',
-                    '-webkit-border-radius': '10px',
-                    '-moz-border-radius': '10px',
-                    opacity: .5,
-                    color: '#fff',
-                } });
-        }
-
 
         function loadData(){
 
@@ -72,7 +58,7 @@
                     {
                         text: 'Reload',
                         action: function ( e, dt, node, config ) {
-                            loadData();
+                            window.location.reload();
                         }
                     }
                 ],

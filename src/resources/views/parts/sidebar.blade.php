@@ -22,7 +22,7 @@
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="{{ route('customers.index') }}" class="nav-link">
+                    <a href="{{ route('customers.index') }}" class="nav-link {{ (request()->is('customers') || request()->is('customers/*')) ? 'active' : '' }}">
                         Customers
                     </a>
                 </li>
