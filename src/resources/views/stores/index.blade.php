@@ -73,11 +73,8 @@
                         return data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
                     }  },
                     { data: null, render: function ( data, type, row, meta ){
-                        if ( data.stores_info.length ){
+
                             return data.stores_info.store_owner_info.owner+'<br><small>'+data.stores_info.store_owner_info.email+'</small>';
-                        } else {
-                            return 'Not avialable';
-                        }
 
                         }  },
                     {

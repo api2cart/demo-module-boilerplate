@@ -34,6 +34,8 @@
                         }
                     }).then(function (rep) {
 
+                        console.log( stores[i] );
+
                         let orders = rep.data.data;
 
                         blockUiStyled('<h3>Adding '+ stores[i].url +' orders.</h3>');

@@ -18,7 +18,6 @@ class StoresController extends Controller
 
     public function index()
     {
-
         return view('stores.index');
     }
 
@@ -27,37 +26,30 @@ class StoresController extends Controller
     {
         \Debugbar::disable();
 
-        $search = ($request->get('search')) ? $request->get('search')['value'] : null;
-        $carts = $this->api2cart->getCartList();
+        /**
+         * get account carts & avialable carts
+         */
+        $carts = collect($this->api2cart->getCartList());
+        $allCarts = collect($this->api2cart->getCartsList());
 
-        $allCarts = collect( $this->api2cart->getCartsList()['result']['supported_carts'] );
+        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
 
-
-
-        $stores = ($carts['result']['carts_count']) ? collect( $carts['result']['carts'] ) : collect([]);
-
-        $perPage = ($request->get('length')) ? $request->get('length') : 100;
-        $totalPages = $stores->count() / $perPage;
-
-
-        $stores = $stores->map(function ($store) use ($allCarts) {
-
-//            Log::debug( print_r($this->api2cart->getCart( $store['store_key'] ),1) );
-
+        $result = $carts->map(function ($store) use ($allCarts) {
             $info = $this->api2cart->getCart( $store['store_key'] );
-            $store['stores_info']   = (isset($info['result']['stores_info'][0]))  ? $info : [];
+            // put additional info
+            $store['stores_info']['store_owner_info']   = [
+                'owner' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getOwner() : null,
+                'email' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getEmail() : null
+            ];
             $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
             return $store;
         });
 
-
-
         $data = [
-            "recordsTotal"      => $stores->count(),
-            "recordsFiltered"   => $stores->count(),
+            "recordsTotal"      => $result->count(),
+            "recordsFiltered"   => $result->count(),
             "start"             => 0,
-            "length"            => $perPage,
-            "data"              => $stores
+            "data"              => $result
 
         ];
 
