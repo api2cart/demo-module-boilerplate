@@ -72,8 +72,6 @@ class ProductsController extends Controller
 
         }
 
-//        Log::debug( print_r( $products->forPage(1,2),1) );
-
 
         $data = [
             "recordsTotal"      => $totalProducts,
