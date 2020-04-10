@@ -11,11 +11,57 @@
 
     <!-- Scripts -->
     <script type="text/javascript" src="{{ asset('js/axios.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script>
         axios.defaults.headers.common = {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN' : '{{ csrf_token() }}'
         };
+        var numberOfAjaxCAllPending = 0;
+
+        // Add a request interceptor
+        axios.interceptors.request.use(function (config) {
+            numberOfAjaxCAllPending++;
+            // show loader
+
+            if ( $('.ajax_status').length ){
+                $('.ajax_status').empty().append('<img src="{{ asset('css/img/loading.gif') }}" style="max-height: 24px;"> Loading....');
+            }
+
+            return config;
+        }, function (error) {
+
+            return Promise.reject(error);
+        });
+
+        // Add a response interceptor
+        axios.interceptors.response.use(function (response) {
+            numberOfAjaxCAllPending--;
+            // console.log("------------  Ajax pending", numberOfAjaxCAllPending);
+
+            if (numberOfAjaxCAllPending == 0) {
+                //hide loader
+                if ( $('.ajax_status').length ){
+                    $('.ajax_status').empty();
+                }
+            } else {
+                if ( $('.ajax_status').length ){
+                    $('.ajax_status').empty().append('<img src="{{ asset('css/img/loading.gif') }}" style="max-height: 24px;"> Loading....');
+                }
+            }
+            return response;
+        }, function (error) {
+
+            numberOfAjaxCAllPending--;
+            if (numberOfAjaxCAllPending == 0) {
+                //hide loader
+                if ( $('.ajax_status').length ){
+                    $('.ajax_status').empty();
+                }
+            }
+            return Promise.reject(error);
+        });
+
 
         String.prototype.trunc = String.prototype.trunc ||
             function(n){
@@ -30,7 +76,6 @@
         }
 
     </script>
-    <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery.blockUI.js') }}"></script>
     <script type="text/javascript" >
