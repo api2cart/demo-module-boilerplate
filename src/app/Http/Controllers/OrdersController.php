@@ -41,7 +41,7 @@ class OrdersController extends Controller
 
             $result = $this->api2cart->getOrderList( $store_id );
 
-            $newOrders = ($result['result']['orders_count']) ? collect( $result['result']['order'] ) : collect([]);
+            $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
             // put additional information
             if ( $newOrders->count() ){
                 foreach ($newOrders as $item){

@@ -150,7 +150,7 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Customers</div>
+                    <div class="card-header">Customers <span class="ajax_status"></span></div>
 
                     <div class="card-body">
 

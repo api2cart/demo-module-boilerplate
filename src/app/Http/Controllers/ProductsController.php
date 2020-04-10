@@ -41,7 +41,7 @@ class ProductsController extends Controller
 
             $result = $this->api2cart->getProductList( $store_id );
 
-            $newRes= ($result['result']['products_count']) ? collect( $result['result']['product'] ) : collect([]);
+            $newRes= (isset($result['result']['products_count'])) ? collect( $result['result']['product'] ) : collect([]);
             // put additional information
             if ( $newRes->count() ){
                 foreach ($newRes as $item){

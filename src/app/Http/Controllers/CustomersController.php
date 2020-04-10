@@ -40,7 +40,7 @@ class CustomersController extends Controller
 
             $result = $this->api2cart->getCustomerList( $store_id );
 
-            $newRes= ($result['result']['customers_count']) ? collect( $result['result']['customer'] ) : collect([]);
+            $newRes= (isset($result['result']['customers_count'])) ? collect( $result['result']['customer'] ) : collect([]);
             // put additional information
             if ( $newRes->count() ){
                 foreach ($newRes as $item){

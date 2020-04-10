@@ -97,7 +97,7 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Stores</div>
+                    <div class="card-header">Stores <span class="ajax_status"></span></div>
 
                     <div class="card-body">
 

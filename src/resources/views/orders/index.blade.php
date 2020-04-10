@@ -163,7 +163,7 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Orders</div>
+                    <div class="card-header">Orders <span class="ajax_status"></span></div>
 
                     <div class="card-body">
 
