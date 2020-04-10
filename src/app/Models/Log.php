@@ -9,5 +9,8 @@ class Log extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'params'    => 'array'
+    ];
 
 }

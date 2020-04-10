@@ -17,6 +17,8 @@
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN' : '{{ csrf_token() }}'
         };
+        axios.defaults.timeout = 5*60*1000;
+
         var numberOfAjaxCAllPending = 0;
 
         // Add a request interceptor
