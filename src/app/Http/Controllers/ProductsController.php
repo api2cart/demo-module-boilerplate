@@ -24,66 +24,55 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
-        $allCarts = collect( $this->api2cart->getCartsList()['result']['supported_carts'] );
-
-        $carts = $this->api2cart->getCartList();
-        $stores = ($carts['result']['carts_count']) ? collect( $carts['result']['carts'] ) : collect([]);
-
-        $storeInfo      = $stores->where('store_key', $store_id)->first();
-        $info           = $this->api2cart->getCart( $store_id )['result']['stores_info'][0];
-
-        $totalProducts = $this->api2cart->getProductCount( $store_id )['result']['products_count'];
 
 
+        /**
+         * get account carts & extract exact store info
+         */
+        $carts = collect($this->api2cart->getCartList());
+        $storeInfo = $this->api2cart->getCart( $store_id );;
 
-        $perPage = 10;
-        $totalPages = $totalProducts / $perPage;
-        $currPage   = $request->get('start') ? ($request->get('start')/$perPage)+1 : 1;
 
-        $results = $this->api2cart->getProductList( $store_id, 0, 10 );
+        $totalProducts = $this->api2cart->getProductCount( $store_id );
+
         $products = collect([]);
 
-        $newProducts = ($results['result']['products_count']) ? collect( $results['result']['product'] ) : collect([]);
+        if ( $totalProducts ){
 
-        if ( $newProducts->count() ){
-            foreach ($newProducts as $item){
-                $newItem = $item;
+            $result = $this->api2cart->getProductList( $store_id );
 
-                $newItem['stores_info']   = $info;
-                $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
-                $newItem['cart_id']       = $stores->where('store_key', $store_id)->first();
-
-                $products->push( $newItem );
+            $newRes= ($result['result']['products_count']) ? collect( $result['result']['product'] ) : collect([]);
+            // put additional information
+            if ( $newRes->count() ){
+                foreach ($newRes as $item){
+                    $newItem = $item;
+                    $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+                    $products->push( $newItem );
+                }
             }
-        }
 
 
-        if ( isset($results['pagination']['next']) && strlen($results['pagination']['next']) ){
-            // get next iteration to load all orders
-
-            while( isset($results['pagination']['next']) && strlen($results['pagination']['next']) ){
-                $results = $this->api2cart->getProductListPage( $store_id , $results['pagination']['next']);
-
-                $newProducts = ($results['result']['products_count']) ? collect( $results['result']['product'] ) : collect([]);
-
-                if ( $newProducts->count() ){
-                    foreach ($newProducts as $item){
-                        $newItem = $item;
-                        $newItem['stores_info']   = $info;
-                        $newItem['cart_info']     = $allCarts->where('cart_id', $storeInfo['cart_id'])->first();
-                        $newItem['cart_id']       = $stores->where('store_key', $store_id)->first();
-                        $products->push( $newItem );
+            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                // get next iteration to load rest customers
+                while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                    $result = $this->api2cart->getProductListPage( $store_id , $result['pagination']['next']);
+                    $newRes = (isset($result['result']['products_count'])) ? collect( $result['result']['product'] ) : collect([]);
+                    // put additional information
+                    if ( $newRes->count() ){
+                        foreach ($newRes as $item){
+                            $newItem = $item;
+                            $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+                            $products->push( $newItem );
+                        }
                     }
                 }
 
-
-
             }
 
 
         }
 
-//        Log::debug( print_r($products->forPage(1,2),1) );
+//        Log::debug( print_r( $products->forPage(1,2),1) );
 
 
         $data = [

@@ -40,6 +40,7 @@
                         blockUiStyled('<h3>Adding '+ stores[i].url +' customers.</h3>');
 
                         for (let j=0; j<orders.length; j++){
+                            orders[j].cart_id = stores[i];
                             items.push( orders[j] );
                         }
 
@@ -107,7 +108,13 @@
                 },
                 columns: [
                     { data: null, render: 'id' },
-                    { data: null, render: 'cart_id' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.owner+'</small><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.email+'</small>';
+                            }
+                    },
                     { data: null, render: 'email' },
                     { data: null, render:
                             function ( data, type, row, meta ){

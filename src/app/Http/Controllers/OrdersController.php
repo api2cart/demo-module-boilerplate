@@ -56,7 +56,7 @@ class OrdersController extends Controller
                 // get next iteration to load rest orders
                 while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                     $result = $this->api2cart->getOrderListPage( $store_id , $result['pagination']['next']);
-                    $newOrders = ($result['result']['orders_count']) ? collect( $result['result']['order'] ) : collect([]);
+                    $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
                     // put additional information
                     if ( $newOrders->count() ){
                         foreach ($newOrders as $item){

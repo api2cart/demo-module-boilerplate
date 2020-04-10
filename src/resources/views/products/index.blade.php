@@ -41,6 +41,7 @@
                         blockUiStyled('<h3>Adding '+ stores[i].url +' product.</h3>');
 
                         for (let j=0; j<orders.length; j++){
+                            orders[j].cart_id = stores[i];
                             items.push( orders[j] );
                         }
 
@@ -124,15 +125,18 @@
                             return data.u_sku;
                         }},
                     { data: null, render: function ( data, type, row, meta ){
-                            let owner = (data.stores_info.store_owner_info) ? data.stores_info.store_owner_info.owner : '';
-                            let email = (data.stores_info.store_owner_info) ? data.stores_info.store_owner_info.email : '';
-                            return owner+'<br><small>'+email+'</small>';
+                            let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
+                            let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
+                            return owner+'<br><small>'+email+'</small><br><small>Store Key: '+data.cart_id.store_key+'</small>';
                      }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
+                            return  '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                    '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
+                                    '<small>'+data.cart_id.cart_info.cart_versions+'</small>';
+
                     }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return data.price + ' ' + data.stores_info.currency.iso3;
+                            return data.price + ' ' + data.currency;
                         } },
                     {
                         data: null, render: function ( data, type, row, meta ){

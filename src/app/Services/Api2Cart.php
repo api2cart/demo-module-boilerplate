@@ -190,7 +190,7 @@ class Api2Cart
 
     }
 
-    public function getOrderList( $store_id=null, $from=0, $numOrders=10 )
+    public function getOrderList( $store_id=null  )
     {
         $this->setApiKey();
 
@@ -198,8 +198,7 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList();
-
+            $result = $this->order->orderList( null, null, null, null,null,null,null,null,'order_id,customer,totals,address,items,bundles,status,currency');
 
 
             if ( $result->getReturnCode() == 0 ){
@@ -207,7 +206,6 @@ class Api2Cart
             } else {
                 return false;
             }
-
 
 
 
@@ -226,24 +224,17 @@ class Api2Cart
 
         try{
 
-//            $response = $this->client->request('GET', url($this->host) . "/v1.1/order.list.json" , [
-//                'query' => [
-//                    'api_key'       => $this->apiKey,
-//                    'store_key'     => $store_id,
-//                    'page_cursor'   => $page_cursor,
-//                    'params'    => 'order_id,customer,totals,address,status'
-//                ]
-//            ]);
-//
-//            $body = $response->getBody();
-//
-//            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null );
+            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'order_id,customer,totals,address,items,bundles,status,currency' );
 
-            return $this->mapToArray( $result );
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
 
 
         } catch (\Exception $e){
@@ -261,13 +252,17 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.count.json" , [
-                'query' => [ 'api_key' => $this->apiKey, 'store_key' => $store_id ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productCount();
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            if ( $result->getReturnCode() == 0 ){
+                return $result->getResult()->getProductsCount();
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -279,25 +274,24 @@ class Api2Cart
 
     }
 
-    public function getProductList($store_id=null, $from=0, $numOrders=10 )
+    public function getProductList($store_id=null )
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'start'     => $from,
-                    'count'     => $numOrders,
-                    'params'    => 'force_all'
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productList( null, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -314,18 +308,17 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.list.json" , [
-                'query' => [
-                    'api_key'       => $this->apiKey,
-                    'store_key'     => $store_id,
-                    'page_cursor'   => $page_cursor,
-                    'params'        => 'force_all'
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productList( $page_cursor, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
 
 
         } catch (\Exception $e){
@@ -342,14 +335,15 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.count.json" , [
-                'query' => [ 'api_key' => $this->apiKey, 'store_key' => $store_id ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerCount();
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
-
+            if ( $result->getReturnCode() == 0 ){
+                return $result->getResult()->getCustomersCount();
+            } else {
+                return false;
+            }
 
         } catch (\Exception $e){
 
@@ -360,24 +354,24 @@ class Api2Cart
 
     }
 
-    public function getCustomerList($store_id=null, $from=0, $numOrders=10 )
+    public function getCustomerList($store_id=null)
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'start'     => $from,
-                    'count'     => $numOrders
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerList( null, null, null, null,null,null,null,'force_all', null);
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -394,17 +388,15 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.list.json" , [
-                'query' => [
-                    'api_key'       => $this->apiKey,
-                    'store_key'     => $store_id,
-                    'page_cursor'   => $page_cursor,
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerList( null, null, null, null, null, $page_cursor, null, 'force_all', null );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
 
 
         } catch (\Exception $e){
@@ -415,21 +407,6 @@ class Api2Cart
         }
     }
 
-    public function test()
-    {
-        $this->setApiKey();
-        $config = new ApiClient\Configuration();
-        $config->setApiKey( 'api_key', $this->apiKey);
-
-        $accApi = new ApiClient\Api\AccountApi(null, $config);
-
-//        dd( $accApi );
-        $carts = $accApi->accountCartList()->getReturnCode();
-
-
-
-        dd( $carts );
-    }
 
     private function mapToArray($data=null)
     {
@@ -468,16 +445,5 @@ class Api2Cart
 
     }
 
-
-
-
-//    private function objectToObject($instance, $className) {
-//        return unserialize(sprintf(
-//            'O:%d:"%s"%s',
-//            strlen($className),
-//            $className,
-//            strstr(strstr(serialize($instance), '"'), ':')
-//        ));
-//    }
 
 }
