@@ -5,7 +5,6 @@
         let items = new Array();
 
 
-
         function loadData(){
 
             items = [];
@@ -19,7 +18,15 @@
                 }
             }).then(function (response) {
 
-                let stores = response.data.data;
+                stores = response.data.data;
+
+                if ( response.data.log ){
+                    for (let k=0; k<response.data.log.length; k++){
+                        logItems.push( response.data.log[k] );
+                    }
+                    calculateLog();
+                }
+
 
                 for (let i=0; i<stores.length; i++){
 
@@ -34,15 +41,27 @@
                         }
                     }).then(function (rep) {
 
+                        //console.log( stores[i] );
+
                         let orders = rep.data.data;
+                        let logs = rep.data.log;
 
                         blockUiStyled('<h3>Adding '+ stores[i].url +' orders.</h3>');
 
                         for (let j=0; j<orders.length; j++){
+                            orders[j].cart_id = stores[i];
                             items.push( orders[j] );
                         }
 
-                        // console.log( rep.data );
+
+                        //update log count
+                        if ( rep.data.log ){
+                            for (let k=0; k<rep.data.log.length; k++){
+                                logItems.push( rep.data.log[k] );
+                            }
+                            calculateLog();
+                        }
+
 
 
                         var datatable = $( '#dtable' ).dataTable().api();
@@ -65,7 +84,6 @@
 
             });
         }
-
 
 
 
@@ -106,7 +124,13 @@
                 },
                 columns: [
                     { data: null, render: 'order_id' },
-                    { data: null, render: 'cart_id' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.owner+'</small><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.email+'</small>';
+                            }
+                    },
                     { data: null, render:
                             function ( data, type, row, meta ){
                                 return data.customer.email + '<br><small class="text-muted">'+data.customer.first_name +' '+data.customer.last_name+'</small>';
@@ -125,7 +149,12 @@
                             }
                     },
                     { data: null, render: 'status.name' },
-                    { data: null, render: 'totals.total' },
+                    { data: null, render: function ( data, type, row, meta ){
+                            let total = (data.totals) ? data.totals.total : '';
+                            let currency = (data.currency) ? data.currency['iso3'] : '';
+                            return total + ' ' + currency;
+                        }
+                    },
                     {
                         data: null, render: function ( data, type, row, meta ){
                             return '<a href="#" aria-disabled="true" class="text-secondary disabled"><ion-icon name="open-outline"></ion-icon></a> ' +
@@ -149,10 +178,14 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Orders</div>
+                    <div class="card-header">Orders <span class="ajax_status"></span></div>
 
                     <div class="card-body">
-
+                        <div class="row">
+                            <div class="col text-right api_log">
+                                <a href="#" id="showApiLog" >Performed <span>0</span> requests with API2Cart. Click to see details...</a><br>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table id="dtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
                                 <thead>

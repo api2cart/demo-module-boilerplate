@@ -4,23 +4,52 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+
 use GuzzleHttp\Client;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Handler\CurlHandler;
+
+
 use App\Models\User;
+use App\Models\Log as Logger;
+
+use Api2Cart\Client as ApiClient;
+use Api2Cart\Client\Model\Cart;
 
 
 class Api2Cart
 {
+    private $config;
 
-    private $host;
-    private $apiKey;
-    private $client;
+
+    private $account;
+    private $cart;
+    private $category;
+    private $customer;
+    private $order;
+    private $product;
+
+    private $log;
+
+
     /**
-     * Api2Cart constructor initiate with right API url
+     * Api2Cart constructor initiate with right API objects
      */
     public function __construct()
     {
-        $this->host = (env('API2CART_URL', "https://api.api2cart.com"));
-        $this->client = new Client();
+        $this->config = new ApiClient\Configuration();
+
+        $this->account  = new ApiClient\Api\AccountApi(null, $this->config);
+        $this->cart     = new ApiClient\Api\CartApi(null, $this->config );
+        $this->category = new ApiClient\Api\CategoryApi( null, $this->config );
+        $this->customer = new ApiClient\Api\CustomerApi( null, $this->config );
+        $this->order    = new ApiClient\Api\OrderApi( null, $this->config );
+        $this->product  = new ApiClient\Api\ProductApi( null, $this->config );
+
+        $this->log = collect();
+
     }
 
     /**
@@ -28,25 +57,34 @@ class Api2Cart
      */
     private function setApiKey()
     {
-        $this->apiKey = Auth::user()->api2cart_key;
+        $this->config->setApiKey( 'api_key', Auth::user()->api2cart_key );
+//        $this->config->setApiKey( 'api_key', '948c024602b4912149c708fdcbbab5d8' );
     }
 
 
-    public function checkConnection($apiKey)
+    /**
+     * Check connection to API uses given API Key
+     * @param null $apiKey
+     * @return bool
+     */
+    public function checkConnection($apiKey=null)
     {
-
-
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/account.cart.list.json" , [
-                'query' => ['api_key' => $apiKey]
-            ]);
 
-            $result = json_decode( $response->getBody()->getContents() ,true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->config->setApiKey( 'api_key', $apiKey);
 
-            if ( $result['return_code'] == 0 ) return true;
-            else return false;
+            $result = $this->account->accountCartList();
+
+            $this->logApiCall( 'account.cart.list.json', $result->getReturnCode(), $this->account->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ) {
+                return true;
+            }
+            else {
+                return false;
+            }
 
 
         } catch (\Exception $e){
@@ -59,23 +97,22 @@ class Api2Cart
 
     }
 
-
     public function getCartList()
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/account.cart.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'params'    => 'force_all'
-                ]
-            ]);
+            $result = $this->account->accountCartList();
 
-            $body = $response->getBody();
+            $this->logApiCall( 'account.cart.list.json', $result->getReturnCode(), $this->account->getConfig(), null, null, null, $result->getReturnMessage()  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            if ( $result->getResult()->getCartsCount() ){
+                return $this->mapToArray( $result->getResult()->getCarts() );
+            } else {
+                return null;
+            }
+
 
 
         } catch (\Exception $e){
@@ -92,17 +129,22 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/cart.info.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'params'    => 'store_name,store_url,stores_info'
-                ]
-            ]);
+            $this->cart->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->cart->cartInfo( 'force_all','additional_fields', $store_id);
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'cart.info.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage() );
+
+            if ( $result->getReturnCode() == 0 ){
+                /**
+                 * return object cause it cant be right maped to array...  swagger issue
+                 */
+                return $result->getResult();
+//                return json_decode( $result->getResult()->__toString() , true, 512, JSON_OBJECT_AS_ARRAY) ;
+            } else {
+                return null;
+            }
+
 
 
         } catch (\Exception $e){
@@ -119,15 +161,15 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/cart.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                ]
-            ]);
+            $result = $this->cart->cartList();
 
-            $body = $response->getBody();
+            $this->logApiCall( 'cart.list.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage()  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result->getResult()->getSupportedCarts() );
+            } else {
+                return null;
+            }
 
 
         } catch (\Exception $e){
@@ -137,7 +179,6 @@ class Api2Cart
             return false;
         }
     }
-
 
     public function getOrderCount( $store_id=null )
     {
@@ -145,13 +186,17 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/order.count.json" , [
-                'query' => [ 'api_key' => $this->apiKey, 'store_key' => $store_id ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->order->orderCount();
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'order.count.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $result->getResult()->getOrdersCount();
+            } else {
+                return false;
+            }
 
 
         } catch (\Exception $e){
@@ -163,26 +208,24 @@ class Api2Cart
 
     }
 
-
-    public function getOrderList( $store_id=null, $from=0, $numOrders=10 )
+    public function getOrderList( $store_id=null  )
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/order.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'start'     => $from,
-                    'count'     => $numOrders,
-                    'params'    => 'order_id,customer,totals,address,status'
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->order->orderList( null, null, null, null,null,null,null,null,'order_id,customer,totals,address,items,bundles,status,currency');
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
 
 
         } catch (\Exception $e){
@@ -200,18 +243,19 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/order.list.json" , [
-                'query' => [
-                    'api_key'       => $this->apiKey,
-                    'store_key'     => $store_id,
-                    'page_cursor'   => $page_cursor,
-                    'params'    => 'order_id,customer,totals,address,status'
-                ]
-            ]);
 
-            $body = $response->getBody();
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'order_id,customer,totals,address,items,bundles,status,currency' );
+
+            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
 
 
         } catch (\Exception $e){
@@ -222,7 +266,6 @@ class Api2Cart
         }
 
     }
-
 
     public function getProductCount($store_id=null)
     {
@@ -230,13 +273,19 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.count.json" , [
-                'query' => [ 'api_key' => $this->apiKey, 'store_key' => $store_id ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productCount();
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'product.count.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $result->getResult()->getProductsCount();
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -248,25 +297,25 @@ class Api2Cart
 
     }
 
-    public function getProductList($store_id=null, $from=0, $numOrders=10 )
+    public function getProductList($store_id=null )
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'start'     => $from,
-                    'count'     => $numOrders,
-                    'params'    => 'force_all'
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productList( null, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -283,18 +332,18 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/product.list.json" , [
-                'query' => [
-                    'api_key'       => $this->apiKey,
-                    'store_key'     => $store_id,
-                    'page_cursor'   => $page_cursor,
-                    'params'        => 'force_all'
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->product->productList( $page_cursor, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
 
 
         } catch (\Exception $e){
@@ -304,7 +353,6 @@ class Api2Cart
             return false;
         }
     }
-
 
     public function getCustomerCount($store_id=null)
     {
@@ -312,14 +360,17 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.count.json" , [
-                'query' => [ 'api_key' => $this->apiKey, 'store_key' => $store_id ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerCount();
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'customer.count.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
 
+            if ( $result->getReturnCode() == 0 ){
+                return $result->getResult()->getCustomersCount();
+            } else {
+                return false;
+            }
 
         } catch (\Exception $e){
 
@@ -330,24 +381,25 @@ class Api2Cart
 
     }
 
-    public function getCustomerList($store_id=null, $from=0, $numOrders=10 )
+    public function getCustomerList($store_id=null)
     {
         $this->setApiKey();
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.list.json" , [
-                'query' => [
-                    'api_key'   => $this->apiKey,
-                    'store_key' => $store_id,
-                    'start'     => $from,
-                    'count'     => $numOrders
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerList( null, null, null, null,null,null,null,'force_all', null,  null, null, null);
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
+
+
 
 
         } catch (\Exception $e){
@@ -364,17 +416,17 @@ class Api2Cart
 
         try{
 
-            $response = $this->client->request('GET', url($this->host) . "/v1.1/customer.list.json" , [
-                'query' => [
-                    'api_key'       => $this->apiKey,
-                    'store_key'     => $store_id,
-                    'page_cursor'   => $page_cursor,
-                ]
-            ]);
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $body = $response->getBody();
+            $result = $this->customer->customerList( $page_cursor, null, null, null, null, null, null, 'force_all', null, null, null, null );
 
-            return json_decode( $body->getContents() , true, 512, JSON_OBJECT_AS_ARRAY);
+            $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                return false;
+            }
 
 
         } catch (\Exception $e){
@@ -383,6 +435,65 @@ class Api2Cart
 
             return false;
         }
+    }
+
+
+    private function mapToArray($data=null)
+    {
+        if ($data == null) return null;
+
+        if ( is_array($data) ){
+            return array_map(function($item){
+
+                try {
+
+                    return json_decode( $item->__toString() , true, 512, JSON_OBJECT_AS_ARRAY);
+
+                } catch (\Exception $e){
+                    return $item;
+                }
+
+
+
+            }, $data);
+
+        }
+
+        if ( is_object($data) ){
+
+            try{
+                return json_decode( $data->__toString() , true, 512, JSON_OBJECT_AS_ARRAY);
+            } catch (\Exception $e){
+                return $data;
+            }
+
+
+        }
+
+
+
+
+    }
+
+
+    private function logApiCall( $action=null, $code=null, $config = null, $store_id=null, $store_ur=null, $user_id=null, $msg=null)
+    {
+        $log = Logger::create([
+            'action'    => $action,
+            'code'      => $code,
+            'params'    => (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [],
+            'store_id'  => ($store_id) ? $store_id : $config->getApiKey('store_key'),
+            'store_url' => $store_ur,
+            'user_id'   => $user_id
+        ]);
+
+        $this->log->push( $log );
+
+    }
+
+    public function getLog()
+    {
+        return $this->log;
     }
 
 }

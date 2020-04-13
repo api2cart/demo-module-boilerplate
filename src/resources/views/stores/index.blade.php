@@ -3,14 +3,12 @@
 @section('script')
     <script type="text/javascript">
 
-        let items = new Array();
-
 
         function loadData(){
 
             blockUiStyled('<h3>Loading stores information.</h3>');
 
-            items = [];
+            stores = [];
 
 
             return axios({
@@ -22,12 +20,19 @@
                 }
             }).then(function (response) {
 
-                items = response.data.data;
+                stores = response.data.data;
+
+                if ( response.data.log ){
+                    for (let k=0; k<response.data.log.length; k++){
+                        logItems.push( response.data.log[k] );
+                    }
+                    calculateLog();
+                }
 
                 var datatable = $( '#dtable' ).dataTable().api();
 
                 datatable.clear();
-                datatable.rows.add( items );
+                datatable.rows.add( stores );
                 datatable.draw();
 
                 $.unblockUI();
@@ -51,7 +56,7 @@
                 processing: true,
                 // serverSide: true,
                 // ordering: false,
-                data: items,
+                data: stores,
                 // dom: 'B<lf<t>ip>',
                 dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col">p>',
                 buttons: [
@@ -73,11 +78,8 @@
                         return data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
                     }  },
                     { data: null, render: function ( data, type, row, meta ){
-                        if ( data.stores_info.length ){
+
                             return data.stores_info.store_owner_info.owner+'<br><small>'+data.stores_info.store_owner_info.email+'</small>';
-                        } else {
-                            return 'Not avialable';
-                        }
 
                         }  },
                     {
@@ -100,10 +102,14 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Stores</div>
+                    <div class="card-header">Stores <span class="ajax_status"></span></div>
 
                     <div class="card-body">
-
+                        <div class="row">
+                            <div class="col text-right api_log">
+                                <a href="#" id="showApiLog" >Performed <span>0</span> requests with API2Cart. Click to see details...</a><br>
+                            </div>
+                        </div>
                         <table id="dtable" class="table table-bordered" style="width:100%">
                             <thead>
                             <tr>

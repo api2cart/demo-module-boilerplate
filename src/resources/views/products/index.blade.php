@@ -21,7 +21,14 @@
                 }
             }).then(function (response) {
 
-                let stores = response.data.data;
+                stores = response.data.data;
+
+                if ( response.data.log ){
+                    for (let k=0; k<response.data.log.length; k++){
+                        logItems.push( response.data.log[k] );
+                    }
+                    calculateLog();
+                }
 
                 for (let i=0; i<stores.length; i++){
 
@@ -41,10 +48,18 @@
                         blockUiStyled('<h3>Adding '+ stores[i].url +' product.</h3>');
 
                         for (let j=0; j<orders.length; j++){
+                            orders[j].cart_id = stores[i];
                             items.push( orders[j] );
                         }
 
-                         // console.log( rep.data );
+
+                        //update log count
+                        if ( rep.data.log ){
+                            for (let k=0; k<rep.data.log.length; k++){
+                                logItems.push( rep.data.log[k] );
+                            }
+                            calculateLog();
+                        }
 
 
                         var datatable = $( '#dtable' ).dataTable().api();
@@ -124,15 +139,18 @@
                             return data.u_sku;
                         }},
                     { data: null, render: function ( data, type, row, meta ){
-                            let owner = (data.stores_info.store_owner_info) ? data.stores_info.store_owner_info.owner : '';
-                            let email = (data.stores_info.store_owner_info) ? data.stores_info.store_owner_info.email : '';
-                            return owner+'<br><small>'+email+'</small>';
+                            let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
+                            let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
+                            return owner+'<br><small>'+email+'</small><br><small>Store Key: '+data.cart_id.store_key+'</small>';
                      }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
+                            return  '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                    '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
+                                    '<small>'+data.cart_id.cart_info.cart_versions+'</small>';
+
                     }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return data.price + ' ' + data.stores_info.currency.iso3;
+                            return data.price + ' ' + data.currency;
                         } },
                     {
                         data: null, render: function ( data, type, row, meta ){
@@ -166,10 +184,14 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Products</div>
+                    <div class="card-header">Products <span class="ajax_status"></span></div>
 
                     <div class="card-body">
-
+                        <div class="row">
+                            <div class="col text-right api_log">
+                                <a href="#" id="showApiLog" >Performed <span>0</span> requests with API2Cart. Click to see details...</a><br>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table id="dtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
                                 <thead>

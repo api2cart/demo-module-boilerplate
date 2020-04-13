@@ -1,5 +1,7 @@
 FROM php:7.4-fpm-alpine
 
+ADD php/php.ini /usr/local/etc/php/conf.d/40-custom.ini
+
 WORKDIR /var/www/html
 
 COPY src/.env.example /var/www/html/.env

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Api2Cart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CustomersController extends Controller
 {
@@ -24,49 +25,45 @@ class CustomersController extends Controller
     {
         \Debugbar::disable();
 
-        $carts = $this->api2cart->getCartList();
-        $stores = ($carts['result']['carts_count']) ? collect( $carts['result']['carts'] ) : collect([]);
-        $storeInfo = $stores->where('store_key', $store_id)->first();
 
-        $totalCustomers = $this->api2cart->getCustomerCount( $store_id )['result']['customers_count'];
+        /**
+         * get account carts & extract exact store info
+         */
+        $carts = collect($this->api2cart->getCartList());
+        $storeInfo = $carts->where('store_key', $store_id)->first();
 
+        $totalCustomers = $this->api2cart->getCustomerCount( $store_id ); Log::debug( $totalCustomers );
 
-
-        $perPage = 10;
-        $totalPages = $totalCustomers / $perPage;
-        $currPage   = $request->get('start') ? ($request->get('start')/$perPage)+1 : 1;
-
-        $results = $this->api2cart->getCustomerList( $store_id, 0, 10 );
         $customers = collect([]);
 
-        $newCustomers = ($results['result']['customers_count']) ? collect( $results['result']['customer'] ) : collect([]);
+        if ( $totalCustomers ){
 
-        if ( $newCustomers->count() ){
-            foreach ($newCustomers as $item){
-                $newItem = $item;
-                $newItem['cart_id'] = $storeInfo['cart_id'];
-                $customers->push( $newItem );
+            $result = $this->api2cart->getCustomerList( $store_id );
+
+            $newRes= (isset($result['result']['customers_count'])) ? collect( $result['result']['customer'] ) : collect([]);
+            // put additional information
+            if ( $newRes->count() ){
+                foreach ($newRes as $item){
+                    $newItem = $item;
+                    $newItem['cart_id'] = $storeInfo['cart_id'];
+                    $customers->push( $newItem );
+                }
             }
-        }
 
-
-        if ( isset($results['pagination']['next']) && strlen($results['pagination']['next']) ){
-            // get next iteration to load all orders
-
-            while( isset($results['pagination']['next']) && strlen($results['pagination']['next']) ){
-                $results = $this->api2cart->getCustomerListPage( $store_id , $results['pagination']['next']);
-
-                $newCustomers = ($results['result']['customers_count']) ? collect( $results['result']['customer'] ) : collect([]);
-
-                if ( $newCustomers->count() ){
-                    foreach ($newCustomers as $item){
-                        $newItem = $item;
-                        $newItem['cart_id'] = $storeInfo['cart_id'];
-                        $customers->push( $newItem );
+            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                // get next iteration to load rest customers
+                while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                    $result = $this->api2cart->getCustomerListPage( $store_id , $result['pagination']['next']);
+                    $newRes = (isset($result['result']['customers_count'])) ? collect( $result['result']['customer'] ) : collect([]);
+                    // put additional information
+                    if ( $newRes->count() ){
+                        foreach ($newRes as $item){
+                            $newItem = $item;
+                            $newItem['cart_id'] = $storeInfo['cart_id'];
+                            $customers->push( $newItem );
+                        }
                     }
                 }
-
-
 
             }
 
@@ -81,8 +78,9 @@ class CustomersController extends Controller
             "recordsFiltered"   => $totalCustomers,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $customers->toArray()
+            "data"              => $customers->toArray(),
 
+            'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);
