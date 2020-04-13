@@ -78,8 +78,9 @@ class ProductsController extends Controller
             "recordsFiltered"   => $totalProducts,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $products->toArray()
+            "data"              => $products->toArray(),
 
+            'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);

@@ -31,6 +31,7 @@ class Api2Cart
     private $order;
     private $product;
 
+    private $log;
 
 
     /**
@@ -47,6 +48,7 @@ class Api2Cart
         $this->order    = new ApiClient\Api\OrderApi( null, $this->config );
         $this->product  = new ApiClient\Api\ProductApi( null, $this->config );
 
+        $this->log = collect();
 
     }
 
@@ -387,7 +389,7 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->customer->customerList( null, null, null, null,null,null,null,'force_all', null);
+            $result = $this->customer->customerList( null, null, null, null,null,null,null,'force_all', null,  null, null, null);
 
             $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
 
@@ -416,7 +418,7 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->customer->customerList( null, null, null, null, null, $page_cursor, null, 'force_all', null );
+            $result = $this->customer->customerList( $page_cursor, null, null, null, null, null, null, 'force_all', null, null, null, null );
 
             $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
 
@@ -476,15 +478,22 @@ class Api2Cart
 
     private function logApiCall( $action=null, $code=null, $config = null, $store_id=null, $store_ur=null, $user_id=null, $msg=null)
     {
-        Logger::create([
+        $log = Logger::create([
             'action'    => $action,
             'code'      => $code,
-            'params'    => (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'host' => $config->getHost() , 'msg' => $msg ] : [],
+            'params'    => (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [],
             'store_id'  => ($store_id) ? $store_id : $config->getApiKey('store_key'),
             'store_url' => $store_ur,
             'user_id'   => $user_id
         ]);
 
+        $this->log->push( $log );
+
+    }
+
+    public function getLog()
+    {
+        return $this->log;
     }
 
 }

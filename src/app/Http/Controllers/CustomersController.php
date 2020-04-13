@@ -32,7 +32,7 @@ class CustomersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
-        $totalCustomers = $this->api2cart->getCustomerCount( $store_id );
+        $totalCustomers = $this->api2cart->getCustomerCount( $store_id ); Log::debug( $totalCustomers );
 
         $customers = collect([]);
 
@@ -78,8 +78,9 @@ class CustomersController extends Controller
             "recordsFiltered"   => $totalCustomers,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $customers->toArray()
+            "data"              => $customers->toArray(),
 
+            'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);

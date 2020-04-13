@@ -80,8 +80,9 @@ class OrdersController extends Controller
             "recordsFiltered"   => $totalOrders,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $orders->toArray()
+            "data"              => $orders->toArray(),
 
+            'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);

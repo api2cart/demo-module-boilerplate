@@ -49,8 +49,9 @@ class StoresController extends Controller
             "recordsTotal"      => $result->count(),
             "recordsFiltered"   => $result->count(),
             "start"             => 0,
-            "data"              => $result
+            "data"              => $result,
 
+            'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);

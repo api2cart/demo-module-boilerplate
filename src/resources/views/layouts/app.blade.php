@@ -13,13 +13,16 @@
     <script type="text/javascript" src="{{ asset('js/axios.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script>
+        let logItems = new Array();
+        let stores;
+
         axios.defaults.headers.common = {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN' : '{{ csrf_token() }}'
         };
         axios.defaults.timeout = 5*60*1000;
 
-        var numberOfAjaxCAllPending = 0;
+        let numberOfAjaxCAllPending = 0;
 
         // Add a request interceptor
         axios.interceptors.request.use(function (config) {
@@ -75,6 +78,65 @@
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
+        }
+
+
+        function calculateLog()
+        {
+            if ( $('.api_log').length ){
+                $('.api_log span').empty().append( logItems.length );
+                reinitApiLogTable();
+            }
+        }
+
+        $(document).ready(function() {
+
+            $( '#logtable' ).dataTable({
+                serverSide: false,
+                data: logItems,
+                columns: [
+                    { data: null, render: 'created_at' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                if ( data.store_id ) {
+                                    return  stores.find(el => el.store_key === data.store_id)['url'];
+                                }
+                                return '';
+                            }
+                    },
+                    { data: null, render: 'action' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                let mr = '';
+                                $.each(data.params, function( index, value ) {
+                                    mr += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
+                                });
+                                return mr;
+                            }
+                    },
+                    { data: null, render: 'code' },
+                ]
+            });
+
+            $('#showApiLog').click(function(){
+
+                // console.log( logItems );
+                // console.log( stores );
+
+                reinitApiLogTable();
+
+
+                $('#staticBackdrop').modal('show');
+                return false;
+            });
+        });
+
+        function reinitApiLogTable()
+        {
+            var datatable = $( '#logtable' ).dataTable().api();
+            datatable.clear();
+            datatable.rows.add( logItems );
+            datatable.draw();
         }
 
     </script>
@@ -181,5 +243,40 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog full_modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">API2Cart Requests</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="table-responsive">
+                        <table id="logtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
+                            <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Store</th>
+                                <th>Method</th>
+                                <th>Params</th>
+                                <th>Response Code</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
