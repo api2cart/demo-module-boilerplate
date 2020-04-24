@@ -11,6 +11,9 @@ else
     cp "$dir/src/.env.example" "$dir/src/.env"
 fi
 
+# give rw permissions for temorary folder
+sudo chmod -R 777 $dir/src/storage
+
 #stop for any case container
 docker-compose down
 
