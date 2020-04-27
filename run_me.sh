@@ -16,6 +16,15 @@ sudo chmod -R 777 $dir/src/storage
 
 #stop for any case container
 docker-compose down
+if [ $? -eq 0 ];
+then
+    echo "Looks docker installed"
+else
+     echo "Please check if Docker installed and runned."
+     xdg-open https://docs.docker.com/engine/install/
+     exit
+fi
+
 
 #run containers in background
 docker-compose up -d
@@ -28,6 +37,7 @@ then
     docker-compose run app php artisan db:seed
 else
      echo "missing start please contact support"
+     xdg-open
      exit
 fi
 
