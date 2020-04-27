@@ -15,15 +15,19 @@ fi
 sudo chmod -R 777 $dir/src/storage
 
 #stop for any case container
-docker-compose down
-if [ $? -eq 0 ];
-then
-    echo "Looks docker installed"
-else
-     echo "Please check if Docker installed and runned."
-     xdg-open https://docs.docker.com/engine/install/
-     exit
+if ! [ -x "$(command -v docker-compose)" ]; then
+  echo "Please check if Docker installed and runned."
+
+  if ! [ -x "$(command -v xdg-open)" ]; then
+    open https://docs.docker.com/get-docker/
+    exit 1
+  fi
+
+  xdg-open https://docs.docker.com/get-docker/
+  exit 1
 fi
+
+docker-compose down
 
 
 #run containers in background
@@ -37,8 +41,11 @@ then
     docker-compose run app php artisan db:seed
 else
      echo "missing start please contact support"
-     xdg-open
      exit
 fi
 
+if ! [ -x "$(command -v xdg-open)" ]; then
+    open http://localhost:8080
+    exit 0
+fi
 xdg-open http://localhost:8080
