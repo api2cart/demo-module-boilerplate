@@ -115,7 +115,7 @@ class ProductsController extends Controller
 //        Log::debug( "{$store_id} {$product_id}" );
 //        Log::debug( $request->all() );
 
-//        $product = $this->api2cart->getProduct( $store_id, $product_id);
+//        $result= $this->api2cart->getProduct( $store_id, $product_id);
 
         $result = $this->api2cart->updateProduct( $store_id, $product_id, $request->all() );
 

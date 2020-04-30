@@ -68,6 +68,21 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group row">
+                    <div class="col-2"></div>
+                    <div class="col-10">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" name="allSelectedProducts" id="allSelectedProducts">
+                            <label class="custom-control-label" for="allSelectedProducts">Apply changes to all selected products</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="tab-pane fade" id="nav-variant" role="tabpanel" aria-labelledby="nav-profile-tab">

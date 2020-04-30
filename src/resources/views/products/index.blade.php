@@ -115,6 +115,8 @@
         }
 
 
+        var rows_selected = [];
+        var table;
 
 
         $(document).ready(function() {
@@ -133,12 +135,12 @@
             // console.log( items );
 
 
-            $('#dtable').DataTable( {
+            table = $('#dtable').DataTable( {
                 processing: true,
                 serverSide: false,
                 // ordering: false,
                 data: items,
-                dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col">p>',
+                dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col num_selected"><"col"p>>',
                 buttons: [
                     {
                         text: 'Reload',
@@ -155,7 +157,50 @@
                 initComplete: function () {
                     $('#dtable_filter input').focus();
                 },
+                columnDefs: [
+                    {
+                        'targets': 0,
+                        'checkboxes': {
+                            'selectAll': true,
+                            'selectRow': true,
+                            'selectAllPages': false,
+                            'selectCallback': function(nodes,selected){
+                                // console.log( nodes, selected  );
+                                rows_selected = [];
+                                table.rows().every(function(index, element ){
+                                    var tnode = this.node();
+
+                                    if ( $(tnode).find('input.dt-checkboxes').is(':checked') ){
+                                        rows_selected.push( $(tnode).find('input.dt-checkboxes').val() );
+                                    }
+
+                                });
+
+                                $(".num_selected").empty();
+
+                                if (rows_selected.length){
+                                    $(".num_selected").append( "Selected: " + rows_selected.length );
+                                }
+                                // console.log( rows_selected );
+
+                            },
+                            // 'selectAllCallback': function(nodes,selected){
+                            //     // console.log( nodes);
+                            //
+                            // },
+                        }
+                    }
+                ],
+                select: {
+                    'style': 'multi',
+                },
+                order: [[2, 'asc']],
                 columns: [
+                    { data: null, render:
+                            function(data, type, row, meta){
+                                return '<input type="checkbox" class="dt-checkboxes" value="'+data.cart_id.store_key+':'+data.id+'" >';
+                            },orderable : false
+                    },
                     { data: null, render: function ( data, type, row, meta ){
                             let imgurl = (data.images[0])? data.images[0].http_path : '{{ asset('css/img/no_image_275x275.jpg') }}';
                             return '<img src="'+imgurl+'" style="max-width: 60px; max-height: 60px;">'
@@ -229,6 +274,7 @@
                             <table id="dtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
                                 <thead>
                                 <tr>
+                                    <th></th>
                                     <th>Image</th>
                                     <th>Name/Description</th>
                                     <th>SKU</th>
@@ -240,7 +286,6 @@
                                 </thead>
                             </table>
                         </div>
-
 
                     </div>
                 </div>

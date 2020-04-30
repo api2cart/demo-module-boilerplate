@@ -60,3 +60,7 @@ div.growlUI {
 .cartImage {
     max-height: 48px !important;
 }
+
+table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
+    background-color: #bab7bc !important;
+}

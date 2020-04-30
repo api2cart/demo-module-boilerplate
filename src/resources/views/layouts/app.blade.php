@@ -198,6 +198,12 @@
                                 var imagefile = document.querySelector('#images');
                                 var formData = getFormData( $('.swal2-content form') );
 
+                                if ( typeof rows_selected !== 'undefined' ){
+                                    for (var n=0; n<rows_selected.length; n++){
+                                        formData.append("selected_items["+n+"]", rows_selected[n]);
+                                    }
+                                }
+
                                 if ( imagefile && imagefile.files.length ){
                                     for (var n=0; n<imagefile.files.length; n++){
                                         formData.append("image["+n+"]", imagefile.files[n]);
@@ -249,7 +255,7 @@
 
                                         trdata.data( nitem ).draw();
 
-
+                                        //TODO: uncheck selected items
 
 
                                         return true;
@@ -532,12 +538,16 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('js/sweetalert2/dist/sweetalert2.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/sfontawesome/css/all.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fileinput/css/fileinput.min.css') }}" media="all" />
-
+    <link type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}" rel="stylesheet" />
+{{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/select.dataTables.min.css') }}"/>--}}
+{{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/select.bootstrap.min.css') }}"/>--}}
 
     <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
-
+{{--    <script type="text/javascript" src="{{ asset('js/dataTables.select.min.js') }}"></script>--}}
+    <script type="text/javascript" src="{{ asset('js/jqdcheckboxes/js/dataTables.checkboxes.min.js') }}"></script>
+{{--    <script type="text/javascript" src="{{ asset('js/select.bootstrap.min.js') }}"></script>--}}
 
 
     @yield('script')
