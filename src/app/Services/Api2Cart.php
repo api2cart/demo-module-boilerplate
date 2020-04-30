@@ -89,8 +89,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'account.cart.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -122,9 +122,10 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'account.cart.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
 
-            return false;
+            return null;
         }
     }
 
@@ -160,9 +161,10 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'cart.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
 
-            return false;
+            return null;
         }
     }
 
@@ -177,12 +179,13 @@ class Api2Cart
 
         try{
 
-            $result = $this->cart->cartList();
+//            $result = $this->cart->cartList();
+            $result = $this->account->accountSupportedPlatforms();
 
             $this->logApiCall( 'cart.list.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage()  );
 
             if ( $result->getReturnCode() == 0 ){
-                return $this->mapToArray( $result->getResult()->getSupportedCarts() );
+                return $this->mapToArray( $result->getResult()->getSupportedPlatforms() );
             } else {
                 return null;
             }
@@ -190,8 +193,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'cart.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -217,8 +220,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'cart.delete.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -244,8 +247,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.count.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -272,8 +275,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -301,8 +304,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -329,8 +332,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -378,8 +381,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -411,8 +414,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'category.delete.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -439,8 +442,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.count.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -468,8 +471,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -498,8 +501,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -526,8 +529,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -556,8 +559,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.count.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -596,8 +599,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -627,8 +630,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -654,8 +657,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -727,8 +730,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -760,8 +763,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.delete.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -834,8 +837,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'customer.count.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
 
@@ -864,8 +867,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'customer.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -891,8 +894,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'customer.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
@@ -965,14 +968,16 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', 'e20f7debea000c989e4583025c996309');
 
-            dd( $this->getCategoryCount('e20f7debea000c989e4583025c996309') );
+            dd( $this->getCartsList() );
+
+//            dd( $this->getCategoryCount('e20f7debea000c989e4583025c996309') );
 
 //            $result = $this->category->categoryList();
 //            dd($result);
 
 //            $result = $this->product->productFields();
 
-            return $this->mapToArray( $result->getResult() );
+//            return $this->mapToArray( $result->getResult() );
 
 //            if ( $result->getResult() ){
 //                return $this->mapToArray( $result->getResult()->getCarts() );

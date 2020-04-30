@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRequest;
 use App\Services\Api2Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +36,8 @@ class StoresController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $allCarts = collect($this->api2cart->getCartsList());
 
-        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
+//        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
+
 
         $result = $carts->map(function ($store) use ($allCarts) {
             $info = $this->api2cart->getCart( $store['store_key'] );
@@ -65,6 +67,25 @@ class StoresController extends Controller
 
     }
 
+
+    public function create(Request $request)
+    {
+        // get supported carts
+        $stores = collect($this->api2cart->getCartsList());
+//            ->whereIn('cart_id',['Amazon']);
+
+        if ( $request->ajax() ){
+            return response()->json( ['data' => view('stores.form', compact('stores'))->render(), 'item' => $stores ] );
+        }
+        return redirect( route('stores.index') );
+    }
+
+
+    public function store(StoreRequest $request)
+    {
+        Log::debug( $request->all() );
+
+    }
 
     /**
      * Remove the specified resource from storage.

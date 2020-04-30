@@ -26,6 +26,16 @@
                     calculateLog();
                 }
 
+                if ( stores.length == 0 ){
+                    Swal.fire(
+                        'Error!',
+                        'Do not have store info, please check API log.',
+                        'error'
+                    );
+                    $.unblockUI();
+                    return;
+                }
+
                 for (let i=0; i<stores.length; i++){
 
                     blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
@@ -77,6 +87,25 @@
 
 
 
+
+            }).catch(function (error) {
+                // handle error
+                // console.log(error.response);
+
+                if ( error.response.data.log ){
+                    for (let k=0; k<error.response.data.log.length; k++){
+                        logItems.push( error.response.data.log[k] );
+                    }
+                    calculateLog();
+                }
+
+                $.unblockUI();
+
+                Swal.fire(
+                    'Error!',
+                    'Do not have store info, please check API log.',
+                    'error'
+                )
 
             });
         }
