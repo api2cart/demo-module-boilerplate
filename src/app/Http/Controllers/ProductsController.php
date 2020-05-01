@@ -112,20 +112,38 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
-//        Log::debug( "{$store_id} {$product_id}" );
-//        Log::debug( $request->all() );
+        if ( $request->get('allSelectedProducts') ){
 
-//        $result= $this->api2cart->getProduct( $store_id, $product_id);
+            $product = $this->api2cart->getProductInfo( $store_id, $product_id);
 
-        $result = $this->api2cart->updateProduct( $store_id, $product_id, $request->all() );
+            $diff = array_diff_assoc_recursive( $request->except(['_token','allSelectedProducts','selected_items','images']), $product );
 
-        if ( $request->ajax() ){
+            foreach ($request->get('selected_items') as $item){
+                $pid = explode(':', $item);
 
+                if ( isset($pid[0]) && isset($pid[1]) && $pid[0] && $pid[1] ){
+
+                    $storeInfo = $this->api2cart->getCart( $store_id );
+                    $res = $this->api2cart->updateProduct( $pid[0], $pid[1], $diff );
+                    $res['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+                    $res['selected_item'] = $item;
+                    $result[] = $res;
+                }
+            }
+
+            return response()->json(['items' => $result, 'log' => $this->api2cart->getLog()]);
+
+        } else {
+
+            $result = $this->api2cart->updateProduct( $store_id, $product_id, $request->all() );
             $storeInfo = $this->api2cart->getCart( $store_id );
             $result['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
 
             return response()->json(['item' => $result, 'log' => $this->api2cart->getLog()]);
+
         }
+
+
 
     }
 

@@ -227,40 +227,80 @@
                                             calculateLog();
                                         }
 
-                                        let nitem = presponse.data.item;
+                                        // update 1 item
+                                        if ( typeof presponse.data.item != 'undefined' ){
 
-                                        if ( nitem == null ){
+                                            let nitem = presponse.data.item;
+                                            if ( nitem == null ){
+                                                $.unblockUI();
+                                                Swal.fire(
+                                                    'Error!',
+                                                    'Failed edit ' + name + '<br>Please check API log.',
+                                                    'error'
+                                                );
+                                                return true;
+                                            }
 
+                                            if ( typeof trdata.data().cart_id != 'undefined' ){
+                                                nitem.cart_id = trdata.data().cart_id;
+                                            }
+                                            if ( typeof trdata.data().parent_name != 'undefined' ){
+                                                nitem.parent_name = trdata.data().parent_name;
+                                            }
+                                            trdata.data( nitem ).draw();
+
+
+                                        }
+                                        else if ( typeof presponse.data.items != 'undefined' ){
+
+                                            $.each(presponse.data.items, function(index, value) {
+
+                                                table.rows().every(function(){
+                                                    var tobj  = this;
+                                                    var tnode = tobj.node();
+                                                    var tdata = tobj.data();
+
+                                                    if ( $(tnode).find('input.dt-checkboxes').is(':checked') ){
+
+                                                        // table node
+                                                        if ( $(tnode).find('input.dt-checkboxes').val() == value.selected_item ){
+
+                                                            if ( typeof tdata.cart_id != 'undefined' ){
+                                                                value.cart_id = tdata.cart_id;
+                                                            }
+                                                            if ( typeof tdata.parent_name != 'undefined' ){
+                                                                value.parent_name = tdata.parent_name;
+                                                            }
+                                                            tobj.data( value ).draw();
+
+                                                        }
+
+                                                    }
+
+                                                });
+
+
+                                            });
+
+                                            table.rows().columns().checkboxes.deselectAll();
+
+
+
+                                        } else {
                                             $.unblockUI();
                                             Swal.fire(
                                                 'Error!',
                                                 'Failed edit ' + name + '<br>Please check API log.',
                                                 'error'
                                             );
-                                            return true;
                                         }
 
-                                        // console.log(presponse);
-                                        //TODO: make more effective item update
-
-                                        if ( typeof trdata.data().cart_id != 'undefined' ){
-                                            nitem.cart_id = trdata.data().cart_id;
-                                        }
-                                        if ( typeof trdata.data().parent_name != 'undefined' ){
-                                            nitem.parent_name = trdata.data().parent_name;
-                                        }
-
-                                        // console.log(trdata.data());
-                                        // console.log( nitem );
-
-                                        trdata.data( nitem ).draw();
-
-                                        //TODO: uncheck selected items
 
 
                                         return true;
                                     })
                                     .catch(function (error) {
+                                        console.log(error);
 
                                         if ( typeof error.response.data.errors != 'undefined'){
 
