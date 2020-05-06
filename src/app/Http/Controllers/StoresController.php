@@ -74,6 +74,11 @@ class StoresController extends Controller
         $stores = collect($this->api2cart->getCartsList());
 //            ->whereIn('cart_id',['Amazon']);
 
+
+        Log::debug( print_r($stores,1) );
+
+
+
         if ( $request->ajax() ){
             return response()->json( ['data' => view('stores.form', compact('stores'))->render(), 'item' => $stores ] );
         }

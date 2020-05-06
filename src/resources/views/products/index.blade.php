@@ -84,6 +84,8 @@
 
                         reinitActions();
 
+                        initFilters();
+
                     });
 
 
@@ -113,6 +115,107 @@
 
             });
         }
+
+        function initFilters()
+        {
+            var names = getUniqueName();
+            var sku   = getUniqueSku();
+            var owner = getUniqueOwner();
+            var store = getUniqueStore();
+
+
+            yadcf.init( table , [
+                {
+                    column_number: 2,
+                    select_type: 'select2',
+                    data: names,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 3,
+                    select_type: 'select2',
+                    data: sku,
+                },
+                {
+                    column_number: 4,
+                    select_type: 'select2',
+                    data: owner,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 5,
+                    select_type: 'select2',
+                    data: store,
+                    select_type_options: { width: '200px' }
+                },
+
+            ]);
+
+        }
+
+
+        function getUniqueName()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                if (!~uniqueItem.indexOf(item.name)) {
+                    uniqueItem.push(item.name);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniquePrice()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                if (!~uniqueItem.indexOf(item.price)) {
+                    uniqueItem.push(item.price);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueSku()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                if (!~uniqueItem.indexOf(item.u_sku)) {
+                    uniqueItem.push(item.u_sku);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueOwner()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                let email = (item.cart_id.stores_info.store_owner_info.email) ? item.cart_id.stores_info.store_owner_info.email : '';
+                if (!~uniqueItem.indexOf(email)) {
+                    uniqueItem.push(email);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueStore()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                let url = (item.cart_id.url) ? item.cart_id.url : '';
+                if (!~uniqueItem.indexOf(url)) {
+                    uniqueItem.push(url);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
 
 
         var rows_selected = [];
@@ -155,7 +258,9 @@
                     emptyTable: "Data loading or not available in table"
                 },
                 initComplete: function () {
+
                     $('#dtable_filter input').focus();
+
                 },
                 columnDefs: [
                     {
@@ -199,7 +304,7 @@
                     { data: null, render:
                             function(data, type, row, meta){
                                 return '<input type="checkbox" class="dt-checkboxes" value="'+data.cart_id.store_key+':'+data.id+'" >';
-                            },orderable : false
+                            },orderable : false,  "searchable": false,
                     },
                     { data: null, render: function ( data, type, row, meta ){
                             let imgurl = (data.images[0])? data.images[0].http_path : '{{ asset('css/img/no_image_275x275.jpg') }}';
@@ -229,7 +334,8 @@
                     }},
                     { data: null, render: function ( data, type, row, meta ){
                             return data.price + ' ' + data.currency;
-                        } },
+                        }
+                    },
                     {
                         data: null, render: function ( data, type, row, meta ){
                             return '<a href="#" aria-disabled="true" class="text-secondary disabled"><i class="far fa-file-alt"></i></a> ' +
@@ -244,8 +350,20 @@
                         html: true
                     });
                     reinitActions();
+
+                    //TODO: refill filters here
+
+
                 }
             } );
+
+
+
+
+            // buildSelect( table );
+            // table.on( 'draw', function () {
+            //     buildSelect( table );
+            // } );
 
             $('#dtable').on( 'page.dt', function () {
                 $('[data-toggle="popover"]').popover('hide');

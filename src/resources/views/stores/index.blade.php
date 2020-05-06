@@ -46,6 +46,7 @@
                 $.unblockUI();
 
                 reinitActions(); $.growlUI('Notification',  ' data loaded successfull!', 500 );
+                initFilters();
 
             }).catch(function (error) {
                 // handle error
@@ -185,6 +186,84 @@
                 });
         }
 
+
+        function initFilters()
+        {
+            var names = getUniqueName();
+            var owner = getUniqueOwner();
+            var store = getUniqueStore();
+
+
+            yadcf.init( table , [
+                {
+                    column_number: 1,
+                    select_type: 'select2',
+                    data: names,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 2,
+                    select_type: 'select2',
+                    data: owner,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 0,
+                    select_type: 'select2',
+                    data: store,
+                    select_type_options: { width: '200px' }
+                },
+
+            ]);
+
+        }
+
+
+        function getUniqueName()
+        {
+            var uniqueItem = [];
+            stores.filter(function(item){
+                let name = item.cart_info.cart_name
+                if (!~uniqueItem.indexOf(name)) {
+                    uniqueItem.push(name);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueOwner()
+        {
+            var uniqueItem = [];
+            stores.filter(function(item){
+                let owner = (item.stores_info.store_owner_info.owner) ? item.stores_info.store_owner_info.owner : '';
+                if (!~uniqueItem.indexOf(owner)) {
+                    uniqueItem.push(owner);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueStore()
+        {
+            var uniqueItem = [];
+            stores.filter(function(item){
+                let url = (item.url) ? item.url : '';
+                if (!~uniqueItem.indexOf(url)) {
+                    uniqueItem.push(url);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+
+
+
+        var table;
+
+
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -197,7 +276,7 @@
             loadData();
             // $.unblockUI();
 
-            $('#dtable').DataTable( {
+            table = $('#dtable').DataTable( {
                 processing: true,
                 // serverSide: true,
                 // ordering: false,

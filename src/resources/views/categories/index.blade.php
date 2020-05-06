@@ -80,6 +80,8 @@
 
                         $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
 
+                        initFilters();
+
                     });
 
 
@@ -112,6 +114,58 @@
 
 
 
+        function initFilters()
+        {
+            var names = getUniqueName();
+            var store = getUniqueStore();
+
+            yadcf.init( table , [
+                {
+                    column_number: 2,
+                    select_type: 'select2',
+                    data: names,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 1,
+                    select_type: 'select2',
+                    data: store,
+                    select_type_options: { width: '200px' }
+                },
+
+            ]);
+
+        }
+
+
+        function getUniqueName()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                if (!~uniqueItem.indexOf(item.name)) {
+                    uniqueItem.push(item.name);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+
+        function getUniqueStore()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                let url = (item.cart_id.url) ? item.cart_id.url : '';
+                if (!~uniqueItem.indexOf(url)) {
+                    uniqueItem.push(url);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+
+        var table;
 
         $(document).ready(function() {
             $.ajaxSetup({
@@ -129,7 +183,7 @@
             // console.log( items );
 
 
-            $('#dtable').DataTable( {
+            table = $('#dtable').DataTable( {
                 processing: true,
                 serverSide: false,
                 // ordering: false,
