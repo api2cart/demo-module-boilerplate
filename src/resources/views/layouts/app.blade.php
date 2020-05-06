@@ -12,15 +12,30 @@
     <!-- Scripts -->
     <script type="text/javascript" src="{{ asset('js/axios.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jquery.blockUI.js') }}"></script>
+
     <script type="text/javascript" src="{{ asset('js/fontawesome/js/all.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/sweetalert2/dist/sweetalert2.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/fileinput/js/fileinput.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/fileinput/js/plugins/piexif.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/fileinput/themes/fas/theme.min.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jqdcheckboxes/js/dataTables.checkboxes.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/yadcf/jquery.dataTables.yadcf.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jui/jquery-ui.min.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('js/select2/js/select2.min.js') }}"></script>
+
     <script>
         let items = new Array();
         let logItems = new Array();
+        let logTable;
         let stores;
+
 
         axios.defaults.headers.common = {
             'X-Requested-With': 'XMLHttpRequest',
@@ -486,10 +501,10 @@
 
 
 
-
         $(document).ready(function() {
+            // 'use strict';
 
-            $( '#logtable' ).dataTable({
+            logTable = $( '#logtable' ).DataTable({
                 serverSide: false,
                 data: logItems,
                 order: [[ 0, "desc" ]],
@@ -506,22 +521,28 @@
                     { data: null, render: 'action' },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                let mr = '';
+                                let mr = '<div><div class="dolessmore">';
                                 $.each(data.params, function( index, value ) {
                                     mr += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
                                 });
+                                mr += '</div><span class="dolessmoreShow">Show more</span></div>'
                                 return mr;
                             }
                     },
                     { data: null, render: 'code'},
-                ]
+                ],
+                "drawCallback": function( settings ) {
+                    // console.log( settings );
+                }
             });
+
 
             $('#showApiLog').click(function(){
                 reinitApiLogTable();
                 $('#staticBackdrop').modal('show');
                 return false;
             });
+
         });
 
         function reinitApiLogTable()
@@ -530,6 +551,84 @@
             datatable.clear();
             datatable.rows.add( logItems );
             datatable.draw();
+
+            var codes  = getLogUniqueCode();
+            var method = getLogUniqueMethod();
+            var storeu  = getLogUniqueStores();
+
+            var myTable = $('#logtable').DataTable();
+
+
+            yadcf.init( myTable , [
+                {
+                    column_number: 2,
+                    select_type: 'select2',
+                    data: method,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 1,
+                    select_type: 'select2',
+                    data: storeu,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 4,
+                    select_type: 'select2',
+                    data: codes,
+                    // select_type_options: { width: '200px' }
+                }
+            ]);
+
+            $('.dolessmoreShow').unbind();
+            $('.dolessmoreShow').click(function(){
+                var obj = $(this).parent().find('.dolessmore').first();
+
+                if ( $(obj).css('height') == '40px' ){
+                    $(obj).css('height','auto')
+                    $(this).text('Show less');
+                } else {
+                    $(obj).css('height','40px')
+                    $(this).text('Show more');
+                }
+
+                console.log( $(obj).css('max-height') );
+            });
+
+        }
+
+        function getLogUniqueCode()
+        {
+            var uniqueItem = [];
+            logItems.filter(function(item){
+                if (!~uniqueItem.indexOf(item.code)) {
+                    uniqueItem.push(item.code);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+        function getLogUniqueStores()
+        {
+            var uniqueItem = [];
+            stores.filter(function(item){
+                if (!~uniqueItem.indexOf(item.url)) {
+                    uniqueItem.push(item.url);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+        function getLogUniqueMethod()
+        {
+            var uniqueItem = [];
+            logItems.filter(function(item){
+                if (!~uniqueItem.indexOf(item.action)) {
+                    uniqueItem.push(item.action);
+                    return item;
+                }
+            });
+            return uniqueItem;
         }
 
         function getFormData($form) {
@@ -542,8 +641,6 @@
         }
 
     </script>
-    <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/jquery.blockUI.js') }}"></script>
     <script type="text/javascript" >
         function blockUiStyled(message){
             $.blockUI({
@@ -575,22 +672,15 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/dataTables.bootstrap4.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/buttons.dataTables.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/sweetalert2/dist/sweetalert2.min.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ asset('js/sfontawesome/css/all.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/fontawesome/css/all.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fileinput/css/fileinput.min.css') }}" media="all" />
     <link type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="{{ asset('js/yadcf/jquery.dataTables.yadcf.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/jui/jquery-ui.min.css') }}"/>
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/select2/css/select2.css') }}"  />
 
-    <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/jqdcheckboxes/js/dataTables.checkboxes.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/yadcf/jquery.dataTables.yadcf.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/jui/jquery-ui.min.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
 
     @yield('script')
