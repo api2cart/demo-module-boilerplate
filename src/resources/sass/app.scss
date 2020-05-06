@@ -64,3 +64,16 @@ div.growlUI {
 table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
     background-color: #bab7bc !important;
 }
+.select2-container--open .select2-dropdown--below {
+    z-index: 2000 !important;
+}
+
+.dolessmore {
+    overflow: hidden;
+    height: 40px;
+}
+
+.dolessmoreShow {
+    font-size: 10px;
+    font-weight: bold;
+}

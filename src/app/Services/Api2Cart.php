@@ -292,7 +292,7 @@ class Api2Cart
 
             $result = $this->category->categoryList( null, null, $page_cursor);
 
-            $this->logApiCall( 'category.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'category.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -305,7 +305,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'category.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'category.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() ,['page_cursor' => $page_cursor] );
             return false;
         }
 
@@ -321,7 +321,7 @@ class Api2Cart
 
             $result = $this->category->categoryInfo($category_id);
 
-            $this->logApiCall( 'category.info.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'category.info.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['category_id' => $category_id] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
@@ -333,7 +333,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'category.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'category.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['category_id' => $category_id]  );
             return false;
         }
 
@@ -364,7 +364,7 @@ class Api2Cart
                     null
                 );
 
-                $this->logApiCall( 'category.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+                $this->logApiCall( 'category.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['category_id' => $category_id, 'fields' => $fields ]  );
 
                 if ( $result->getReturnCode() == 0 ){
 
@@ -382,7 +382,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'category.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'category.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['category_id' => $category_id, 'fields' => $fields ]   );
             return false;
         }
 
@@ -400,7 +400,7 @@ class Api2Cart
 
             $result = $this->category->categoryDelete( $category_id );
 
-            $this->logApiCall( 'category.delete.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'category.delete.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['category_id'=>$category_id] );
 
 
             if ( $result->getReturnCode() == 0 ){
@@ -489,7 +489,7 @@ class Api2Cart
 
             $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'order_id,customer,totals,address,items,bundles,status,currency' );
 
-            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -502,7 +502,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['page_cursor'=>$page_cursor]  );
             return false;
         }
 
@@ -518,7 +518,7 @@ class Api2Cart
 
             $result = $this->order->orderInfo( $order_id ,'force_all');
 
-            $this->logApiCall( 'order.info.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'order.info.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['order_id'=>$order_id] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
@@ -530,7 +530,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'order.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'order.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() ,['order_id'=>$order_id] );
             return false;
         }
 
@@ -583,7 +583,7 @@ class Api2Cart
 
             $result = $this->product->productList( null, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, $ids, null, null, null, null, null, null  );
 
-            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['ids' => $ids ] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -600,7 +600,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() ,['ids' => $ids ]  );
             return false;
         }
     }
@@ -615,7 +615,7 @@ class Api2Cart
 
             $result = $this->product->productList( $page_cursor, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
 
-            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -631,7 +631,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'product.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['page_cursor'=>$page_cursor] );
             return false;
         }
     }
@@ -645,7 +645,7 @@ class Api2Cart
             $this->order->getConfig()->setApiKey('store_key', $store_id);
             $result = $this->product->productInfo($product_id,'force_all');
 
-            $this->logApiCall( 'product.info.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'product.info.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
@@ -658,7 +658,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'product.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id'=>$product_id]  );
             return false;
         }
 
@@ -715,7 +715,7 @@ class Api2Cart
 
 //                Log::debug( print_r($result,1));
 
-                $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+                $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
 
                 if ( $result->getReturnCode() == 0 ){
 
@@ -733,7 +733,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'product.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
             return false;
         }
 
@@ -751,7 +751,7 @@ class Api2Cart
 
             $result = $this->product->productDelete( $product_id );
 
-            $this->logApiCall( 'product.delete.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'product.delete.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() , ['product_id'=>$product_id] );
 
 
             if ( $result->getReturnCode() == 0 ){
@@ -766,7 +766,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.delete.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'product.delete.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() ,['product_id'=>$product_id] );
             return false;
         }
 
@@ -885,7 +885,7 @@ class Api2Cart
 
             $result = $this->customer->customerList( $page_cursor, null, null, null, null, null, null, 'force_all', null, null, null, null );
 
-            $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'customer.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage() , ['page_cursor' => $page_cursor] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -897,7 +897,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'customer.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'customer.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['page_cursor' => $page_cursor]  );
             return false;
         }
     }
@@ -941,12 +941,20 @@ class Api2Cart
     }
 
 
-    private function logApiCall( $action=null, $code=null, $config = null, $store_id=null, $store_ur=null, $user_id=null, $msg=null)
+    private function logApiCall( $action=null, $code=null, $config = null, $store_id=null, $store_ur=null, $user_id=null, $msg=null, $params=null)
     {
+        $p = (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [];
+
+        if ( is_array($params) ){
+            foreach ($params as $k=>$v){
+                $p[ $k ] = $v;
+            }
+        }
+
         $log = Logger::create([
             'action'    => $action,
             'code'      => $code,
-            'params'    => (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [],
+            'params'    => $p,
             'store_id'  => ($store_id) ? $store_id : $config->getApiKey('store_key'),
             'store_url' => $store_ur,
             'user_id'   => $user_id
