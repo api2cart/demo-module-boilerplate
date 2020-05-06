@@ -10,6 +10,13 @@
 <div class="row text-left">
     <div class="col">
         <div class="form-group row">
+            <label for="name" class="col-4 col-form-label">Store Url</label>
+            <div class="col-8">
+                <input type="text" class="form-control" id="store_url" name="store_url" value="">
+                <div class="invalid-feedback"></div>
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="name" class="col-4 col-form-label">Store Type</label>
             <div class="col-8">
                 <select class="custom-select" id="cart_id" name="cart_id" required >
@@ -21,6 +28,7 @@
                 <div class="invalid-feedback"></div>
             </div>
         </div>
+
 
         <div id="addItemFields">
         </div>

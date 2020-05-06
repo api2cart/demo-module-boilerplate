@@ -211,7 +211,6 @@
                                 }
 
 
-
                                 return axios.post( fact , formData , {
                                     headers: {
                                         'Content-Type': 'multipart/form-data'
@@ -579,15 +578,19 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('js/sfontawesome/css/all.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fileinput/css/fileinput.min.css') }}" media="all" />
     <link type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}" rel="stylesheet" />
-{{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/select.dataTables.min.css') }}"/>--}}
-{{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/select.bootstrap.min.css') }}"/>--}}
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/yadcf/jquery.dataTables.yadcf.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/jui/jquery-ui.min.css') }}"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
     <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dataTables.buttons.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
-{{--    <script type="text/javascript" src="{{ asset('js/dataTables.select.min.js') }}"></script>--}}
     <script type="text/javascript" src="{{ asset('js/jqdcheckboxes/js/dataTables.checkboxes.min.js') }}"></script>
-{{--    <script type="text/javascript" src="{{ asset('js/select.bootstrap.min.js') }}"></script>--}}
+    <script type="text/javascript" src="{{ asset('js/yadcf/jquery.dataTables.yadcf.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jui/jquery-ui.min.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
 
     @yield('script')

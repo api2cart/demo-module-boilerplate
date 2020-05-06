@@ -713,6 +713,8 @@ class Api2Cart
                     null
                 );
 
+//                Log::debug( print_r($result,1));
+
                 $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage()  );
 
                 if ( $result->getReturnCode() == 0 ){
