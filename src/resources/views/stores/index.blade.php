@@ -143,20 +143,33 @@
                     $('#cart_id').change(function(e){
 
                         let selected = this.value;
+
+
+
                         let item = Object.values( selectItems ).find( obj =>{ return obj.cart_id === selected } );
                         $('#addItemFields').empty();
-                        for (let value of Object.values( item.params )) {
-                            // console.log( value );
-                            $('#addItemFields').append(
-                            '<div class="form-group row">\n' +
-                            '                <label for="field.'+value+'" class="col-4 col-form-label">'+value+'</label>\n' +
-                            '                <div class="col-8">\n' +
-                            '                    <input class="form-control" id="field.'+value+'" name="field['+value+']" required="required" >\n' +
-                            '                    <div class="invalid-feedback"></div>\n' +
-                            '                </div>\n' +
-                            '            </div>'
-                            );
-                        }
+
+                        axios.get( 'stores/fields/' + item.cart_id ).then(function (cfresponse) {
+                            $('#addItemFields').append( cfresponse.data );
+                        });
+
+
+
+                        // console.log(  );
+
+                        // for (let value of Object.values( item.params )) {
+                        //     // console.log( value );
+                        //
+                        //     $('#addItemFields').append(
+                        //     '<div class="form-group row">\n' +
+                        //     '                <label for="field.'+value+'" class="col-4 col-form-label">'+value+'</label>\n' +
+                        //     '                <div class="col-8">\n' +
+                        //     '                    <input class="form-control" id="field.'+value+'" name="field['+value+']" required="required" >\n' +
+                        //     '                    <div class="invalid-feedback"></div>\n' +
+                        //     '                </div>\n' +
+                        //     '            </div>'
+                        //     );
+                        // }
 
 
                     });
