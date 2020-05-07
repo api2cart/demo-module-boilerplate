@@ -523,7 +523,21 @@
                             function ( data, type, row, meta ){
                                 let mr = '<div><div class="dolessmore">';
                                 $.each(data.params, function( index, value ) {
-                                    mr += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
+
+                                    if ( typeof value === 'object' ){
+
+                                        $.each( value, function( i, v ) {
+                                            if ( typeof v === 'object'){
+                                                mr += '<small><strong>'+ index +'->'+ i + '</strong> : ' + JSON.stringify( v ) +'</small><br>';
+                                            } else {
+                                                mr += '<small><strong>'+ index +'->'+ i + '</strong> : ' + v +'</small><br>';
+                                            }
+                                        });
+
+                                    } else {
+                                        mr += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
+                                    }
+
                                 });
                                 mr += '</div><span class="dolessmoreShow">Show more</span></div>'
                                 return mr;
@@ -544,6 +558,41 @@
             });
 
         });
+
+        function displayProperties(val, out )
+        {
+
+            console.log( typeof val );
+            console.log( val );
+
+            if (typeof val === 'object') {
+
+                $.each( val , function( index, value ) {
+
+                    if ( typeof value === 'object'){
+
+                        // console.log( value );
+                        // out += displayProperties( value, out );
+
+                    } else {
+                        out += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
+                    }
+
+                });
+
+                return out;
+
+            } else {
+
+                // console.log( val );
+                // console.log( out );
+
+            }
+
+            return out;
+
+        }
+
 
         function reinitApiLogTable()
         {
@@ -592,7 +641,7 @@
                     $(this).text('Show more');
                 }
 
-                console.log( $(obj).css('max-height') );
+                // console.log( $(obj).css('max-height') );
             });
 
         }
