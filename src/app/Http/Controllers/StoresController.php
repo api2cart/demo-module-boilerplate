@@ -62,8 +62,11 @@ class StoresController extends Controller
         return response()->json($data);
     }
 
-    public function storeDetails(Request $request, $id=null)
+    public function fields(Request $request, $id=null)
     {
+        $store = collect($this->api2cart->getCartsList())->where('cart_id',$id)->first();
+
+        return view('stores.store_fields', compact('store'));
 
     }
 
@@ -75,7 +78,7 @@ class StoresController extends Controller
 //            ->whereIn('cart_id',['Amazon']);
 
 
-        Log::debug( print_r($stores,1) );
+//        Log::debug( print_r($stores,1) );
 
 
 
@@ -88,7 +91,17 @@ class StoresController extends Controller
 
     public function store(StoreRequest $request)
     {
-        Log::debug( $request->all() );
+//        Log::debug( $request->all() );
+        //load required store info
+        $store = collect($this->api2cart->getCartsList())->where('cart_id',$request->get('cart_id'))->first();
+
+        $requestData = $request->except(['_token']);
+        $requestData['field']['cart_id'] = $request->get('cart_id');
+
+        //TODO: for bridget carts ftp credentials is optional
+        // 'ftp_host','ftp_user','ftp_password','ftp_port','ftp_store_dir'
+
+//        $this->api2cart->addCart( $requestData['field'] );
 
     }
 
