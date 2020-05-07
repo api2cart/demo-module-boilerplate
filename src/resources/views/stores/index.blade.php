@@ -45,7 +45,8 @@
 
                 $.unblockUI();
 
-                reinitActions(); $.growlUI('Notification',  ' data loaded successfull!', 500 );
+                reinitActions();
+                $.growlUI('Notification',  ' data loaded successfull!', 500 );
                 initFilters();
 
             }).catch(function (error) {
