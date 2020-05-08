@@ -48,6 +48,13 @@ class ProductsController extends Controller
                 foreach ($newRes as $item){
                     $newItem = $item;
                     $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+
+                    // collect product variants
+                    if ( $item['type'] === 'configurable' ){
+                        $pv = $this->api2cart->getProductVariant($store_id, $item['id'] );
+                        $newItem['children'] = $pv['children'];
+                    }
+
                     $products->push( $newItem );
                 }
             }
@@ -63,6 +70,13 @@ class ProductsController extends Controller
                         foreach ($newRes as $item){
                             $newItem = $item;
                             $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+
+                            // collect product variants
+                            if ( $item['type'] === 'configurable' ){
+                                $pv = $this->api2cart->getProductVariant($store_id, $item['id'] );
+                                $newItem['children'] = $pv['children'];
+                            }
+
                             $products->push( $newItem );
                         }
                     }
@@ -73,6 +87,7 @@ class ProductsController extends Controller
 
         }
 
+//        Log::debug( print_r($products->forPage(0,5),1) );
 
         $data = [
             "recordsTotal"      => $totalProducts,
@@ -99,7 +114,12 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
-        $product = $this->api2cart->getProductInfo($store_id, $product_id);
+        $product = $this->api2cart->getProductInfo($store_id, $product_id); //Log::debug( print_r($product,1));
+
+        if ( $product['type'] === 'configurable' ){
+            $pv = $this->api2cart->getProductVariant($store_id, $product['id'] );
+            $product['children'] = $pv['children'];
+        }
 
         if ( $request->ajax() ){
             return response()->json(['data' => view('products.form',compact('product','store_id', 'product_id'))->render(), 'item' => $product,'log' => $this->api2cart->getLog() ]);
