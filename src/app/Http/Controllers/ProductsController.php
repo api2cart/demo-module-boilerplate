@@ -114,12 +114,14 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
-        $product = $this->api2cart->getProductInfo($store_id, $product_id); //Log::debug( print_r($product,1));
+        $product = $this->api2cart->getProductInfo($store_id, $product_id);
 
         if ( $product['type'] === 'configurable' ){
             $pv = $this->api2cart->getProductVariant($store_id, $product['id'] );
             $product['children'] = $pv['children'];
         }
+
+//        Log::debug( print_r($product,1));
 
         if ( $request->ajax() ){
             return response()->json(['data' => view('products.form',compact('product','store_id', 'product_id'))->render(), 'item' => $product,'log' => $this->api2cart->getLog() ]);
