@@ -94,9 +94,29 @@
     </div>
 
     <div class="tab-pane fade" id="nav-variant" role="tabpanel" aria-labelledby="nav-profile-tab">
-        <br><br>
-        <h5>Coming soon...</h5>
-        <br><br>
+        @if( !isset($product['children']) )
+            <br><br>
+            <h5>This product do not have variants</h5>
+            <br><br>
+        @else
+            @foreach($product['children'] as $k=>$item)
+                <div class="card">
+                    <div class="card-header">
+                        {{ $item['name'] }}
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="price" class="col-4 col-form-label">Price</label>
+                            <div class="col-8">
+                                <input type="number" class="form-control" id="children.default_price.{{ $k }}" name="children[default_price][{{ $k }}]" value="{{ ( isset($item['default_price']) ) ? $item['default_price'] : '' }}" step="0.01"  >
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            @endforeach
+        @endif
     </div>
 
     <div class="tab-pane fade" id="nav-options" role="tabpanel" aria-labelledby="nav-contact-tab">
