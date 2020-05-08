@@ -829,20 +829,16 @@ class Api2Cart
 
     }
 
-    public function getProductVariant($store_id=null, $product_variant_id=null)
+    public function getProductVariant($store_id=null, $product_id=null)
     {
         $this->setApiKey();
 
         try{
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
-//            $result = $this->product->productVariantInfo($product_variant_id,'force_all');
-            $result = $this->product->productChildItemList( $product_variant_id );
+            $result = $this->product->productChildItemList( $product_id );
 
-//            $this->logApiCall( 'product.info.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id] );
-
-//            Log::debug( print_r($result,1) );
-//            return null;
+            $this->logApiCall( 'product.child_item.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id] );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
@@ -854,8 +850,8 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-            Log::debug( $e->getMessage() );
-//            $this->logApiCall( 'product.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id'=>$product_id]  );
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.child_item.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id'=>$product_id]  );
             return false;
         }
 
