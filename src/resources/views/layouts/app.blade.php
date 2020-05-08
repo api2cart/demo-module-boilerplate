@@ -208,6 +208,7 @@
                             preConfirm: ( pconfirm ) => {
 
                                 $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
+                                $( $(document.getElementById('_form_errors')).parent() ).hide();
 
                                 let fact = $('.swal2-content form')[0].action;
                                 var imagefile = document.querySelector('#images');
@@ -317,14 +318,22 @@
                                         console.log(error);
 
                                         if ( typeof error.response.data.errors != 'undefined'){
-
+                                            var err_msg = '<ul>';
                                             $.each(error.response.data.errors, function(index, value) {
-                                                let obj = $('#'+index);
+                                                let obj = document.getElementById( index ); // $('#'+index)
                                                 let err = $(obj).parent().parent().find('.invalid-feedback');
-                                                $(err).empty().append( value.shift() );
-                                                $(obj).addClass('is-invalid')
-                                            });
+                                                let msg = value.shift();
 
+                                                $(err).empty().append( msg );
+                                                $(obj).addClass('is-invalid')
+
+                                                err_msg += '<li>' + msg + '</li>';
+                                            });
+                                            err_msg += '</ul>';
+
+                                            let awin = document.getElementById('_form_errors');
+                                            $(awin).empty().append(err_msg).parent();
+                                            $( $(awin).parent() ).show().fadeOut(9000);
                                         }
 
 
