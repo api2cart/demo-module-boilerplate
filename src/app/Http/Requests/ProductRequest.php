@@ -24,9 +24,17 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'          => 'required',
-//            'description'   => 'required',
-            'price'         => 'required'
+            'name'                      => 'required',
+//            'description'               => 'required',
+            'price'                     => 'required',
+            'children.default_price.*'  => 'required_with:children.id'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'children.default_price.*.required_with' => 'Variant price must be filled'
         ];
     }
 }
