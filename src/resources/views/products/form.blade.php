@@ -7,7 +7,7 @@
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-general" role="tab" aria-controls="nav-general" aria-selected="true">General</a>
         <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-variant" role="tab" aria-controls="nav-variant" aria-selected="false">Variants</a>
         <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-options" role="tab" aria-controls="nav-options" aria-selected="false">Options</a>
-        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-child" role="tab" aria-controls="nav-child" aria-selected="false">Child Items</a>
+{{--        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-child" role="tab" aria-controls="nav-child" aria-selected="false">Child Items</a>--}}
     </div>
 </nav>
 <div class="tab-content" id="nav-tabContent" style="padding-top: 5px; text-align: left;">
@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="col-4">
-                Variants Count:
+                Variants Count: {{ (isset($product['children'])) ? count($product['children']) : '' }}
             </div>
         </div>
 
@@ -38,22 +38,28 @@
                 </div>
             </div>
             <div class="col-4">
-                Options Count: {{ (isset($product['product_options'][0]['option_items'])) ? count($product['product_options'][0]['option_items']) : '' }}
+                Options Count: {{ (isset($product['product_options'][0]['option_items'])) ? count($product['product_options']) : '' }}
             </div>
         </div>
 
         <div class="row">
             <div class="col-8">
                 <div class="form-group row">
+                    @if (!isset($product['children']))
                     <label for="price" class="col-4 col-form-label">Price</label>
                     <div class="col-8">
-                        <input type="number" class="form-control" id="price" name="price" value="{{ (isset($product['price'])) ? $product['price'] : '' }}" step="0.01">
+                        <input type="number" class="form-control" id="price" name="price" value="{{ ( isset($product['price']) ) ? $product['price'] : '' }}" step="0.01" @if( isset($product['children']) ) readonly @endif >
                         <div class="invalid-feedback"></div>
                     </div>
+                    @else
+                        <div class="col-12">
+                            Price configured in <a href="#" onclick="$('#nav-profile-tab').click(); return false;">Variants</a> tab
+                        </div>
+                    @endif
                 </div>
             </div>
             <div class="col-4">
-                Child Items Count:
+{{--                Child Items Count:--}}
             </div>
         </div>
 
@@ -68,7 +74,7 @@
                 </div>
             </div>
         </div>
-
+        @if( !isset($product['children']) )
         <div class="row">
             <div class="col">
                 <div class="form-group row">
@@ -82,6 +88,8 @@
                 </div>
             </div>
         </div>
+        @endif
+        <br>
 
     </div>
 
