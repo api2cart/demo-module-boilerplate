@@ -333,7 +333,17 @@
 
                     }},
                     { data: null, render: function ( data, type, row, meta ){
-                            return data.price + ' ' + data.currency;
+                            let Pprice = '';
+                            if ( typeof data.children != 'undefined' && data.children.length ){
+
+                                $.each(data.children, function(i, v) {
+                                    Pprice += v.default_price + '&nbsp;' + data.currency + '&nbsp;<i class="fas fa-tags" style="font-size: 8px;" title="This is price of product vsriant '+ v.name +'"></i><br>';
+                                });
+
+                            } else {
+                                Pprice = data.price + '&nbsp;' + data.currency;
+                            }
+                            return Pprice;
                         }
                     },
                     {

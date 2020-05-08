@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/magneticone-projects/api2cart-sdk.git",
-                "reference": "800a98d152eecd2d1948bcfd8732d0d58d93653d"
+                "reference": "50fae72250f60a86ae2495bcc966e78bc169348a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/magneticone-projects/api2cart-sdk/get/800a98d152eecd2d1948bcfd8732d0d58d93653d.zip",
-                "reference": "800a98d152eecd2d1948bcfd8732d0d58d93653d",
+                "url": "https://bitbucket.org/magneticone-projects/api2cart-sdk/get/50fae72250f60a86ae2495bcc966e78bc169348a.zip",
+                "reference": "50fae72250f60a86ae2495bcc966e78bc169348a",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 }
             ],
             "homepage": "https://bitbucket.org/magneticone-projects/api2cart-sdk",
-            "time": "2020-04-28T15:38:02+00:00"
+            "time": "2020-05-08T07:33:59+00:00"
         },
         {
             "name": "asm89/stack-cors",
