@@ -2,6 +2,12 @@
     {!! Form::open(['url' => route('products.update', [$store_id, $product_id]) ]) !!}
 @else
 @endif
+
+<div class="alert alert-danger" role="alert" style="display: none;">
+    <div id="_form_errors" class="text-left"></div>
+</div>
+
+
 <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-general" role="tab" aria-controls="nav-general" aria-selected="true">General</a>
@@ -54,6 +60,7 @@
                     @else
                         <div class="col-12">
                             Price configured in <a href="#" onclick="$('#nav-profile-tab').click(); return false;">Variants</a> tab
+                            <input type="hidden" id="price" name="price" value="{{ ( isset($product['price']) ) ? $product['price'] : '' }}"  readonly >
                         </div>
                     @endif
                 </div>
@@ -103,6 +110,7 @@
                 <div class="card">
                     <div class="card-header">
                         {{ $item['name'] }}
+                        <input type="hidden"  id="children.id.{{ $k }}" name="children[id][{{ $k }}]" value="{{ ( isset($item['id']) ) ? $item['id'] : '' }}" >
                     </div>
                     <div class="card-body">
                         <div class="form-group row">

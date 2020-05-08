@@ -802,8 +802,8 @@ class Api2Cart
                     null
                 );
 
-                Log::debug('edit_product_result');
-                Log::debug( print_r($result,1));
+//                Log::debug('edit_product_result');
+//                Log::debug( print_r($result,1));
 
                 $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
 

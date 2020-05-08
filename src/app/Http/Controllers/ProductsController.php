@@ -134,11 +134,16 @@ class ProductsController extends Controller
     {
         \Debugbar::disable();
 
+//        Log::debug( $request->all() );
+
+        $product = $this->api2cart->getProductInfo( $store_id, $product_id);
+        $diff = array_diff_assoc_recursive( $request->except(['_token','allSelectedProducts','selected_items','images']), $product );
+
+        if ( $product['type'] === 'configurable' ){
+            $diff['price'] = null;
+        }
+
         if ( $request->get('allSelectedProducts') ){
-
-            $product = $this->api2cart->getProductInfo( $store_id, $product_id);
-
-            $diff = array_diff_assoc_recursive( $request->except(['_token','allSelectedProducts','selected_items','images']), $product );
 
             foreach ($request->get('selected_items') as $item){
                 $pid = explode(':', $item);
@@ -149,6 +154,14 @@ class ProductsController extends Controller
                     $res = $this->api2cart->updateProduct( $pid[0], $pid[1], $diff );
                     $res['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
                     $res['selected_item'] = $item;
+
+                    if ( $res['type'] === 'configurable' ){
+                        $pv = $this->api2cart->getProductVariant($store_id, $product['id'] );
+                        //TODO: update variant price
+
+                        $res['children'] = $pv['children'];
+                    }
+
                     $result[] = $res;
                 }
             }
@@ -157,9 +170,16 @@ class ProductsController extends Controller
 
         } else {
 
-            $result = $this->api2cart->updateProduct( $store_id, $product_id, $request->all() );
+            $result = $this->api2cart->updateProduct( $store_id, $product_id, $diff );
             $storeInfo = $this->api2cart->getCart( $store_id );
             $result['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
+
+            if ( $result['type'] === 'configurable' ){
+                $pv = $this->api2cart->getProductVariant($store_id, $product['id'] );
+                //TODO: update variant price
+
+                $result['children'] = $pv['children'];
+            }
 
             return response()->json(['item' => $result, 'log' => $this->api2cart->getLog()]);
 
