@@ -802,8 +802,8 @@ class Api2Cart
                     null
                 );
 
-//                Log::debug('edit_product_result');
-//                Log::debug( print_r($result,1));
+                Log::debug('edit_product_result');
+                Log::debug( print_r($result,1));
 
                 $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
 
@@ -829,7 +829,7 @@ class Api2Cart
 
     }
 
-    public function getProductVariant($store_id=null, $product_id=null)
+    public function getProductVariants($store_id=null, $product_id=null)
     {
         $this->setApiKey();
 
@@ -855,6 +855,61 @@ class Api2Cart
             return false;
         }
 
+    }
+
+    public function updateProductVariant($store_id=null, $product_id=null, $id=null, $fields)
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->product->productVariantUpdate(
+                $id,
+                $product_id,
+                $store_id,
+                null,
+                null,
+                null,
+                null,
+                null,
+                (isset($fields['default_price'])) ? $fields['default_price'] : null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+//            Log::debug( print_r($result,1) );
+
+            $this->logApiCall( 'product.variant.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id, 'variant_id' => $id, 'fields' => $fields] );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result->getResult() );
+            } else {
+                return null;
+            }
+
+
+
+        } catch (\Exception $e){
+
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.variant.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id'=>$product_id, 'variant_id' => $id, 'fields' => $fields]  );
+            return false;
+        }
     }
 
     public function deleteProduct($store_id=null, $product_id=null)
