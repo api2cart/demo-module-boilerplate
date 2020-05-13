@@ -546,7 +546,7 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList( null, null, null, null,null,null,null,null,'order_id,customer,totals,address,items,bundles,status,currency');
+            $result = $this->order->orderList( null, null, null, null,null,null,null,null,'force_all');
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
 
@@ -576,7 +576,7 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'order_id,customer,totals,address,items,bundles,status,currency' );
+            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'force_all' );
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
