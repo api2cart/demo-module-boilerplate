@@ -802,8 +802,8 @@ class Api2Cart
                     null
                 );
 
-                Log::debug('edit_product_result');
-                Log::debug( print_r($result,1));
+//                Log::debug('edit_product_result');
+//                Log::debug( print_r($result,1));
 
                 $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
 
@@ -868,7 +868,7 @@ class Api2Cart
             $result = $this->product->productVariantUpdate(
                 $id,
                 $product_id,
-                $store_id,
+                null,
                 null,
                 null,
                 null,
@@ -892,6 +892,7 @@ class Api2Cart
                 null
             );
 
+//            Log::debug('update variant');
 //            Log::debug( print_r($result,1) );
 
             $this->logApiCall( 'product.variant.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id, 'variant_id' => $id, 'fields' => $fields] );
