@@ -39,4 +39,41 @@
             </ul>
         </div>
     </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            Business Cases
+        </div>
+
+        <div class="card-body sidemenu">
+            <ul class="nav flex-column">
+                <li class="nav-item" >
+                    <a href="#" class="nav-link {{ (request()->is('home')) ? 'active' : '' }}">
+                        Import Orders Automation
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                        Abandoned cart recovery
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                        Automatic Price Updating
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                        Automatic Email Sending
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                        Automatic Synchronization of Inventory
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
 </div>
