@@ -121,6 +121,7 @@ class ProductsController extends Controller
             $product['children'] = $pv['children'];
         }
 
+//        Log::debug( 'edit product ');
 //        Log::debug( print_r($product,1));
 
         if ( $request->ajax() ){
@@ -135,6 +136,7 @@ class ProductsController extends Controller
         \Debugbar::disable();
 
 //        Log::debug( $request->all() );
+
 
         $product = $this->api2cart->getProductInfo( $store_id, $product_id);
         $diff = array_diff_assoc_recursive( $request->except(['_token','allSelectedProducts','selected_items','images']), $product );
@@ -159,18 +161,20 @@ class ProductsController extends Controller
                     $res['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
                     $res['selected_item'] = $item;
 
+//                    Log::debug( print_r($res,1) );
+
                     if ( $res['type'] === 'configurable' ){
-                        $pv = collect( $this->api2cart->getProductVariants($store_id, $res['id'] )['children'] );
+                        $pv = collect( $this->api2cart->getProductVariants( $pid[0], $pid[1] )['children'] );
                         foreach ($pv as $_pvitem){
                             $fields = [];
                             // check variant price
                             if ( isset($diff['price']) && $diff['price'] != $_pvitem['default_price'] ){
                                 $fields['default_price'] = $request->get('price');
                             }
-                            if (count($fields)) $this->api2cart->updateProductVariant($store_id, $product_id, $_pvitem['id'], $fields );
+                            if (count($fields)) $this->api2cart->updateProductVariant($pid[0], $pid[1], $_pvitem['id'], $fields );
                         }
                         // reload variant data
-                        $pv = collect( $this->api2cart->getProductVariants($store_id, $res['id'] )['children'] );
+                        $pv = collect( $this->api2cart->getProductVariants( $pid[0], $pid[1] )['children'] );
                         $res['children'] = $pv;
                     }
 
