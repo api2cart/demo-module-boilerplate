@@ -14,6 +14,7 @@
     <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery.blockUI.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/moment.min.js') }}"></script>
 
     <script type="text/javascript" src="{{ asset('js/fontawesome/js/all.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/sweetalert2/dist/sweetalert2.min.js') }}"></script>

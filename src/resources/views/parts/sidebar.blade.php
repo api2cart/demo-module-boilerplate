@@ -48,12 +48,12 @@
         <div class="card-body sidemenu">
             <ul class="nav flex-column">
                 <li class="nav-item" >
-                    <a href="#" class="nav-link {{ (request()->is('home')) ? 'active' : '' }}">
+                    <a href="{{ route('businessCases.import_orders_automation') }}" class="nav-link {{ (request()->is('businessCases/import_orders_automation') || request()->is('businessCases/import_orders_automation/*')) ? 'active' : '' }}">
                         Import Orders Automation
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                    <a href="#" class="nav-link ">
                         Abandoned cart recovery
                     </a>
                 </li>

@@ -57,6 +57,15 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::post('/categories/{store_id?}/{category_id?}', 'CategoriesController@update')->name('categories.update');
     Route::delete('/categories/{store_id?}/{category_id?}', 'CategoriesController@destroy')->name('categories.delete');
 
+
+    Route::prefix('businessCases')->name('businessCases.')->group(function () {
+
+        Route::get('import_orders_automation', 'BusinessCases\ImportOrdersAutomationController@index' )->name('import_orders_automation');
+
+    });
+
+
+
 });
 
 
