@@ -57,11 +57,10 @@
 
                         blockUiStyled('<h3>Adding '+ stores[i].url +' orders.</h3>');
 
-                        for (let j=0; j<orders.length; j++){
-                            orders[j].cart_id = stores[i];
-                            items.push( orders[j] );
-                        }
-
+                        $.each( orders , function( index, value ) {
+                            value.cart_id = stores[i];
+                            items.push( value );
+                        });
 
                         //update log count
                         if ( rep.data.log ){
@@ -77,7 +76,8 @@
 
                         datatable.clear();
                         datatable.rows.add( items );
-                        datatable.draw();
+                        datatable.order([ 1, "asc" ]).draw();
+
 
                         $.unblockUI();
 
@@ -124,18 +124,18 @@
 
             yadcf.init( table , [
                 {
-                    column_number: 2,
+                    column_number: 3,
                     select_type: 'select2',
                     data: names,
                     select_type_options: { width: '200px' }
                 },
                 {
-                    column_number: 4,
+                    column_number: 5,
                     select_type: 'select2',
                     data: status,
                 },
                 {
-                    column_number: 1,
+                    column_number: 2,
                     select_type: 'select2',
                     data: store,
                     select_type_options: { width: '200px' }
@@ -241,8 +241,14 @@
                 initComplete: function () {
                     $('#dtable_filter input').focus();
                 },
+                "order": [[ 1, "desc" ]],
                 columns: [
                     { data: null, render: 'order_id' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                return moment(data.create_at.value).format('MMMM Do YYYY HH:mm');
+                            }
+                    },
                     { data: null, render:
                             function ( data, type, row, meta ){
                                 let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
@@ -320,6 +326,7 @@
                                 <thead>
                                 <tr>
                                     <th>Id</th>
+                                    <th>Date</th>
                                     <th>Store</th>
                                     <th>Customer</th>
                                     <th>Shipping Address</th>
