@@ -73,14 +73,15 @@ class OrdersController extends Controller
         }
 
 
-
+        $sorted = $orders->sortBy('create_at.value', null, true );
+//        Log::debug( print_r($sorted,1) );
 
         $data = [
             "recordsTotal"      => $totalOrders,
             "recordsFiltered"   => $totalOrders,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $orders->toArray(),
+            "data"              => $sorted->toArray(),
 
             'log'               => $this->api2cart->getLog(),
         ];
