@@ -36,7 +36,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::any('/stores/list', 'StoresController@storeList')->name('stores.list');
     Route::get('/stores/fields/{id?}', 'StoresController@fields')->name('stores.fields');
 
-    Route::get('/orders', 'OrdersController@index')->name('orders.index');
+    Route::resource('orders', 'OrdersController');
     Route::post('/orders/list/{store_id?}', 'OrdersController@orderList')->name('orders.list');
     Route::get('/orders/{store_id?}/{order_id?}', 'OrdersController@orderInfo')->name('orders.info');
     Route::get('/orders/{store_id?}/{order_id?}/products', 'OrdersController@orderProducts')->name('orders.products');
