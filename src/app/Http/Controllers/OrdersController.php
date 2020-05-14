@@ -130,4 +130,16 @@ class OrdersController extends Controller
 
     }
 
+    public function create(Request $request)
+    {
+        $carts = collect($this->api2cart->getCartList());
+
+//        Log::debug( print_r($carts,1) );
+
+        if ( $request->ajax() ){
+            return response()->json( ['data' => view('orders.form', compact('carts'))->render(), 'item' => $carts ] );
+        }
+        return redirect( route('orders.index') );
+    }
+
 }
