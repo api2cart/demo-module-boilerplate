@@ -1,0 +1,139 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+.sidemenu a {
+    color: #1b1e21;
+}
+
+.sidemenu .active {
+    color: #1b4b72;
+    font-weight: bold;
+}
+
+.full_modal-dialog {
+    width: 98% !important;
+    height: 92% !important;
+    min-width: 98% !important;
+    min-height: 92% !important;
+    max-width: 98% !important;
+    max-height: 92% !important;
+    padding: 0 !important;
+}
+
+.full_modal-content {
+    height: 99% !important;
+    min-height: 99% !important;
+    max-height: 99% !important;
+}
+
+.swal2-actions button {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.modal {
+    z-index: 1090;
+}
+
+
+div.growlUI h1, div.growlUI h2 {
+    color: white; padding: 5px 5px 5px 25px; text-align: left
+}
+
+div.growlUI h1 {
+    font-size: 18px !important;
+}
+
+div.growlUI h2 {
+    font-size: 14px !important;
+}
+
+div.growlUI {
+    opacity: 0.3;
+}
+.cartImage {
+    max-height: 48px !important;
+}
+
+table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
+    background-color: #bab7bc !important;
+}
+.select2-container--open .select2-dropdown--below {
+    z-index: 2000 !important;
+}
+
+.dolessmore {
+    overflow: hidden;
+    height: 40px;
+}
+
+.dolessmoreShow {
+    font-size: 10px;
+    font-weight: bold;
+    color: lightskyblue;
+}
+
+
+.card-input-element+.card {
+    //height: calc(66px + 2*1rem);
+    color: var(--primary);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.card-input-element+.card:hover {
+    cursor: pointer;
+}
+
+.card-input-element:checked+.card {
+    border: 2px solid var(--primary);
+    -webkit-transition: border .3s;
+    -o-transition: border .3s;
+    transition: border .3s;
+}
+
+.card-input-element:checked+.card::before {
+    content: '\e5ca';
+    color: #AFB8EA;
+    font-family: 'Material Icons';
+    font-size: 24px;
+    -webkit-animation-name: fadeInCheckbox;
+    animation-name: fadeInCheckbox;
+    -webkit-animation-duration: .5s;
+    animation-duration: .5s;
+    -webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    margin-top: -20px;
+    margin-left: -15px;
+}
+
+@-webkit-keyframes fadeInCheckbox {
+    from {
+        opacity: 0;
+        -webkit-transform: rotateZ(-20deg);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: rotateZ(0deg);
+    }
+}
+
+@keyframes fadeInCheckbox {
+    from {
+        opacity: 0;
+        transform: rotateZ(-20deg);
+    }
+    to {
+        opacity: 1;
+        transform: rotateZ(0deg);
+    }
+}
