@@ -143,7 +143,7 @@ class Api2Cart
 
             $this->cart->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->cart->cartInfo( 'force_all','additional_fields', $store_id);
+            $result = $this->cart->cartInfo( 'force_all','additional_fields');
 
             $this->logApiCall( 'cart.info.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage() );
 
@@ -151,7 +151,7 @@ class Api2Cart
                 /**
                  * return object cause it cant be right maped to array...  swagger issue
                  */
-                return $result->getResult();
+                return $this->mapToArray( $result->getResult() );
 //                return json_decode( $result->getResult()->__toString() , true, 512, JSON_OBJECT_AS_ARRAY) ;
             } else {
                 return null;
@@ -625,6 +625,38 @@ class Api2Cart
 
     }
 
+    public function createOrder( $store_id=null, $fields=null )
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->order->orderAdd(
+                $fields
+            );
+
+//            Log::debug( print_r($result,1) );
+
+            $this->logApiCall( 'order.add.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() , $fields );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result->getResult() );
+            } else {
+                return null;
+            }
+
+
+        } catch (\Exception $e){
+
+            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() , $fields );
+            return false;
+        }
+
+    }
+
     public function getProductCount($store_id=null)
     {
         $this->setApiKey();
@@ -1015,6 +1047,33 @@ class Api2Cart
 
 //            Log::debug( $e->getMessage() );
             $this->logApiCall( 'customer.count.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            return false;
+        }
+
+    }
+
+    public function getCustomer($store_id=null, $customer_id=null)
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->customer->customerInfo( $customer_id, "force_all", null, null );
+
+            $this->logApiCall( 'customer.info.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage(), ['id' => $customer_id ]  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result->getResult() );
+            } else {
+                return false;
+            }
+
+        } catch (\Exception $e){
+
+            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'customer.info.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() , ['id' => $customer_id ]  );
             return false;
         }
 
