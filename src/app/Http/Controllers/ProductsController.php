@@ -33,6 +33,7 @@ class ProductsController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $this->api2cart->getCart( $store_id );
 
+//        Log::debug( print_r($storeInfo,1) );
 
         $totalProducts = $this->api2cart->getProductCount( $store_id );
 
@@ -87,7 +88,6 @@ class ProductsController extends Controller
 
         }
 
-//        Log::debug( print_r($products->forPage(0,5),1) );
 
         $data = [
             "recordsTotal"      => $totalProducts,
