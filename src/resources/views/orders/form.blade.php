@@ -39,15 +39,15 @@
 
                 <div class="row" id="productsList" style="max-height: 300px; overflow-y: scroll;">
 
-                    <label class="col-lg-6">
-                        <input type="checkbox" name="demo[]" class="card-input-element d-none" value="demo1">
-                        <div class="card card-body bg-light d-flex ">
-                            <h6>Product name <span class="badge badge-secondary">$10</span></h6>
-                            <small>
-                                Quantity: <input type="number" min="0" step="1" value="0">
-                            </small>
-                        </div>
-                    </label>
+{{--                    <label class="col-lg-6">--}}
+{{--                        <input type="checkbox" name="demo[]" class="card-input-element d-none" value="demo1">--}}
+{{--                        <div class="card card-body bg-light d-flex ">--}}
+{{--                            <h6>Product name <span class="badge badge-secondary">$10</span></h6>--}}
+{{--                            <small>--}}
+{{--                                Quantity: <input type="number" min="0" step="1" value="0">--}}
+{{--                            </small>--}}
+{{--                        </div>--}}
+{{--                    </label>--}}
 
 
                 </div>
