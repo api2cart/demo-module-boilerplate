@@ -163,7 +163,7 @@
                                 .then(function (presponse) {
 
                                     //TODO: store added
-
+                                    console.log( presponse );
 
                                     return true;
                                 })
@@ -173,10 +173,14 @@
                                     if ( typeof error.response.data.errors != 'undefined'){
 
                                         $.each(error.response.data.errors, function(index, value) {
-                                            let obj = $( document.getElementById(index) );
-                                            let err = $(obj).parent().parent().find('.invalid-feedback');
-                                            $(err).empty().append( value.shift() );
-                                            $(obj).addClass('is-invalid')
+                                            if (typeof index !== 'undefined' || typeof value !== 'undefined'){
+
+                                                let obj = $( document.getElementById(index) );
+                                                let err = $(obj).parent().parent().find('.invalid-feedback');
+                                                $(err).empty().append( value.shift() );
+                                                $(obj).addClass('is-invalid')
+                                            }
+
                                         });
 
                                     }
@@ -210,7 +214,7 @@
                                         $('#customer_id')
                                             .append($("<option></option>")
                                                 .attr("value", value.id )
-                                                .text(value.email));
+                                                .text( value.first_name +' '+ value.last_name +'[ ' + value.email +' ]' ));
                                     });
                                     $( "#customer_id" ).prop( "disabled", false );
                                 }
@@ -219,12 +223,16 @@
                                     $.each(products.data.data, function(key, value) {
 
                                         let html = '<label class="col-lg-6">\n' +
-                                            '                        <input type="checkbox" name="product_id[]" class="card-input-element d-none" value="'+value.id+'">\n' +
+                                            '                        <input type="checkbox" name="checked_id[]" class="card-input-element d-none" value="'+value.id+'">\n' +
                                             '                        <div class="card card-body bg-light d-flex ">\n' +
-                                            '                            <h6>'+value.name+'&nbsp;&nbsp;<span class="badge badge-secondary">'+value.currency+' '+value.price+'</span></h6>\n' +
+                                            '                            <h5>'+value.name+'</h5>\n' +
                                             '                            <small>\n' +
-                                            '                                Quantity: <input type="number" min="0" step="1" value="0">\n' +
+                                            '                                Price: ' +value.price +' '+ value.currency +
                                             '                            </small>\n' +
+                                            '                            <small>\n' +
+                                            '                                Quantity: <input type="number" name="product_quantity[]"  min="0" max="'+ value.quantity +'" step="1" value="0">\n' +
+                                            '                            </small>\n' +
+                                            '                        <input type="hidden" name="product_id[]" value="'+value.id+'">\n' +
                                             '                        </div>\n' +
                                             '                    </label>';
 
@@ -233,42 +241,10 @@
                                     });
                                 }
 
-                                console.log( products );
+                                // console.log( products );
 
                                 $.unblockUI();
                             }));
-
-                        // axios.post( '/customers/list/' + item.store_key ).then(function (cfresponse) {
-                        //
-                        //     let citems = cfresponse.data.data;
-                        //     if (citems.length){
-                        //         $.each(citems, function(key, value) {
-                        //             $('#customer_id')
-                        //                 .append($("<option></option>")
-                        //                     .attr("value", value.id )
-                        //                     .text(value.email));
-                        //         });
-                        //         $( "#customer_id" ).prop( "disabled", false );
-                        //     }
-                        // });
-
-
-
-                        // console.log(  );
-
-                        // for (let value of Object.values( item.params )) {
-                        //     // console.log( value );
-                        //
-                        //     $('#addItemFields').append(
-                        //     '<div class="form-group row">\n' +
-                        //     '                <label for="field.'+value+'" class="col-4 col-form-label">'+value+'</label>\n' +
-                        //     '                <div class="col-8">\n' +
-                        //     '                    <input class="form-control" id="field.'+value+'" name="field['+value+']" required="required" >\n' +
-                        //     '                    <div class="invalid-feedback"></div>\n' +
-                        //     '                </div>\n' +
-                        //     '            </div>'
-                        //     );
-                        // }
 
 
                     });
@@ -281,6 +257,7 @@
                             logItems.push( response.data.log[k] );
                         }
                         calculateLog();
+
                     }
                     $.unblockUI();
 
