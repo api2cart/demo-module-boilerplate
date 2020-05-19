@@ -142,4 +142,74 @@ class OrdersController extends Controller
         return redirect( route('orders.index') );
     }
 
+    public function store(Request $request)
+    {
+//        Log::debug( print_r($request->all(),1) );
+
+        $cart = $this->api2cart->getCart( $request->get('cart_id') );
+        $customer = $this->api2cart->getCustomer( $request->get('cart_id'), $request->get('customer_id') );
+
+        $address = collect( $customer['address_book'] );
+        $billing = $address->where('type', 'billing')->first();
+        $shipping= $address->where('type', 'shipping')->first();
+
+//        Log::debug( print_r( $address->where('type', 'billing')->first(), 1 ) );
+
+        $order = [
+            'store_id'          => $cart['stores_info'][0]['store_id'],
+            'customer_email'    => $customer['email'],
+            'order_status'      => 'Processing',
+            'subtotal_price'    => 0,
+            'total_price'       => 0,
+
+            'bill_first_name'   => $billing['first_name'],
+            'bill_last_name'    => $billing['last_name'],
+            'bill_address_1'    => $billing['address1'],
+            'bill_city'         => $billing['city'],
+            'bill_postcode'     => $billing['postcode'],
+
+            // state & country need be cleared
+            'bill_state'        => $billing['state']['code'],
+            'bill_country'      => $billing['country']['code3'],
+
+
+
+        ];
+
+        foreach ($request->get('checked_id') as $cpi){
+            $product  = $this->api2cart->getProductInfo( $request->get('cart_id'), $cpi );
+            $quantity = $request->get('product_quantity')[ array_search($cpi, $request->get('product_id')) ];
+
+//            Log::debug( print_r($product,1));
+
+            // check if quantity right
+            if ( $product['quantity']< $quantity) continue;
+
+            $order['order_item'][] = [
+                'order_item_id'         => $product['id'],
+                'order_item_name'       => $product['name'],
+                'order_item_model'      => $product['u_model'],
+                'order_item_price'      => $product['price'],
+                'order_item_quantity'   => $quantity
+            ];
+
+            $order['subtotal_price']    += $product['price'] * $quantity;
+            $order['total_price']       += $product['price'] * $quantity;
+        }
+
+        $result = $this->api2cart->createOrder( $request->get('cart_id') , $order );
+
+        if ($result){
+
+
+            return response()->json([ 'log' => $this->api2cart->getLog(), 'item' => $this->api2cart->getOrderInfo( $request->get('cart_id'), $result['order_id'] ) ]);
+
+        } else {
+            // error creating order
+            return response()->json([ 'log' => $this->api2cart->getLog() ], 404);
+        }
+
+
+    }
+
 }

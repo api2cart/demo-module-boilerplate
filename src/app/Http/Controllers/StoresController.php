@@ -43,8 +43,8 @@ class StoresController extends Controller
             $info = $this->api2cart->getCart( $store['store_key'] );
             // put additional info
             $store['stores_info']['store_owner_info']   = [
-                'owner' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getOwner() : null,
-                'email' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getEmail() : null
+                'owner' => ( isset($info['stores_info'][0]['store_owner_info']['owner']) ) ? $info['stores_info'][0]['store_owner_info']['owner'] : null,
+                'email' => ( isset($info['stores_info'][0]['store_owner_info']['email']) ) ? $info['stores_info'][0]['store_owner_info']['email'] : null
             ];
             $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
             return $store;
