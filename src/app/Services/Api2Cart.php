@@ -538,7 +538,7 @@ class Api2Cart
 
     }
 
-    public function getOrderList( $store_id=null  )
+    public function getOrderStatuses( $store_id=null )
     {
         $this->setApiKey();
 
@@ -546,7 +546,61 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList( null, null, null, null,null,null,null,null,'force_all');
+            $result = $this->order->orderStatusList();
+
+            $this->logApiCall( 'order.status.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result->getResult() );
+            } else {
+                return false;
+            }
+
+
+        } catch (\Exception $e){
+
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.status.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            return false;
+        }
+
+    }
+
+    public function getOrderList( $store_id=null , $sort_by=null, $sort_direct=null, $limit=null )
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->order->orderList(
+                null,
+                null,
+                null,
+                null,
+                $limit,
+                null,
+                $sort_by,
+                $sort_direct,
+                'force_all',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
 
