@@ -38,6 +38,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
 
     Route::resource('orders', 'OrdersController');
     Route::post('/orders/list/{store_id?}', 'OrdersController@orderList')->name('orders.list');
+    Route::post('/orders/statuses/{store_id?}', 'OrdersController@statuses')->name('orders.statuses');
     Route::get('/orders/{store_id?}/{order_id?}', 'OrdersController@orderInfo')->name('orders.info');
     Route::get('/orders/{store_id?}/{order_id?}/products', 'OrdersController@orderProducts')->name('orders.products');
 
