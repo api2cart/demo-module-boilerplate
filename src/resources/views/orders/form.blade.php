@@ -34,6 +34,16 @@
         </div>
 
         <div class="form-group row">
+            <label for="status_id" class="col-4 col-form-label">Order Status</label>
+            <div class="col-8">
+                <select class="custom-select" id="status_id" name="status_id" required disabled>
+                    <option selected disabled value="">Choose status...</option>
+                </select>
+                <div class="invalid-feedback"></div>
+            </div>
+        </div>
+
+        <div class="form-group row">
             <label for="" class="col-4 col-form-label">Products</label>
             <div class="col-8" >
 
