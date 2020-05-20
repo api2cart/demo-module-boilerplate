@@ -76,7 +76,7 @@
 
                         datatable.clear();
                         datatable.rows.add( items );
-                        datatable.order([ 1, "asc" ]).draw();
+                        datatable.order([ 1, "desc" ]).draw();
 
 
                         $.unblockUI();
@@ -246,7 +246,7 @@
                     { data: null, render: 'order_id' },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return moment(data.create_at.value).format('MMMM Do YYYY HH:mm');
+                                return type === 'sort' ? data.create_at.value : moment(data.create_at.value).format('L');
                             }
                     },
                     { data: null, render:
