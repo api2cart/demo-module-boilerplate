@@ -46,7 +46,10 @@
                         url: '{{ route('orders.list') }}/'+stores[i].store_key,
                         data: {
                             length: 10,
-                            start: 0
+                            start: 0,
+                            limit: 3,
+                            sort_by: 'create_at',
+                            sort_direct: 'desc'
                         }
                     }).then(function (rep) {
 
@@ -76,7 +79,7 @@
 
                         datatable.clear();
                         datatable.rows.add( items );
-                        datatable.order([ 1, "asc" ]).draw();
+                        datatable.order([ 1, "desc" ]).draw();
 
 
                         $.unblockUI();
@@ -124,6 +127,11 @@
             return axios.post( '/products/list/' + store_key );
         }
 
+        function loadStatuses(store_key)
+        {
+            return axios.post( '/orders/statuses/' + store_key );
+        }
+
         function addOrder()
         {
             let action = "{{ route('orders.create') }}";
@@ -152,6 +160,7 @@
                             $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
 
                             let fact = $('.swal2-content form')[0].action;
+                            let store_key = $('#cart_id').val();
                             var formData = getFormData( $('.swal2-content form') );
 
 
@@ -162,8 +171,38 @@
                             })
                                 .then(function (presponse) {
 
-                                    //TODO: store added
-                                    console.log( presponse );
+                                    // console.log( presponse );
+
+                                    let st = stores.find(el => el.store_key === store_key);
+                                    let newItem = presponse.data.item;
+
+                                    newItem.cart_id = st;
+                                    items.push( newItem );
+
+                                    var datatable = $( '#dtable' ).dataTable().api();
+                                    datatable.clear();
+                                    datatable.rows.add( items );
+                                    datatable.order([ 1, "desc" ]).draw();
+
+                                    datatable.rows().every(function(){
+                                        var tobj  = this;
+                                        var tnode = tobj.node();
+                                        var tdata = tobj.data();
+
+                                        if ( tdata.cart_id.store_key == st.store_key && tdata.id == newItem.id ){
+                                            $(tnode).addClass('table-info');
+                                        }
+                                    });
+
+
+                                    // let lobj = $( '#dtable' ).find('.'+store_key+':'+newItem.order_id);
+                                    //
+                                    // console.log( lobj );
+                                    //
+                                    // if ( typeof lobj != 'undefined'){
+                                    //     $(lobj).parent().parent().addClass('table-info');
+                                    // }
+
 
                                     return true;
                                 })
@@ -201,12 +240,13 @@
                         $('#addItemFields').empty();
                         $('#customer_id').empty();
                         $('#productsList').empty();
-                        $( "#customer_id" ).prop( "disabled", true );
+                        $('#status_id').empty();
+                        $('#customer_id').prop( "disabled", true );
 
                         blockUiStyled('<h3>Loading store customers and products.</h3>');
 
-                        axios.all([loadCustomers( item.store_key ), loadProducts( item.store_key )])
-                            .then(axios.spread(function ( users, products) {
+                        axios.all([ loadCustomers( item.store_key ), loadProducts( item.store_key ), loadStatuses( item.store_key ) ])
+                            .then(axios.spread(function ( users, products, statuses) {
                                 // Both requests are now complete
 
                                 if (users.data.data.length){
@@ -216,7 +256,18 @@
                                                 .attr("value", value.id )
                                                 .text( value.first_name +' '+ value.last_name +'[ ' + value.email +' ]' ));
                                     });
-                                    $( "#customer_id" ).prop( "disabled", false );
+                                    $('#customer_id').prop( "disabled", false );
+                                }
+
+                                // console.log( statuses );
+                                if (statuses.data.data.length){
+                                    $.each(statuses.data.data, function(key, value) {
+                                        $('#status_id')
+                                            .append($("<option></option>")
+                                                .attr("value", value.id )
+                                                .text( value.name ));
+                                    });
+                                    $('#status_id').prop( "disabled", false );
                                 }
 
                                 if ( products.data.data.length ){
@@ -296,7 +347,7 @@
                 serverSide: false,
                 // ordering: false,
                 data: items,
-                dom: '<"row"<"col"><"col"><"col">><t><"row"<"col"i><"col">>',
+                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col">>',
                 buttons: [
                     {
                         text: 'Reload',
@@ -315,8 +366,8 @@
                 },
                 order: [[ 1, "desc" ]],
 
-                iDisplayLength: 10,
-                bLengthChange: false,
+                // iDisplayLength: 10,
+                // bLengthChange: false,
 
                 columns: [
                     { data: null, render:
@@ -326,7 +377,8 @@
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return moment(data.create_at.value).format('MMMM Do YYYY HH:mm');
+                                return type === 'sort' ? data.create_at.value : moment(data.create_at.value).format('lll');
+                                // return moment(data.create_at.value).format('D/MM/YYYY HH:mm');
                             }, orderable : false
                     },
                     { data: null, render:
