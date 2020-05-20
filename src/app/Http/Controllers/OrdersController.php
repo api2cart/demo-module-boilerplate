@@ -33,6 +33,11 @@ class OrdersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
+        $sort_by    = ($request->get('sort_by')) ? $request->get('sort_by') : null;
+        $sort_direct= ($request->get('sort_direct')) ? true : false;
+
+        $limit      = ($request->get('limit')) ? $request->get('limit') : null;
+
         $totalOrders = $this->api2cart->getOrderCount( $store_id );
 
         $orders = collect([]);
@@ -72,16 +77,30 @@ class OrdersController extends Controller
 
         }
 
+        if ( $sort_by  ){
+            switch ($sort_by){
+                case 'create_at':
+                    $sort_by = 'create_at.value';
+                    break;
+                default:
+                    $sort_by = 'create_at.value';
+                    break;
+            }
+            $sorted = $orders->sortBy($sort_by, null, $sort_direct );
+        } else {
+            $sorted = $orders->sortBy('create_at.value', null, $sort_direct );
+        }
 
-        $sorted = $orders->sortBy('create_at.value', null, true );
-//        Log::debug( print_r($sorted,1) );
+
+
+//        Log::debug( print_r($sorted->forPage(0,5),1) );
 
         $data = [
             "recordsTotal"      => $totalOrders,
             "recordsFiltered"   => $totalOrders,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $sorted->toArray(),
+            "data"              => ($limit) ? $sorted->forPage(0, $limit) : $sorted->toArray(),
 
             'log'               => $this->api2cart->getLog(),
         ];
@@ -130,6 +149,14 @@ class OrdersController extends Controller
 
     }
 
+    public function statuses($store_id=null, Request $request)
+    {
+        if ( $request->ajax() ){
+            return response()->json(['data' => collect($this->api2cart->getOrderStatuses( $store_id )['cart_order_statuses']), 'log' => $this->api2cart->getLog() ]);
+        }
+        return redirect( route('orders.index') );
+    }
+
     public function create(Request $request)
     {
         $carts = collect($this->api2cart->getCartList());
@@ -158,7 +185,7 @@ class OrdersController extends Controller
         $order = [
             'store_id'          => $cart['stores_info'][0]['store_id'],
             'customer_email'    => $customer['email'],
-            'order_status'      => 'Processing',
+            'order_status'      => $request->get('status_id'),
             'subtotal_price'    => 0,
             'total_price'       => 0,
 
