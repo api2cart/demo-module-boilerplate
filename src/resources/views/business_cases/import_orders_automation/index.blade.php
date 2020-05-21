@@ -4,7 +4,7 @@
     <script type="text/javascript">
 
 
-        function loadData(){
+        function loadData(created_from=null){
 
             items = [];
 
@@ -49,7 +49,8 @@
                             start: 0,
                             limit: 3,
                             sort_by: 'create_at',
-                            sort_direct: 'desc'
+                            sort_direct: 'desc',
+                            created_from: created_from
                         }
                     }).then(function (rep) {
 
@@ -327,6 +328,84 @@
                 });
         }
 
+        function checkNewOrders()
+        {
+            // console.log('check for new orders');
+            blockUiStyled('<h3>Loading new orders.</h3>');
+
+            let datatable = $( '#dtable' ).dataTable().api();
+            let last_order = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+
+            $.each( stores , function( i, stor ) {
+                blockUiStyled('<h3>Loading '+ stor.url +' information.</h3>');
+
+                axios({
+                    method: 'post',
+                    url: '{{ route('orders.list') }}/'+stor.store_key,
+                    data: {
+                        length: 10,
+                        start: 0,
+                        limit: 3,
+                        sort_by: 'create_at',
+                        sort_direct: 'desc',
+                        created_from: last_order
+                    }
+                }).then(function (rep) {
+
+                    //console.log( stores[i] );
+
+                    let orders = rep.data.data;
+                    let logs = rep.data.log;
+
+                    // console.log( orders );
+
+                    $.each( orders , function( oi, order ) {
+
+                        order.cart_id = stor;
+
+                        let elexist =  items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key );
+
+                        if ( typeof elexist == 'undefined' ){
+
+                            // add new order to table and highlight it
+                            items.push( order );
+
+                            datatable.clear();
+                            datatable.rows.add( items );
+                            datatable.order([ 1, "desc" ]).draw();
+
+                            datatable.rows().every(function(){
+                                var tobj  = this;
+                                var tnode = tobj.node();
+                                var tdata = tobj.data();
+                                if ( tdata.cart_id.store_key == stor.store_key && tdata.id == order.id ){
+                                    $(tnode).addClass('table-info');
+                                }
+                            });
+
+
+                        }
+
+
+                    });
+
+
+
+                    $.unblockUI();
+
+                    $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
+
+
+                });
+
+
+            });
+
+
+
+
+            // $.unblockUI();
+        }
 
 
         var table;
@@ -434,11 +513,14 @@
 
 
             $('#_btnCreateOrder').click(function(){
-
                 addOrder();
-
                 return false;
             });
+            $('#_btnCheckNewOrder').click(function(){
+                checkNewOrders();
+                return false;
+            });
+
 
 
         } );
@@ -468,7 +550,7 @@
                         <div class="row">
                             <div class="col">
                                 <button class="btn btn-outline-secondary" id="_btnCreateOrder">Create test order</button>
-                                <button class="btn btn-outline-secondary ">Check for newt orders</button>
+                                <button class="btn btn-outline-secondary" id="_btnCheckNewOrder">Check for newt orders</button>
                             </div>
                         </div>
 
