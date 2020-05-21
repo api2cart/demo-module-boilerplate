@@ -23,6 +23,7 @@ class Api2Cart
 {
     private $config;
 
+    private $debug = true;
 
     private $account;
     private $cart;
@@ -115,6 +116,7 @@ class Api2Cart
             if ( $result->getResult()->getCartsCount() ){
                 return $this->mapToArray( $result->getResult()->getCarts() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -154,6 +156,7 @@ class Api2Cart
                 return $this->mapToArray( $result->getResult() );
 //                return json_decode( $result->getResult()->__toString() , true, 512, JSON_OBJECT_AS_ARRAY) ;
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -187,6 +190,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult()->getSupportedPlatforms() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -213,6 +217,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return true;
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -302,6 +307,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult()->getSupportedPlatforms() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -330,6 +336,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $result->getResult()->getCategoriesCount();
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -357,6 +364,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -386,6 +394,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -415,6 +424,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -459,6 +469,7 @@ class Api2Cart
 
                     return $this->getCategoryInfo($store_id,$category_id);
                 } else {
+                    if ($this->debug) Log::debug( print_r($result,1) );
                     return null;
                 }
 
@@ -495,6 +506,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return true;
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -525,6 +537,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $result->getResult()->getOrdersCount();
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -553,6 +566,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -566,7 +580,7 @@ class Api2Cart
 
     }
 
-    public function getOrderList( $store_id=null , $sort_by=null, $sort_direct=null, $limit=null )
+    public function getOrderList( $store_id=null , $sort_by=null, $sort_direct=null, $limit=null, $created_from=null )
     {
         $this->setApiKey();
 
@@ -586,7 +600,7 @@ class Api2Cart
                 'force_all',
                 null,
                 null,
-                null,
+                $created_from,
                 null,
                 null,
                 null,
@@ -607,6 +621,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -614,7 +629,7 @@ class Api2Cart
 
         } catch (\Exception $e){
 
-//            Log::debug( $e->getMessage() );
+            Log::debug( $e->getMessage() );
             $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
@@ -637,6 +652,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -666,6 +682,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -698,6 +715,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -726,6 +744,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $result->getResult()->getProductsCount();
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -763,9 +782,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
-
-                Log::debug( print_r( $this->product->getConfig()->getDebug(),1 ) );
-
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -795,9 +812,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
-
-                Log::debug( print_r( $this->product->getConfig()->getDebug(),1 ) );
-
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -825,6 +840,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -897,6 +913,7 @@ class Api2Cart
 
                     return $this->getProductInfo($store_id,$product_id);
                 } else {
+                    if ($this->debug) Log::debug( print_r($result,1) );
                     return null;
                 }
 
@@ -929,6 +946,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -986,6 +1004,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
             }
 
@@ -1017,6 +1036,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return true;
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -1094,6 +1114,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $result->getResult()->getCustomersCount();
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -1121,6 +1142,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult() );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -1148,6 +1170,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
@@ -1177,6 +1200,7 @@ class Api2Cart
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
             } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
                 return false;
             }
 
