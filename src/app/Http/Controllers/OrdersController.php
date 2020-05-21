@@ -33,18 +33,19 @@ class OrdersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
-        $sort_by    = ($request->get('sort_by')) ? $request->get('sort_by') : null;
-        $sort_direct= ($request->get('sort_direct')) ? true : false;
-
-        $limit      = ($request->get('limit')) ? $request->get('limit') : null;
+        $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
+        $sort_direct  = ($request->get('sort_direct')) ? true : false;
+        $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
+        $limit        = ($request->get('limit')) ? $request->get('limit') : null;
 
         $totalOrders = $this->api2cart->getOrderCount( $store_id );
 
         $orders = collect([]);
 
+
         if ( $totalOrders ){
 
-            $result = $this->api2cart->getOrderList( $store_id );
+            $result = $this->api2cart->getOrderList( $store_id, null,null, null, $created_from );
 
             $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
             // put additional information
@@ -77,6 +78,10 @@ class OrdersController extends Controller
 
         }
 
+//        $result = $this->api2cart->getOrderList( $store_id , 'create_at.value', null,$limit);
+//        Log::debug('raw api result');
+//        Log::debug( print_r($result,1) );
+
         if ( $sort_by  ){
             switch ($sort_by){
                 case 'create_at':
@@ -91,9 +96,6 @@ class OrdersController extends Controller
             $sorted = $orders->sortBy('create_at.value', null, $sort_direct );
         }
 
-
-
-//        Log::debug( print_r($sorted->forPage(0,5),1) );
 
         $data = [
             "recordsTotal"      => $totalOrders,
@@ -180,7 +182,14 @@ class OrdersController extends Controller
         $billing = $address->where('type', 'billing')->first();
         $shipping= $address->where('type', 'shipping')->first();
 
+        // for any case if only shipping avialable
+        if ($billing == null) $billing = $shipping;
+
+        // some customers do not have state
+        if ( !isset($shipping['state']['code']) || $shipping['state']['code'] == '' ) $shipping['state']['code'] = 'AL';
+
 //        Log::debug( print_r( $address->where('type', 'billing')->first(), 1 ) );
+//        Log::debug( print_r($customer,1) );
 
         $order = [
             'store_id'          => $cart['stores_info'][0]['store_id'],
@@ -189,15 +198,15 @@ class OrdersController extends Controller
             'subtotal_price'    => 0,
             'total_price'       => 0,
 
-            'bill_first_name'   => $billing['first_name'],
-            'bill_last_name'    => $billing['last_name'],
-            'bill_address_1'    => $billing['address1'],
-            'bill_city'         => $billing['city'],
-            'bill_postcode'     => $billing['postcode'],
+            'bill_first_name'   => (isset($billing['first_name'])) ? $billing['first_name'] : $shipping['first_name'],
+            'bill_last_name'    => (isset($billing['last_name'])) ? $billing['last_name'] : $shipping['last_name'],
+            'bill_address_1'    => (isset($billing['address1'])) ? $billing['address1'] : $shipping['address1'],
+            'bill_city'         => (isset($billing['city'])) ? $billing['city'] : $shipping['city'],
+            'bill_postcode'     => (isset($billing['postcode'])) ? $billing['postcode'] : $shipping['postcode'],
 
             // state & country need be cleared
-            'bill_state'        => $billing['state']['code'],
-            'bill_country'      => $billing['country']['code3'],
+            'bill_state'        => (isset($billing['state']['code']) && $billing['state']['code'] != '') ? $billing['state']['code'] : $shipping['state']['code'],
+            'bill_country'      => (isset($billing['country']['code3']) && $billing['country']['code3'] != '') ? $billing['country']['code3'] : $shipping['country']['code3'],
 
 
 
