@@ -31,6 +31,7 @@ class Api2Cart
     private $customer;
     private $order;
     private $product;
+    private $subscriber;
 
     private $log;
 
@@ -48,6 +49,7 @@ class Api2Cart
         $this->customer = new ApiClient\Api\CustomerApi( null, $this->config );
         $this->order    = new ApiClient\Api\OrderApi( null, $this->config );
         $this->product  = new ApiClient\Api\ProductApi( null, $this->config );
+        $this->subscriber = new ApiClient\Api\SubscriberApi(null, $this->config );
 
         $this->log = collect();
 
@@ -616,7 +618,7 @@ class Api2Cart
                 null
             );
 
-            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), [ 'sort_by' => $sort_by, 'sort_direct' => $sort_direct, 'limit' => $limit, 'created_from' => $created_from]  );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result );
@@ -630,7 +632,7 @@ class Api2Cart
         } catch (\Exception $e){
 
             Log::debug( $e->getMessage() );
-            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'order.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), [ 'sort_by' => $sort_by, 'sort_direct' => $sort_direct, 'limit' => $limit, 'created_from' => $created_from]  );
             return false;
         }
 
@@ -775,7 +777,30 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->product->productList( null, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, $ids, null, null, null, null, null, null  );
+            $result = $this->product->productList(
+                null,
+                null,
+                null,
+                'force_all',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $ids,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
             $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['ids' => $ids ] );
 
@@ -1181,6 +1206,45 @@ class Api2Cart
 
 //            Log::debug( $e->getMessage() );
             $this->logApiCall( 'customer.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            return false;
+        }
+    }
+
+
+    public function getSubscriberList($store_id=null)
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->subscriber->subscriberList(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+            $this->logApiCall( '/subscriber.list.json', $result->getReturnCode(), $this->customer->getConfig(), null, null, null, $result->getReturnMessage()  );
+
+            if ( $result->getReturnCode() == 0 ){
+                return $this->mapToArray( $result );
+            } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
+                return false;
+            }
+
+
+
+
+        } catch (\Exception $e){
+
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( '/subscriber.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
