@@ -53,22 +53,22 @@
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link ">
+                    <a href="#" class="nav-link disabled">
                         Abandoned cart recovery
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                    <a href="#" class="nav-link disabled ">
                         Automatic Price Updating
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                    <a href="{{ route('businessCases.automatic_email_sending') }}" class="nav-link  {{ (request()->is('businessCases/automatic_email_sending') || request()->is('businessCases/automatic_email_sending/*')) ? 'active' : '' }}">
                         Automatic Email Sending
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link {{ (request()->is('home') || request()->is('home/*')) ? 'active' : '' }}">
+                    <a href="#" class="nav-link disabled ">
                         Automatic Synchronization of Inventory
                     </a>
                 </li>
