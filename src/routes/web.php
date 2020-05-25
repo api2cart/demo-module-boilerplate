@@ -51,6 +51,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
 
     Route::get('/customers', 'CustomersController@index')->name('customers.index');
     Route::post('/customers/list/{store_id?}', 'CustomersController@customerList')->name('customers.list');
+    Route::post('/subscribers/list/{store_id?}', 'CustomersController@subscriberList')->name('subscribers.list');
 
     Route::get('/categories', 'CategoriesController@index')->name('categories.index');
     Route::post('/categories/list/{store_id?}', 'CategoriesController@categoryList')->name('categories.list');
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::prefix('businessCases')->name('businessCases.')->group(function () {
 
         Route::get('import_orders_automation', 'BusinessCases\ImportOrdersAutomationController@index' )->name('import_orders_automation');
+        Route::get('automatic_email_sending', 'BusinessCases\AutomaticEmailSendingController@index' )->name('automatic_email_sending');
 
     });
 
