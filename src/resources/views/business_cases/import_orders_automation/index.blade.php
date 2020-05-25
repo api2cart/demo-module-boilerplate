@@ -357,7 +357,13 @@
                     let orders = rep.data.data;
                     let logs = rep.data.log;
 
-                    // console.log( orders );
+                    if ( rep.data.log ){
+                        for (let k=0; k<rep.data.log.length; k++){
+                            logItems.push( rep.data.log[k] );
+                        }
+                        calculateLog();
+
+                    }
 
                     $.each( orders , function( oi, order ) {
 
@@ -495,9 +501,7 @@
                     },
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            return '<i class="far fa-file-alt"></i> ' +
-                                '<i class="fas fa-edit"></i> '+
-                                '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'"><i class="fas fa-shipping-fast"></i></a> '+
+                            return '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'"><i class="fas fa-shipping-fast"></i></a> '+
                                 '<a href="#" class="text-primary productsItem" title="Products" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'/products"><i class="fas fa-shopping-cart"></i></a> ';
                         }, orderable : false
                     }
@@ -535,7 +539,7 @@
             <div class="col-lg-10">
 
                 <div class="card">
-                    <div class="card-header">Orders <span class="ajax_status"></span></div>
+                    <div class="card-header">Import order automation <span class="ajax_status"></span></div>
 
                     <div class="card-body">
                         <div class="row">
