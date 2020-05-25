@@ -33,6 +33,11 @@ class ProductsController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $this->api2cart->getCart( $store_id );
 
+        $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
+        $sort_direct  = ($request->get('sort_direct')) ? true : false;
+        $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
+        $limit        = ($request->get('limit')) ? $request->get('limit') : null;
+
 //        Log::debug( print_r($storeInfo,1) );
 
         $totalProducts = $this->api2cart->getProductCount( $store_id );
