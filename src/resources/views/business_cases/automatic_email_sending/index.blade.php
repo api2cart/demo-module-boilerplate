@@ -7,8 +7,7 @@
         let subscribers = [];
 
 
-
-        function loadData(){
+        function loadData( created_from=null , product_only=false ){
 
             items = [];
 
@@ -49,7 +48,11 @@
                         url: '{{ route('products.list') }}/'+stores[i].store_key,
                         data: {
                             length: 10,
-                            start: 0
+                            start: 0,
+                            sort_by: 'modified_at',
+                            sort_direct: 'desc',
+                            limit: 3,
+                            created_from: created_from
                         }
                     }).then(function (rep) {
 
@@ -93,13 +96,34 @@
 
 
                    // load rest datatables
-                    axios.all([ loadCustomers( stores[i].store_key ), loadSubscribers( stores[i].store_key )  ])
-                        .then(axios.spread(function ( it1, it2 ) {
+                    if ( product_only == false ){
+                        axios.all([
+                            loadCustomers( stores[i].store_key )
+                        ])
+                            .then(axios.spread(function ( tcustomer ) {
 
-                            console.log( it1 );
-                            console.log( it2 );
+                                if (tcustomer.data.data.length){
+                                    $.each(tcustomer.data.data, function(key, value) {
 
-                        }));
+                                        value.cart_id = stores[i];
+                                        customers.push( value );
+
+                                    });
+                                    // console.log( customers );
+
+                                    var datatable = $( '#cdtable' ).dataTable().api();
+                                    datatable.clear();
+                                    datatable.rows.add( customers );
+                                    datatable.draw();
+
+                                }
+
+
+                                $.unblockUI();
+                            }));
+                    }
+
+
 
                 }
 
@@ -128,23 +152,21 @@
             });
         }
 
-        function loadCustomers(store_key)
+        function loadCustomers(store_key, created_from=null )
         {
-            return axios.post( '/customers/list/' + store_key );
-        }
-
-        function loadProducts(store_key)
-        {
-            return axios.post( '/products/list/' + store_key );
-        }
-
-        function loadSubscribers(store_key)
-        {
-            return axios.post( '/subscribers/list/' + store_key );
+            return axios.post( '/customers/list/' + store_key ,{
+                length: 10,
+                start: 0,
+                sort_by: 'create_at',
+                sort_direct: 'desc',
+                created_from: created_from
+            });
         }
 
 
-        var table;
+        var table, ctable;
+        var product_selected = [];
+        var customer_selected = [];
 
         $(document).ready(function() {
             $.ajaxSetup({
@@ -176,11 +198,6 @@
                 language: {
                     emptyTable: "Data loading or not available in table"
                 },
-                initComplete: function () {
-
-                    $('#pdtable_filter input').focus();
-
-                },
                 columnDefs: [
                     {
                         'targets': 0,
@@ -190,20 +207,20 @@
                             'selectAllPages': false,
                             'selectCallback': function(nodes,selected){
                                 // console.log( nodes, selected  );
-                                rows_selected = [];
+                                product_selected = [];
                                 table.rows().every(function(index, element ){
                                     var tnode = this.node();
 
                                     if ( $(tnode).find('input.dt-checkboxes').is(':checked') ){
-                                        rows_selected.push( $(tnode).find('input.dt-checkboxes').val() );
+                                        product_selected.push( $(tnode).find('input.dt-checkboxes').val() );
                                     }
 
                                 });
 
                                 $(".num_selected").empty();
 
-                                if (rows_selected.length){
-                                    $(".num_selected").append( "Selected: " + rows_selected.length );
+                                if (product_selected.length){
+                                    $(".num_selected").append( "Selected: " + product_selected.length );
                                 }
                                 // console.log( rows_selected );
 
@@ -232,11 +249,12 @@
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return data.name + '<br><small class="text-muted more" data-toggle="popover" data-trigger="hover" data-content="'+data.description.escapeHTML()+'">'+data.description.trunc(80)+'</small>';
+                                let desc = (typeof data.description != 'undefined') ? data.description : '';
+                                return data.name + '<br><small class="text-muted more" data-toggle="popover" data-trigger="hover" data-content="'+desc.escapeHTML()+'">'+desc.trunc(80)+'</small>';
                             }
                     },
                     { data: null, render: function ( data, type, row, meta ){
-                            return data.u_sku;
+                            return (typeof data.u_sku != 'undefined') ? data.u_sku : '';
                         }},
                     { data: null, render: function ( data, type, row, meta ){
                             let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
@@ -281,7 +299,195 @@
                 }
             } );
 
+            ctable = $('#cdtable').DataTable( {
+                processing: true,
+                serverSide: false,
+                // ordering: false,
+                data: customers,
+                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col">>',
+                buttons: [
+                    {
+                        text: 'Reload',
+                        action: function ( e, dt, node, config ) {
 
+                            window.location.reload();
+
+                        }
+                    }
+                ],
+                language: {
+                    emptyTable: "Data loading or not available in table"
+                },
+                order: [[3, 'asc']],
+                columnDefs: [
+                    {
+                        'targets': 0,
+                        'checkboxes': {
+                            'selectAll': true,
+                            'selectRow': true,
+                            'selectAllPages': false,
+                            'selectCallback': function(nodes,selected){
+                                // console.log( nodes, selected  );
+                                customer_selected = [];
+                                ctable.rows().every(function(index, element ){
+                                    var tnode = this.node();
+
+                                    if ( $(tnode).find('input.dt-checkboxes').is(':checked') ){
+                                        customer_selected.push( $(tnode).find('input.dt-checkboxes').val() );
+                                    }
+
+                                });
+
+                                $('#cdtable').find(".num_selected").empty();
+
+                                if (customer_selected.length){
+                                    $('#cdtable').find(".num_selected").append( "Selected: " + customer_selected.length );
+                                }
+                                // console.log( rows_selected );
+
+                            },
+                            // 'selectAllCallback': function(nodes,selected){
+                            //     // console.log( nodes);
+                            //
+                            // },
+                        }
+                    }
+                ],
+                columns: [
+                    { data: null, render:
+                            function(data, type, row, meta){
+                                return '<input type="checkbox" class="dt-checkboxes" value="'+data.cart_id.store_key+':'+data.id+'" >';
+                            },orderable : false,  "searchable": false,
+                    },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+                                return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>' +
+                                    '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.owner+'</small><br>'+
+                                    '<small>'+data.cart_id.stores_info.store_owner_info.email+'</small>';
+                            }
+                    },
+                    { data: null, render: 'email' },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                return data.first_name +' '+ data.last_name;
+                            }
+                    },
+                    {
+                        data: null, render: function ( data, type, row, meta ){
+                            return '<i class="far fa-file-alt"></i> ' +
+                                '<i class="fas fa-edit"></i> ';
+                        }, orderable : false
+                    }
+                ]
+            } );
+
+            $('#_btnGetProducts').click(function(){
+                loadData(null, true );
+                return false;
+            });
+
+            $('#_btnGenerateEmail').click(function(){
+
+                if ( product_selected.length < 1 || customer_selected.length < 1 ){
+                    $('#template-tab').prop( "disabled", true );
+                    $('#template-tab').addClass('disabled');
+
+                    Swal.fire(
+                        'Error!',
+                        'Please be sure you selected one or more product and customer.',
+                        'error'
+                    )
+                    return false;
+                }
+
+                $('#template-tab').prop( "disabled", false );
+                $('#template-tab').removeClass('disabled');
+                $('#template-tab').click();
+
+
+
+                $('#_mailTemplate').contents().find("body").empty();
+
+                axios({
+                    method: 'post',
+                    url: '{{ route('businessCases.automatic_email_sending.compose') }}',
+                    data: {
+                        products: product_selected,
+                        customers: customer_selected,
+                    }
+                }).then(function (rep) {
+
+                    // console.log( rep );
+                    $('#_mailTemplate').contents().find("body").append( rep.data );
+
+                });
+
+                return false;
+            });
+
+
+            $('#_btnSendTestMail').click(function(){
+                if ( product_selected.length < 1 || customer_selected.length < 1 ){
+                    $('#template-tab').prop( "disabled", true );
+                    $('#template-tab').addClass('disabled');
+
+                    Swal.fire(
+                        'Error!',
+                        'Please be sure you selected one or more product and customer.',
+                        'error'
+                    )
+                    return false;
+                }
+
+
+                Swal.fire({
+                    title: 'Submit your email address',
+                    input: 'email',
+                    inputAttributes: {
+                        autocapitalize: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Send',
+                    showLoaderOnConfirm: true,
+                    preConfirm: (email) => {
+
+                        blockUiStyled('<h3>Sending email....</h3>');
+
+                        axios({
+                            method: 'post',
+                            url: '{{ route('businessCases.automatic_email_sending.send') }}',
+                            data: {
+                                products: product_selected,
+                                customers: customer_selected,
+                                email: email
+                            }
+                        }).then(function (rep) {
+
+                            $.unblockUI();
+
+                            Swal.fire(
+                                'OK!',
+                                'Email was send.',
+                                'success'
+                            );
+
+                            $('input:checkbox').prop('checked', false);
+                            product_selected = [];
+                            customer_selected = [];
+                            $('#products-tab').click();
+                        });
+
+
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                });
+
+
+
+
+            });
 
 
 
@@ -311,9 +517,9 @@
 
                         <div class="row">
                             <div class="col">
-                                <button class="btn btn-outline-secondary" id="">Get new products</button>
-                                <button class="btn btn-outline-secondary" id="">Generate Email</button>
-                                <button class="btn btn-outline-secondary" id="">Send Test Email</button>
+                                <button class="btn btn-outline-secondary" id="_btnGetProducts">Get new products</button>
+                                <button class="btn btn-outline-secondary" id="_btnGenerateEmail">Generate Email</button>
+                                <button class="btn btn-outline-secondary" id="_btnSendTestMail">Send Test Email</button>
                             </div>
                         </div>
 
@@ -330,19 +536,17 @@
                                         <a class="nav-link active" id="products-tab" data-toggle="tab" href="#products" role="tab" aria-controls="home" aria-selected="true">Products</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="subscribers-tab" data-toggle="tab" href="#subscribers" role="tab" aria-controls="profile" aria-selected="false">Subscribers</a>
-                                    </li>
-                                    <li class="nav-item">
                                         <a class="nav-link" id="customers-tab" data-toggle="tab" href="#customers" role="tab" aria-controls="contact" aria-selected="false">Customers</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="template-tab" data-toggle="tab" href="#template" role="tab" aria-controls="contact" aria-selected="false">Mail Template</a>
+                                        <a class="nav-link disabled" disabled id="template-tab" data-toggle="tab" href="#template" role="tab" aria-controls="contact" aria-selected="false">Mail Template</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <br>
                         <div class="tab-content" id="myTabContent">
+
                             <div class="tab-pane fade show active" id="products" role="tabpanel" aria-labelledby="products-tab">
                                 <div class="row">
                                     <div class="col">
@@ -364,9 +568,31 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="subscribers" role="tabpanel" aria-labelledby="subscribers-tab">...</div>
-                            <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">...</div>
-                            <div class="tab-pane fade" id="template" role="tabpanel" aria-labelledby="template-tab">...</div>
+
+                            <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="table-responsive">
+                                            <table id="cdtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
+                                                <thead>
+                                                <tr>
+                                                    <th>Id</th>
+                                                    <th>Store</th>
+                                                    <th>Email</th>
+                                                    <th>Name</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="template" role="tabpanel" aria-labelledby="template-tab">
+                                <iframe id="_mailTemplate" src="" width="100%" height="800" frameborder="0" ></iframe>
+                            </div>
+
                         </div>
 
 
