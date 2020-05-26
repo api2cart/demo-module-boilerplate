@@ -32,6 +32,13 @@ class CustomersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
+        $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
+        $sort_direct  = ($request->get('sort_direct')) ? true : false;
+        $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
+        $limit        = ($request->get('limit')) ? $request->get('limit') : null;
+
+//        Log::debug( print_r($request->all(),1) );
+
         $totalCustomers = $this->api2cart->getCustomerCount( $store_id );
 
         $customers = collect([]);
@@ -101,60 +108,22 @@ class CustomersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
-        $totalCustomers = $this->api2cart->getCustomerCount( $store_id );
-
-        $customers = collect([]);
-
-        if ( $totalCustomers ){
-
-            $result = $this->api2cart->getCustomerList( $store_id );
-
-            $newRes= (isset($result['result']['customers_count'])) ? collect( $result['result']['customer'] ) : collect([]);
-            // put additional information
-            if ( $newRes->count() ){
-                foreach ($newRes as $item){
-                    $newItem = $item;
-                    $newItem['cart_id'] = $storeInfo['cart_id'];
-                    $customers->push( $newItem );
-                }
-            }
-
-            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
-                // get next iteration to load rest customers
-                while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
-                    $result = $this->api2cart->getCustomerListPage( $store_id , $result['pagination']['next']);
-                    $newRes = (isset($result['result']['customers_count'])) ? collect( $result['result']['customer'] ) : collect([]);
-                    // put additional information
-                    if ( $newRes->count() ){
-                        foreach ($newRes as $item){
-                            $newItem = $item;
-                            $newItem['cart_id'] = $storeInfo['cart_id'];
-                            $customers->push( $newItem );
-                        }
-                    }
-                }
-
-            }
-
-
-        }
-
+//        Log::debug( $store_id );
+        $result = $this->api2cart->getSubscriberList( $store_id );
 
 
 
         $data = [
-            "recordsTotal"      => $totalCustomers,
-            "recordsFiltered"   => $totalCustomers,
+            "recordsTotal"      => 0,
+            "recordsFiltered"   => 0,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $customers->toArray(),
+            "data"              => [],
 
             'log'               => $this->api2cart->getLog(),
         ];
 
         return response()->json($data);
-
-
 
     }
 
