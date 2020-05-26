@@ -65,6 +65,11 @@ Route::middleware(['auth', 'apikey'])->group(function () {
         Route::get('import_orders_automation', 'BusinessCases\ImportOrdersAutomationController@index' )->name('import_orders_automation');
         Route::get('automatic_email_sending', 'BusinessCases\AutomaticEmailSendingController@index' )->name('automatic_email_sending');
 
+        Route::post('automatic_email_sending/compose', 'BusinessCases\AutomaticEmailSendingController@compose')->name('automatic_email_sending.compose');
+        Route::post('automatic_email_sending/send', 'BusinessCases\AutomaticEmailSendingController@send')->name('automatic_email_sending.send');
+
+
+
     });
 
 
