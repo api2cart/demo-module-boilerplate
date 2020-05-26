@@ -33,12 +33,18 @@ class ProductsController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $this->api2cart->getCart( $store_id );
 
-        $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
-        $sort_direct  = ($request->get('sort_direct')) ? true : false;
+        $sort_by      = ($request->get('sort_by')) ? 'create_at' : null;
+        $sort_direct  = ($request->get('sort_direct')) ? $request->get('sort_direct') : null;
         $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
         $limit        = ($request->get('limit')) ? $request->get('limit') : null;
 
+//        Log::debug( print_r($request->all(),1) );
+//        Log::debug( $store_id );
 //        Log::debug( print_r($storeInfo,1) );
+
+//        if ($store_id == 'c4630f83adeef90ee1c57d757c017312') {
+//            $limit = null;
+//        }
 
         $totalProducts = $this->api2cart->getProductCount( $store_id );
 
@@ -46,7 +52,7 @@ class ProductsController extends Controller
 
         if ( $totalProducts ){
 
-            $result = $this->api2cart->getProductList( $store_id );
+            $result = $this->api2cart->getProductList( $store_id, null, $sort_by, $sort_direct, $limit , null );
 
             $newRes= (isset($result['result']['products_count'])) ? collect( $result['result']['product'] ) : collect([]);
             // put additional information
@@ -56,7 +62,7 @@ class ProductsController extends Controller
                     $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
 
                     // collect product variants
-                    if ( $item['type'] === 'configurable' ){
+                    if ( isset($item['type']) && $item['type'] === 'configurable' ){
                         $pv = $this->api2cart->getProductVariants($store_id, $item['id'] );
                         $newItem['children'] = $pv['children'];
                     }
@@ -66,7 +72,7 @@ class ProductsController extends Controller
             }
 
 
-            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+            if ( $limit == null && isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                 // get next iteration to load rest customers
                 while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                     $result = $this->api2cart->getProductListPage( $store_id , $result['pagination']['next']);
@@ -78,7 +84,7 @@ class ProductsController extends Controller
                             $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
 
                             // collect product variants
-                            if ( $item['type'] === 'configurable' ){
+                            if ( isset($item['type']) && $item['type'] === 'configurable' ){
                                 $pv = $this->api2cart->getProductVariants($store_id, $item['id'] );
                                 $newItem['children'] = $pv['children'];
                             }
@@ -93,6 +99,9 @@ class ProductsController extends Controller
 
         }
 
+//        if ($store_id == 'c4630f83adeef90ee1c57d757c017312') {
+//            Log::debug( print_r($products,1) );
+//        }
 
         $data = [
             "recordsTotal"      => $totalProducts,
