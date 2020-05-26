@@ -762,7 +762,7 @@ class Api2Cart
 
     }
 
-    public function getProductList($store_id=null, $ids=null )
+    public function getProductList($store_id=null, $ids=null, $sort_by=null, $sort_direct=null, $limit=null, $created_from=null )
     {
         $this->setApiKey();
 
@@ -780,11 +780,11 @@ class Api2Cart
             $result = $this->product->productList(
                 null,
                 null,
-                null,
+                $limit,
                 'force_all',
                 null,
                 null,
-                null,
+                $created_from,
                 null,
                 null,
                 null,
@@ -798,8 +798,8 @@ class Api2Cart
                 null,
                 null,
                 null,
-                null,
-                null
+                $sort_by,
+                $sort_direct
             );
 
             $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['ids' => $ids ] );
