@@ -317,7 +317,7 @@
                             }
                     },
                     { data: null, render: function ( data, type, row, meta ){
-                            return data.u_sku;
+                            return (typeof data.u_sku != 'undefined') ? data.u_sku : '';
                         }},
                     { data: null, render: function ( data, type, row, meta ){
                             let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
