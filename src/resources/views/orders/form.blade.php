@@ -10,6 +10,10 @@
 <div class="row text-left">
     <div class="col">
 
+        <div class="alert alert-danger" role="alert" style="display: none;">
+            <div id="_form_errors" class="text-left"></div>
+        </div>
+
         <div class="form-group row">
             <label for="name" class="col-4 col-form-label">Store Type</label>
             <div class="col-8">

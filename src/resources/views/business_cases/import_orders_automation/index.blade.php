@@ -160,6 +160,7 @@
                         preConfirm: ( pconfirm ) => {
 
                             $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
+                            $( $(document.getElementById('_form_errors')).parent() ).hide();
 
                             let fact = $('.swal2-content form')[0].action;
                             let store_key = $('#cart_id').val();
@@ -209,7 +210,14 @@
                                     return true;
                                 })
                                 .catch(function (error) {
-                                    // console.log( error );
+
+                                    // console.log( error.response.data.errors.checked_id );
+                                    if( typeof error.response.data.errors.checked_id != 'undefined' ){
+                                        $('#_form_errors').empty().append('Please check at least one product.')
+                                        $( $(document.getElementById('_form_errors')).parent() ).show();
+                                        $( $(document.getElementById('_form_errors')).parent() ).fadeOut(9000);
+                                    }
+
 
                                     if ( typeof error.response.data.errors != 'undefined'){
 
