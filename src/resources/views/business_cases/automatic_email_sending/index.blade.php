@@ -517,9 +517,9 @@
 
                         <div class="row">
                             <div class="col">
-                                <button class="btn btn-outline-secondary" id="_btnGetProducts">Get new products</button>
-                                <button class="btn btn-outline-secondary" id="_btnGenerateEmail">Generate Email</button>
-                                <button class="btn btn-outline-secondary" id="_btnSendTestMail">Send Test Email</button>
+                                <button class="btn btn-primary" id="_btnGetProducts">Get new products</button>
+                                <button class="btn btn-primary" id="_btnGenerateEmail">Generate Email</button>
+                                <button class="btn btn-primary" id="_btnSendTestMail">Send Test Email</button>
                             </div>
                         </div>
 
