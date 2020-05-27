@@ -251,7 +251,8 @@
 
                             window.location.reload();
 
-                        }
+                        },
+                        className: 'btn btn-primary'
                     }
                 ],
                 language: {
@@ -390,7 +391,9 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Products <span class="ajax_status"></span></div>
+                    <div class="card-header">Products <span class="ajax_status"></span>
+                        <span class="float-right"><a target="_blank" href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#operations-tag-product">Read Products API methods</a></span>
+                    </div>
 
                     <div class="card-body">
                         <div class="row">
