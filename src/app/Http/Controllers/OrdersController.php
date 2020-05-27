@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
 use App\Services\Api2Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -171,7 +172,7 @@ class OrdersController extends Controller
         return redirect( route('orders.index') );
     }
 
-    public function store(Request $request)
+    public function store(OrderRequest $request)
     {
 //        Log::debug( print_r($request->all(),1) );
 
