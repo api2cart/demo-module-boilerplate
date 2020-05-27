@@ -10,6 +10,15 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-MSLGM6D');</script>
+    <!-- End Google Tag Manager -->
+
+
     <script type="text/javascript" src="{{ asset('js/axios.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
@@ -198,7 +207,7 @@
                             html: response.data.data,
                             buttonsStyling: false,
                             customClass: {
-                                confirmButton: 'btn btn-success',
+                                confirmButton: 'btn btn-primary',
                                 cancelButton: 'btn btn-danger'
                             },
                             showCancelButton: true,
@@ -545,7 +554,7 @@
                                         });
 
                                     } else {
-                                        mr += '<small><strong>'+ index + '</strong> : ' + value +'</small><br>';
+                                        mr += '<small><strong>'+ index + '</strong> : ' + value.trunc(40) +'</small><br>';
                                     }
 
                                 });
@@ -557,6 +566,20 @@
                 ],
                 "drawCallback": function( settings ) {
                     // console.log( settings );
+                    $('.dolessmoreShow').unbind();
+                    $('.dolessmoreShow').click(function(){
+                        var obj = $(this).parent().find('.dolessmore').first();
+
+                        if ( $(obj).css('height') == '40px' ){
+                            $(obj).css('height','auto')
+                            $(this).text('Show less');
+                        } else {
+                            $(obj).css('height','40px')
+                            $(this).text('Show more');
+                        }
+
+                        // console.log( $(obj).css('max-height') );
+                    });
                 }
             });
 
@@ -572,8 +595,8 @@
         function displayProperties(val, out )
         {
 
-            console.log( typeof val );
-            console.log( val );
+            // console.log( typeof val );
+            // console.log( val );
 
             if (typeof val === 'object') {
 
@@ -727,19 +750,22 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/dataTables.bootstrap4.min.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/buttons.dataTables.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/sweetalert2/dist/sweetalert2.min.css') }}"/>
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/dataTables.bootstrap4.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/select2/css/select2.css') }}"  />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}"/>
+
+
+{{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/buttons.dataTables.min.css') }}"/>--}}
+
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fontawesome/css/all.min.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fileinput/css/fileinput.min.css') }}" media="all" />
-    <link type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}"  />
     <link rel="stylesheet" type="text/css" href="{{ asset('js/yadcf/jquery.dataTables.yadcf.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/jui/jquery-ui.min.css') }}"/>
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('js/select2/css/select2.css') }}"  />
+
 
 
 
@@ -748,12 +774,29 @@
 
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSLGM6D"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="fusion-contact-info cont-info">
+                <span>Got questions? <a href="/contact-us" style=" top: -1px; position: relative;">Contact Us</a><span class="dot-space">,</span></span>
+            </div>
+            <div class="fusion-contact-info">
+                <span>Call Us <a href="tel:18002240976" style=" top: -1px; position: relative;">1-800-224-0976</a> or write <a href="mailto:manager@api2cart.com" style=" top: -1px; position: relative;">manager@api2cart.com</a></span>
+            </div>
+        </div>
+    </div>
+
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm _magMenu" style="background-color: cadetblue !important;">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                    <img src="{{ asset('images/logo.png') }}"> {{ config('app.name', 'Laravel') }}
                 </a>
+                <div><small>In this demo account, all data will reset every hour</small></div>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -810,6 +853,8 @@
         </main>
     </div>
 
+    @include('parts.footer')
+
     <!-- Modal -->
     <div class="modal fade" id="staticBackdrop" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog full_modal-dialog" role="document">
@@ -838,7 +883,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

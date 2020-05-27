@@ -1,7 +1,7 @@
 <div class="col-lg-2">
     <div class="card">
         <div class="card-header">
-            Sidebar
+            Entities
         </div>
 
         <div class="card-body sidemenu">
@@ -70,6 +70,11 @@
                 <li class="nav-item" >
                     <a href="#" class="nav-link disabled ">
                         Automatic Synchronization of Inventory
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a href="https://api2cart.com/business-cases" target="_blank" class="nav-link">
+                        More Cases
                     </a>
                 </li>
             </ul>
