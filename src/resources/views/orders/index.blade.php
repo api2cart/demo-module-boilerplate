@@ -27,11 +27,17 @@
                 }
 
                 if ( stores.length == 0 ){
-                    Swal.fire(
-                        'Error!',
-                        'Do not have store info, please check API log.',
-                        'error'
-                    );
+
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Do not have store info, please check API log.',
+                        icon: 'error',
+
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-primary btn-lg',
+                        cancelButtonClass: 'btn btn-lg',
+                    })
+
                     $.unblockUI();
                     return;
                 }
@@ -106,11 +112,15 @@
 
                 $.unblockUI();
 
-                Swal.fire(
-                    'Error!',
-                    'Do not have store info, please check API log.',
-                    'error'
-                )
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Do not have store info, please check API log.',
+                    icon: 'error',
+
+                    buttonsStyling: false,
+                    confirmButtonClass: 'btn btn-primary btn-lg',
+                    cancelButtonClass: 'btn btn-lg',
+                })
 
             });
         }
@@ -232,7 +242,8 @@
 
                             window.location.reload();
 
-                        }
+                        },
+                        className: 'btn btn-primary'
                     }
                 ],
                 language: {
@@ -313,7 +324,9 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Orders <span class="ajax_status"></span></div>
+                    <div class="card-header">Orders <span class="ajax_status"></span>
+                        <span class="float-right"><a target="_blank" href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#operations-tag-order">Read Orders API methods</a></span>
+                    </div>
 
                     <div class="card-body">
                         <div class="row">

@@ -148,11 +148,12 @@
                         title: 'Add new Order',
                         html: response.data.data,
                         customClass: {
-                            confirmButton: 'btn btn-success',
+                            confirmButton: 'btn btn-primary',
                             cancelButton: 'btn btn-danger'
                         },
                         showCancelButton: true,
                         showCloseButton: true,
+                        buttonsStyling: false,
                         confirmButtonText: 'Create',
                         width: '70%',
                         allowOutsideClick: false,
@@ -553,8 +554,8 @@
 
                         <div class="row">
                             <div class="col">
-                                <button class="btn btn-outline-secondary" id="_btnCreateOrder">Create test order</button>
-                                <button class="btn btn-outline-secondary" id="_btnCheckNewOrder">Check for newt orders</button>
+                                <button class="btn btn-primary" id="_btnCreateOrder">Create test order</button>
+                                <button class="btn btn-primary" id="_btnCheckNewOrder">Check for newt orders</button>
                             </div>
                         </div>
 
