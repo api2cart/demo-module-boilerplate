@@ -8,6 +8,12 @@
                 <div class="card-header">{{ __('Login') }}</div>
 
                 <div class="card-body">
+
+                    <div class="text-center">
+                        <strong>This Demo Module demonstrates how you can use API of API2Cart <br>service to achieve your business goals</strong>
+                    </div>
+                    <br>
+
                     <form method="POST" action="{{ route('login') }}" autocomplete="off">
                         @csrf
 
@@ -47,6 +53,27 @@
                                     <label class="form-check-label" for="remember">
                                         {{ __('Remember Me') }}
                                     </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-6 offset-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input @error('agreed') is-invalid @enderror" type="checkbox" name="agreed" id="agreed" checked="checked" >
+
+                                    <label class="form-check-label" for="agreed">
+                                        I agree with
+                                        <a href="https://www.api2cart.com/terms-of-service/" target="_blank" title="Terms Of Service">Terms Of Service</a> and
+                                        <a href="https://www.api2cart.com/privacy-policy/" target="_blank" title="Privacy Policy">Privacy Policy</a>
+                                    </label>
+
+                                    @error('agreed')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                    @enderror
+
                                 </div>
                             </div>
                         </div>
