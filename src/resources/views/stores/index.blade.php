@@ -30,11 +30,15 @@
                 }
 
                 if ( !stores.length ){
-                    Swal.fire(
-                        'Info',
-                        'Do not have store info, please check API log or Add stores.',
-                        'info'
-                    )
+                    Swal.fire({
+                        title: 'Info',
+                        text: 'Do not have store info, please check API log or Add stores.',
+                        icon: 'info',
+
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-primary btn-lg',
+                        cancelButtonClass: 'btn btn-lg',
+                    })
                 }
 
                 var datatable = $( '#dtable' ).dataTable().api();
@@ -62,11 +66,15 @@
 
                 $.unblockUI();
 
-                Swal.fire(
-                    'Error!',
-                    'Do not have store info, please check API log.',
-                    'error'
-                )
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Do not have store info, please check API log.',
+                    icon: 'error',
+
+                    buttonsStyling: false,
+                    confirmButtonClass: 'btn btn-primary btn-lg',
+                    cancelButtonClass: 'btn btn-lg',
+                })
 
             });
 
@@ -88,11 +96,12 @@
                         title: 'Add new Store',
                         html: response.data.data,
                         customClass: {
-                            confirmButton: 'btn btn-success',
+                            confirmButton: 'btn btn-primary',
                             cancelButton: 'btn btn-danger'
                         },
                         showCancelButton: true,
                         showCloseButton: true,
+                        buttonsStyling: false,
                         confirmButtonText: 'Create',
                         width: '70%',
                         allowOutsideClick: false,
@@ -191,11 +200,16 @@
                     console.log(error);
                     $.unblockUI();
 
-                    Swal.fire(
-                        'Error!',
-                        'Failed info ' + id,
-                        'error'
-                    )
+
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed info ' + id,
+                        icon: 'error',
+
+                        buttonsStyling: false,
+                        confirmButtonClass: 'btn btn-primary btn-lg',
+                        cancelButtonClass: 'btn btn-lg',
+                    })
 
                 });
         }
@@ -302,7 +316,8 @@
                         text: 'Reload',
                         action: function ( e, dt, node, config ) {
                             window.location.reload();
-                        }
+                        },
+                        className: 'btn btn-primary'
                     },
                     {
                         text: 'Add Store',
@@ -310,7 +325,8 @@
 
                             addStore();
 
-                        }
+                        },
+                        className: 'btn btn-primary'
                     }
                 ],
                 language: {
@@ -358,7 +374,9 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Stores <span class="ajax_status"></span></div>
+                    <div class="card-header">Stores <span class="ajax_status"></span>
+                        <span class="float-right"><a target="_blank" href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#operations-tag-cart">Read Carts API methods</a></span>
+                    </div>
 
                     <div class="card-body">
                         <div class="row">

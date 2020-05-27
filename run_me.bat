@@ -4,11 +4,7 @@ SET mypath=%cd%
 SET CONFIGFILE=%mypath%\src\.env
 
 
-IF EXIST %CONFIGFILE% (
-    echo Config exists
-) ELSE (
-    copy %mypath%\src\.env.example %CONFIGFILE%
-)
+copy %mypath%\src\.env.example %CONFIGFILE%
 
 docker-compose down
 
