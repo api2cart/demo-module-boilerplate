@@ -846,7 +846,7 @@
                 </div>
             </div>
         </nav>
-        <main class="py-4">
+        <main class="">
             @include('parts.messages')
 
             @yield('content')
