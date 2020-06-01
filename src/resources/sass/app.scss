@@ -104,7 +104,7 @@ table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
     content: '\e5ca';
     //color: #AFB8EA;
     font-family: 'Material Icons';
-    font-size: 24px;
+    font-size: 23px;
     -webkit-animation-name: fadeInCheckbox;
     animation-name: fadeInCheckbox;
     -webkit-animation-duration: .5s;
@@ -113,7 +113,8 @@ table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected {
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     position: absolute;
     margin-top: -20px;
-    margin-left: -15px;
+    margin-left: -20px;
+    background-color: white;
 }
 
 @-webkit-keyframes fadeInCheckbox {
