@@ -6,7 +6,7 @@
 
         function loadData(){
 
-            blockUiStyled('<h3>Loading stores information.</h3>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             stores = [];
 
