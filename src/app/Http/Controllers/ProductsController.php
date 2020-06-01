@@ -38,13 +38,6 @@ class ProductsController extends Controller
         $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
         $limit        = ($request->get('limit')) ? $request->get('limit') : null;
 
-//        Log::debug( print_r($request->all(),1) );
-//        Log::debug( $store_id );
-//        Log::debug( print_r($storeInfo,1) );
-
-//        if ($store_id == 'c4630f83adeef90ee1c57d757c017312') {
-//            $limit = null;
-//        }
 
         $totalProducts = $this->api2cart->getProductCount( $store_id );
 
@@ -98,10 +91,6 @@ class ProductsController extends Controller
 
 
         }
-
-//        if ($store_id == 'c4630f83adeef90ee1c57d757c017312') {
-//            Log::debug( print_r($products,1) );
-//        }
 
         $data = [
             "recordsTotal"      => $totalProducts,
