@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\OrdersProductRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class OrderRequest extends FormRequest
@@ -24,10 +25,10 @@ class OrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'cart_id'       => 'required',
-            'customer_id'   => 'required',
-            'status_id'     => 'required',
-            'checked_id'    => 'required'
+            'cart_id'       => ['required'],
+            'customer_id'   => ['required'],
+            'status_id'     => ['required'],
+            'checked_id'    => ['required', new OrdersProductRule ]
         ];
     }
 }

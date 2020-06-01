@@ -3,6 +3,7 @@
 @section('script')
     <script type="text/javascript">
 
+        var curentProducts = [];
 
         function loadData(created_from=null){
 
@@ -133,6 +134,40 @@
             return axios.post( '/orders/statuses/' + store_key );
         }
 
+        function productQuantityProcess()
+        {
+            $('.product_quantity').unbind();
+            $('.product_quantity').change(function(){
+                let quantity = $(this).val();
+                let check = $(this).parent().parent().parent().find('.d-none');
+
+                if ( quantity == 0 ){
+                    $(check).prop('checked', false);
+                } else {
+                    $(check).prop('checked', true);
+                }
+
+                calculateTotalPrice();
+
+            });
+
+        }
+
+        function calculateTotalPrice()
+        {
+            let store_id = $('#cart_id').val();
+            let total = 0;
+            $.each( $('.product_quantity'), function(key, value) {
+                let check = $(this).parent().parent().parent().find('.d-none');
+                let quantity = $(this).val();
+                if ( quantity > 0 ){
+                    let price = curentProducts.find(el => el.id === $(check).val() )['price'];
+                    total += price;
+                }
+            });
+            $('#product_total').val( total );
+        }
+
         function addOrder()
         {
             let action = "{{ route('orders.create') }}";
@@ -165,6 +200,19 @@
                             let fact = $('.swal2-content form')[0].action;
                             let store_key = $('#cart_id').val();
                             var formData = getFormData( $('.swal2-content form') );
+
+                            $.each( $('.product_quantity'), function(key, value) {
+
+                                let check = $(this).parent().parent().parent().find('.d-none');
+                                let quantity = $(this).val();
+
+                                if ( quantity == 0 ){
+                                    $(check).prop('checked', false);
+                                } else {
+                                    $(check).prop('checked', true);
+                                }
+                            });
+
 
 
                             return axios.post( fact , formData , {
@@ -213,7 +261,7 @@
 
                                     // console.log( error.response.data.errors.checked_id );
                                     if( typeof error.response.data.errors.checked_id != 'undefined' ){
-                                        $('#_form_errors').empty().append('Please check at least one product.')
+                                        $('#_form_errors').empty().append( error.response.data.errors.checked_id[0] )
                                         $( $(document.getElementById('_form_errors')).parent() ).show();
                                         $( $(document.getElementById('_form_errors')).parent() ).fadeOut(9000);
                                     }
@@ -281,7 +329,10 @@
                                 }
 
                                 if ( products.data.data.length ){
-                                    $.each(products.data.data, function(key, value) {
+
+                                    curentProducts = products.data.data;
+
+                                    $.each(curentProducts, function(key, value) {
 
                                         let html = '<label class="col-lg-6">\n' +
                                             '                        <input type="checkbox" name="checked_id[]" class="card-input-element d-none" value="'+value.id+'">\n' +
@@ -291,7 +342,7 @@
                                             '                                Price: ' +value.price +' '+ value.currency +
                                             '                            </small>\n' +
                                             '                            <small>\n' +
-                                            '                                Quantity: <input type="number" name="product_quantity[]"  min="0" max="'+ value.quantity +'" step="1" value="0">\n' +
+                                            '                                Quantity: <input type="number" class="product_quantity" name="product_quantity[]"  min="0" max="'+ value.quantity +'" step="1" value="0">\n' +
                                             '                            </small>\n' +
                                             '                        <input type="hidden" name="product_id[]" value="'+value.id+'">\n' +
                                             '                        </div>\n' +
@@ -300,6 +351,8 @@
                                         $('#productsList').append( html );
 
                                     });
+
+                                    productQuantityProcess();
                                 }
 
                                 // console.log( products );
@@ -310,7 +363,10 @@
 
                     });
 
-
+                    $('#cart_id').change(function(){
+                        $(this).removeClass('is-invalid');
+                        $('#customer_id,#status_id').removeClass('is-invalid');
+                    });
 
                     //update log count
                     if ( response.data.log ){
