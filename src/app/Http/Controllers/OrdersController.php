@@ -154,8 +154,12 @@ class OrdersController extends Controller
 
     public function statuses($store_id=null, Request $request)
     {
+        $statuses = $this->api2cart->getOrderStatuses( $store_id );
+        if ( !$statuses ){
+            return response()->json(['log' => $this->api2cart->getLog() ], 404);
+        }
         if ( $request->ajax() ){
-            return response()->json(['data' => collect($this->api2cart->getOrderStatuses( $store_id )['cart_order_statuses']), 'log' => $this->api2cart->getLog() ]);
+            return response()->json(['data' => collect($statuses['cart_order_statuses']), 'log' => $this->api2cart->getLog() ]);
         }
         return redirect( route('orders.index') );
     }
