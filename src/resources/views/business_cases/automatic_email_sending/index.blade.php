@@ -41,7 +41,7 @@
 
                 for (let i=0; i<stores.length; i++){
 
-                    blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
+                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
 
                     axios({
                         method: 'post',
@@ -58,7 +58,7 @@
 
                         let orders = rep.data.data;
 
-                        blockUiStyled('<h3>Adding '+ stores[i].url +' product.</h3>');
+                        blockUiStyled('<h4>Adding '+ stores[i].url +' product.</h4>');
 
                         for (let j=0; j<orders.length; j++){
                             orders[j].cart_id = stores[i];
@@ -175,7 +175,7 @@
                 }
             });
 
-            blockUiStyled('<h3>Loading stores information.</h3>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             loadData();
 
@@ -384,7 +384,85 @@
             } );
 
             $('#_btnGetProducts').click(function(){
-                loadData(null, true );
+                blockUiStyled('<h4>Loading products.</h4>');
+
+                let datatable = $( '#pdtable' ).dataTable().api();
+                let last_product = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+
+                console.log( last_product );
+                return false;
+                $.each( stores , function( i, stor ) {
+                    blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
+
+                    axios({
+                        method: 'post',
+                        url: '{{ route('products.list') }}/'+stor.store_key,
+                        data: {
+                            length: 10,
+                            start: 0,
+                            limit: 3,
+                            sort_by: 'create_at',
+                            sort_direct: 'desc',
+                            created_from: last_order
+                        }
+                    }).then(function (rep) {
+
+                        //console.log( stores[i] );
+
+                        let orders = rep.data.data;
+                        let logs = rep.data.log;
+
+                        if ( rep.data.log ){
+                            for (let k=0; k<rep.data.log.length; k++){
+                                logItems.push( rep.data.log[k] );
+                            }
+                            calculateLog();
+
+                        }
+
+                        $.each( orders , function( oi, order ) {
+
+                            order.cart_id = stor;
+
+                            let elexist =  items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key );
+
+                            if ( typeof elexist == 'undefined' ){
+
+                                // add new order to table and highlight it
+                                items.push( order );
+
+                                datatable.clear();
+                                datatable.rows.add( items );
+                                datatable.order([ 1, "desc" ]).draw();
+
+                                datatable.rows().every(function(){
+                                    var tobj  = this;
+                                    var tnode = tobj.node();
+                                    var tdata = tobj.data();
+                                    if ( tdata.cart_id.store_key == stor.store_key && tdata.id == order.id ){
+                                        $(tnode).addClass('table-info');
+                                    }
+                                });
+
+
+                            }
+
+
+                        });
+
+
+
+                        $.unblockUI();
+
+                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
+
+
+                    });
+
+
+                });
+
+
                 return false;
             });
 
@@ -453,7 +531,7 @@
                     showLoaderOnConfirm: true,
                     preConfirm: (email) => {
 
-                        blockUiStyled('<h3>Sending email....</h3>');
+                        blockUiStyled('<h4>Sending email....</h4>');
 
                         axios({
                             method: 'post',
