@@ -70,6 +70,13 @@
             </div>
         </div>
 
+        <div class="form-group row">
+            <label for="status_id" class="col-4 col-form-label">Order total</label>
+            <div class="col-8">
+                <input type="text" class="form-control" id="product_total" name="product_total" value="0" readonly  disabled>
+                <div class="invalid-feedback"></div>
+            </div>
+        </div>
 
         <div id="addItemFields">
         </div>
