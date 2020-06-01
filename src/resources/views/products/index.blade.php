@@ -406,13 +406,13 @@
                                 <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Image</th>
-                                    <th>Name/Description</th>
-                                    <th>SKU</th>
-                                    <th>Store Owner</th>
-                                    <th>Store</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Image<br></th>
+                                    <th>Name/Description<br></th>
+                                    <th>SKU<br></th>
+                                    <th>Store Owner<br></th>
+                                    <th>Store<br></th>
+                                    <th>Price<br></th>
+                                    <th>Action<br></th>
                                 </tr>
                                 </thead>
                             </table>
