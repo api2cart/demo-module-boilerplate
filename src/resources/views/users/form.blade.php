@@ -9,7 +9,7 @@
     <div class="input-group">
         {!! Form::text('api2cart_key', null, ['class' => 'form-control', 'required' => 'required', 'autocomplete'=>'off', 'aria-describedby'=>"button-addon2"] ) !!}
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="$('#api2cart_key').val('f408de7875733736c244b75a4f33862a')">Switch to demo account</button>
+            <button class="btn btn-info" type="button" id="button-addon2" onclick="$('#api2cart_key').val('f408de7875733736c244b75a4f33862a')">Switch to demo account</button>
         </div>
     </div>
     {!! $errors->first('api2cart_key', '<p class="help-block">:message</p>') !!}

@@ -52,7 +52,7 @@ class ProductsController extends Controller
 
         if ( $totalProducts ){
 
-            $result = $this->api2cart->getProductList( $store_id, null, $sort_by, $sort_direct, $limit , null );
+            $result = $this->api2cart->getProductList( $store_id, null, $sort_by, $sort_direct, $limit , $created_from );
 
             $newRes= (isset($result['result']['products_count'])) ? collect( $result['result']['product'] ) : collect([]);
             // put additional information
