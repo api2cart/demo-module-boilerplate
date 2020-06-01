@@ -38,7 +38,7 @@
 
                 for (let i=0; i<stores.length; i++){
 
-                    blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
+                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
 
                     axios({
                         method: 'post',
@@ -51,7 +51,7 @@
 
                         let orders = rep.data.data;
 
-                        blockUiStyled('<h3>Adding '+ stores[i].url +' customers.</h3>');
+                        blockUiStyled('<h4>Adding '+ stores[i].url +' customers.</h4>');
 
                         for (let j=0; j<orders.length; j++){
                             orders[j].cart_id = stores[i];
@@ -172,7 +172,7 @@
                 }
             });
 
-            blockUiStyled('<h3>Loading stores information.</h3>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             loadData();
 
