@@ -40,7 +40,7 @@
 
                 for (let i=0; i<stores.length; i++){
 
-                    blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
+                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
 
                     axios({
                         method: 'post',
@@ -60,7 +60,7 @@
                         let orders = rep.data.data;
                         let logs = rep.data.log;
 
-                        blockUiStyled('<h3>Adding '+ stores[i].url +' orders.</h3>');
+                        blockUiStyled('<h4>Adding '+ stores[i].url +' orders.</h4>');
 
                         $.each( orders , function( index, value ) {
                             value.cart_id = stores[i];
@@ -301,7 +301,7 @@
                         $('#status_id').empty();
                         $('#customer_id').prop( "disabled", true );
 
-                        blockUiStyled('<h3>Loading store customers and products.</h3>');
+                        blockUiStyled('<h4>Loading store customers and products.</h4>');
 
                         axios.all([ loadCustomers( item.store_key ), loadProducts( item.store_key ), loadStatuses( item.store_key ) ])
                             .then(axios.spread(function ( users, products, statuses) {
@@ -396,13 +396,13 @@
         function checkNewOrders()
         {
             // console.log('check for new orders');
-            blockUiStyled('<h3>Loading new orders.</h3>');
+            blockUiStyled('<h4>Loading new orders.</h4>');
 
             let datatable = $( '#dtable' ).dataTable().api();
             let last_order = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
 
             $.each( stores , function( i, stor ) {
-                blockUiStyled('<h3>Loading '+ stor.url +' information.</h3>');
+                blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
 
                 axios({
                     method: 'post',
@@ -488,7 +488,7 @@
                 }
             });
 
-            blockUiStyled('<h3>Loading stores information.</h3>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             loadData();
 

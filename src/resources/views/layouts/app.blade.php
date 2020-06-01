@@ -195,7 +195,7 @@
 
                 // console.log( trdata );
 
-                blockUiStyled('<h3>Loading '+name+' details</h3>');
+                blockUiStyled('<h4>Loading '+name+' details</h4>');
 
                 axios.get( action )
                     .then(function (response) {
@@ -731,16 +731,23 @@
                 css: {
                     border: 'none',
                     padding: '15px',
-                    backgroundColor: '#000',
+                    fontSize:'12px',
+                    backgroundColor: '#fff',
                     '-webkit-border-radius': '10px',
                     '-moz-border-radius': '10px',
-                    opacity: .5,
-                    color: '#fff',
+                    opacity: .95,
+                    color: '#000',
                     margin:         0,
-                    width:          '30%',
+                    width:          '70%',
                     top:            '40%',
-                    left:           '35%',
-                } });
+                    left:           '15%',
+                },
+                overlayCSS:  {
+                    backgroundColor: '#000',
+                    opacity:         0.85,
+                    cursor:          'wait'
+                },
+            });
         }
     </script>
 
