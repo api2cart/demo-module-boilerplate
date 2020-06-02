@@ -16,7 +16,7 @@
 {{--        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-child" role="tab" aria-controls="nav-child" aria-selected="false">Child Items</a>--}}
     </div>
 </nav>
-<div class="tab-content" id="nav-tabContent" style="padding-top: 5px; text-align: left;">
+<div class="tab-content" id="nav-tabContent" style="padding-top: 5px; text-align: left; color: white;">
     <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-home-tab">
         <div class="row">
             <div class="col-8">
@@ -109,7 +109,7 @@
             @foreach($product['children'] as $k=>$item)
                 <div class="card">
                     <div class="card-header">
-                        {{ $item['name'] }}
+                        {{ (isset($item['name'])) ? $item['name'] : '' }}
                         <input type="hidden"  id="children.id.{{ $k }}" name="children[id][{{ $k }}]" value="{{ ( isset($item['id']) ) ? $item['id'] : '' }}" >
                     </div>
                     <div class="card-body">
