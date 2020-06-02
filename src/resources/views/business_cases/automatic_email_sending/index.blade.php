@@ -387,9 +387,23 @@
                 blockUiStyled('<h4>Loading products.</h4>');
 
                 let datatable = $( '#pdtable' ).dataTable().api();
-                let last_product = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+                let products = []; // datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+                let last_product;
 
-                console.log( last_product );
+                products = datatable.column( 1,{order:'applied'} ).data();
+
+                console.log( products );
+                console.log( typeof products );
+
+                for(var i=0; i<stores.length; i++){
+                    // walk over all stores product to det latest from loadet
+
+                    last_product = products.find(el => el.cart_id.store_key == stores[i].store_key );
+
+                    console.log( stores[i] );
+                    console.log( last_product );
+                }
+
                 return false;
                 $.each( stores , function( i, stor ) {
                     blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
