@@ -878,11 +878,11 @@
                         <table id="logtable" class="table table-bordered" style="width: 100%; font-size: 12px;">
                             <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Store</th>
-                                <th>Method</th>
-                                <th>Params</th>
-                                <th>Response Code</th>
+                                <th>Time<br></th>
+                                <th>Store<br></th>
+                                <th>Method<br></th>
+                                <th>Params<br></th>
+                                <th>Response Code<br></th>
                             </tr>
                             </thead>
                         </table>
