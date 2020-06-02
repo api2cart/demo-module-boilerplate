@@ -162,7 +162,7 @@
                 let quantity = $(this).val();
                 if ( quantity > 0 ){
                     let price = curentProducts.find(el => el.id === $(check).val() )['price'];
-                    total += price;
+                    total += price *quantity;
                 }
             });
             $('#product_total').val( total );
