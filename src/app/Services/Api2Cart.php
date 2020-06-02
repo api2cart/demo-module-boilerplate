@@ -781,7 +781,7 @@ class Api2Cart
                 null,
                 null,
                 $limit,
-                'force_all',
+                'id,name,description,price,categories_ids,images,u_sku,type',
                 null,
                 null,
                 $created_from,
@@ -830,7 +830,29 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->product->productList( $page_cursor, null, null, 'force_all',null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null  );
+            $result = $this->product->productList(
+                $page_cursor,
+                null,
+                null,
+                'id,name,description,price,categories_ids,images,u_sku,type',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null  );
 
             $this->logApiCall( 'product.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
