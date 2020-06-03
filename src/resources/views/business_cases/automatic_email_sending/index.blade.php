@@ -49,10 +49,9 @@
                         data: {
                             length: 10,
                             start: 0,
-                            sort_by: 'modified_at',
+                            sort_by: 'create_at',
                             sort_direct: 'desc',
                             limit: 3,
-                            created_from: created_from
                         }
                     }).then(function (rep) {
 
@@ -60,10 +59,10 @@
 
                         blockUiStyled('<h4>Adding '+ stores[i].url +' product.</h4>');
 
-                        for (let j=0; j<orders.length; j++){
-                            orders[j].cart_id = stores[i];
-                            items.push( orders[j] );
-                        }
+                        $.each( orders , function( index, value ) {
+                            value.cart_id = stores[i];
+                            items.push( value );
+                        });
 
 
                         //update log count
@@ -79,7 +78,7 @@
 
                         datatable.clear();
                         datatable.rows.add( items );
-                        datatable.draw();
+                        datatable.order([ 1, "desc" ]).draw();
 
                         $.unblockUI();
 
@@ -235,12 +234,17 @@
                 select: {
                     'style': 'multi',
                 },
-                order: [[2, 'asc']],
+                order: [[1, 'desc']],
                 columns: [
                     { data: null, render:
                             function(data, type, row, meta){
                                 return '<input type="checkbox" class="dt-checkboxes" value="'+data.cart_id.store_key+':'+data.id+'" >';
                             },orderable : false,  "searchable": false,
+                    },
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                return type === 'sort' ? data.create_at.value : moment(data.create_at.value).format('L');
+                            }
                     },
                     { data: null, render: function ( data, type, row, meta ){
                             let imgurl = (data.images[0])? data.images[0].http_path : '{{ asset('css/img/no_image_275x275.jpg') }}';
@@ -392,21 +396,10 @@
 
                 products = datatable.column( 1,{order:'applied'} ).data();
 
-                console.log( products );
-                console.log( typeof products );
-
-                for(var i=0; i<stores.length; i++){
-                    // walk over all stores product to det latest from loadet
-
-                    last_product = products.find(el => el.cart_id.store_key == stores[i].store_key );
-
-                    console.log( stores[i] );
-                    console.log( last_product );
-                }
-
-                return false;
                 $.each( stores , function( i, stor ) {
-                    blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
+                    // walk over all stores product to get latest
+                    last_product = products.filter(el => el.cart_id.store_key == stor.store_key ).shift();
+                    // console.log( last_product );
 
                     axios({
                         method: 'post',
@@ -417,33 +410,33 @@
                             limit: 3,
                             sort_by: 'create_at',
                             sort_direct: 'desc',
-                            created_from: last_order
+                            created_from: last_product.create_at.value
                         }
                     }).then(function (rep) {
 
-                        //console.log( stores[i] );
+                        // console.log( rep );
 
-                        let orders = rep.data.data;
                         let logs = rep.data.log;
+                        let products = rep.data.data;
 
                         if ( rep.data.log ){
                             for (let k=0; k<rep.data.log.length; k++){
                                 logItems.push( rep.data.log[k] );
                             }
                             calculateLog();
-
                         }
 
-                        $.each( orders , function( oi, order ) {
 
-                            order.cart_id = stor;
+                        $.each( products , function( oi, product ) {
 
-                            let elexist =  items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key );
+                            product.cart_id = stor;
+
+                            let elexist =  items.find(el => el.id == product.id && el.cart_id.store_key == stor.store_key );
 
                             if ( typeof elexist == 'undefined' ){
 
                                 // add new order to table and highlight it
-                                items.push( order );
+                                items.push( product );
 
                                 datatable.clear();
                                 datatable.rows.add( items );
@@ -453,7 +446,7 @@
                                     var tobj  = this;
                                     var tnode = tobj.node();
                                     var tdata = tobj.data();
-                                    if ( tdata.cart_id.store_key == stor.store_key && tdata.id == order.id ){
+                                    if ( tdata.cart_id.store_key == stor.store_key && tdata.id == product.id ){
                                         $(tnode).addClass('table-info');
                                     }
                                 });
@@ -464,18 +457,13 @@
 
                         });
 
-
-
                         $.unblockUI();
-
-                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
+                        $.growlUI('Notification', stor.url + ' data loaded successfull!', 500);
 
 
                     });
 
-
                 });
-
 
                 return false;
             });
@@ -647,6 +635,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th></th>
+                                                    <th>Date</th>
                                                     <th>Image</th>
                                                     <th>Name/Description</th>
                                                     <th>SKU</th>
