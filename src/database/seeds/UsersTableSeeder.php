@@ -23,7 +23,7 @@ class UsersTableSeeder extends Seeder
                 'password'          => Hash::make('123456'),
                 'email_verified_at' => Carbon::now(),
                 'api2cart_key'      => 'f408de7875733736c244b75a4f33862a',
-                'api2cart_verified' => Carbon::now(),
+                'api2cart_verified' => true,
             ]);
 
         }
