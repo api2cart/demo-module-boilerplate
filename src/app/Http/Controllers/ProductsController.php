@@ -34,7 +34,7 @@ class ProductsController extends Controller
         $storeInfo = $this->api2cart->getCart( $store_id );
 
         $sort_by      = ($request->get('sort_by')) ? 'create_at' : null;
-        $sort_direct  = ($request->get('sort_direct')) ? $request->get('sort_direct') : null;
+        $sort_direct  = ($request->get('sort_direct')) ? true : false;
         $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
         $limit        = ($request->get('limit')) ? $request->get('limit') : null;
 
@@ -45,7 +45,7 @@ class ProductsController extends Controller
 
         if ( $totalProducts ){
 
-            $result = $this->api2cart->getProductList( $store_id, null, $sort_by, $sort_direct, $limit , $created_from );
+            $result = $this->api2cart->getProductList( $store_id, null, null, null, null , $created_from );
 
             $newRes= (isset($result['result']['products_count'])) ? collect( $result['result']['product'] ) : collect([]);
             // put additional information
@@ -65,7 +65,7 @@ class ProductsController extends Controller
             }
 
 
-            if ( $limit == null && isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                 // get next iteration to load rest customers
                 while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                     $result = $this->api2cart->getProductListPage( $store_id , $result['pagination']['next']);
@@ -92,12 +92,26 @@ class ProductsController extends Controller
 
         }
 
+        if ( $sort_by  ){
+            switch ($sort_by){
+                case 'create_at':
+                    $sort_by = 'create_at.value';
+                    break;
+                default:
+                    $sort_by = 'create_at.value';
+                    break;
+            }
+            $sorted = $products->sortBy($sort_by, null, $sort_direct );
+        } else {
+            $sorted = $products->sortBy('create_at.value', null, $sort_direct );
+        }
+
         $data = [
             "recordsTotal"      => $totalProducts,
             "recordsFiltered"   => $totalProducts,
             "start"             => 0,
             "length"            => 10,
-            "data"              => $products->toArray(),
+            "data"              => ($limit) ? $sorted->forPage(0, $limit)->toArray() : $products->toArray(),
 
             'log'               => $this->api2cart->getLog(),
         ];
