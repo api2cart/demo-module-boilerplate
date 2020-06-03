@@ -460,11 +460,8 @@
 
                     });
 
-
-
                     $.unblockUI();
-
-                    $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
+                    $.growlUI('Notification', stor.url + ' data loaded successfull!', 500);
 
 
                 });
