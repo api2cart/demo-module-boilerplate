@@ -1,0 +1,5 @@
+pipelines:
+  default:
+    - step:
+        script:
+          - git push --mirror git@github.com:api2cart/php-a2c-demo-module-boilerplate.git
