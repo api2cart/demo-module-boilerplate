@@ -19,7 +19,7 @@ class Api2Cart
     {
         if ( !Auth::guest() ){
 
-            if ( Auth::user()->api2cart_key && Auth::user()->api2cart_verified ){
+            if ( Auth::user()->api2cart_key && Auth::user()->api2cart_verified == true ){
 
 //                Log::debug( 'API key OK');
                 return $next($request);
@@ -27,6 +27,7 @@ class Api2Cart
             } else {
                 // API key do not exist or do not verified
 //                Log::debug( 'API key do not exist or do not verified');
+//                Log::debug( print_r(Auth::user(),1) );
                 return redirect( route('users.edit', Auth::user()->id ) );
                 return $next($request);
             }
