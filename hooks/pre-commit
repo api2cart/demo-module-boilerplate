@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if ! [ -x "$(command -v docker-compose)" ]; then
+  echo "Please check if Docker installed and runned."
+
+  if ! [ -x "$(command -v xdg-open)" ]; then
+    open https://docs.docker.com/get-docker/
+    exit 1
+  fi
+
+  xdg-open https://docs.docker.com/get-docker/
+  exit 1
+fi
+
+docker-compose run artisan test
+
+
+if [ $? -eq 0 ];
+then
+    echo "Looks all ok"
+    exit 0
+else
+     echo "missing tests passes, please fix errors"
+     exit 1
+fi
