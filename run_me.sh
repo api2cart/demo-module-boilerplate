@@ -2,6 +2,8 @@
 
 dir=$(pwd)
 
+cp "$dir/hooks/pre-commit" "$dir/.git/hooks"
+
 #overwrite config
 CONFIGFILE="$dir/src/.env"
 
