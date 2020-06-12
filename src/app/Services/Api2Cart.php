@@ -34,13 +34,15 @@ class Api2Cart
     private $subscriber;
 
     private $log;
-
+    private $isTest;
 
     /**
      * Api2Cart constructor initiate with right API objects
      */
-    public function __construct()
+    public function __construct($isTest=false)
     {
+        $this->isTest = $isTest;
+
         $this->config = new ApiClient\Configuration();
 
         $this->account  = new ApiClient\Api\AccountApi(null, $this->config);
@@ -58,10 +60,10 @@ class Api2Cart
     /**
      * Set User's API Key
      */
-    private function setApiKey()
+    public function setApiKey($api_key=null)
     {
-        $this->config->setApiKey( 'api_key', Auth::user()->api2cart_key );
-//        $this->config->setApiKey( 'api_key', '948c024602b4912149c708fdcbbab5d8' );
+        $api_key = ($api_key) ? $api_key : Auth::user()->api2cart_key;
+        $this->config->setApiKey( 'api_key', $api_key );
     }
 
 
@@ -1340,6 +1342,9 @@ class Api2Cart
 
     private function logApiCall( $action=null, $code=null, $config = null, $store_id=null, $store_ur=null, $user_id=null, $msg=null, $params=null)
     {
+        // for Unittest do not log
+        if ( $this->isTest ) return;
+
         $p = (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [];
 
         if ( is_array($params) ){
