@@ -26,7 +26,8 @@
                             'url' => ['/users', $user->id],
                             'class' => 'form-horizontal',
                             'files' => true,
-                            'autocomplete' => "off"
+                            'autocomplete' => "off",
+                            'id' => 'userForm'
                         ]) !!}
 
                         @include ('users.form', ['formMode' => 'edit'])
