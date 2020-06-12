@@ -2,9 +2,6 @@
 
 @section('script')
     <script type="text/javascript">
-        let items = new Array();
-
-
 
 
         function loadData(){
@@ -29,9 +26,19 @@
                     calculateLog();
                 }
 
+                if ( stores.length == 0 ){
+                    Swal.fire(
+                        'Error!',
+                        'Do not have store info, please check API log.',
+                        'error'
+                    );
+                    $.unblockUI();
+                    return;
+                }
+
                 for (let i=0; i<stores.length; i++){
 
-                    blockUiStyled('<h3>Loading '+ stores[i].url +' information.</h3>');
+                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
 
                     axios({
                         method: 'post',
@@ -44,7 +51,7 @@
 
                         let orders = rep.data.data;
 
-                        blockUiStyled('<h3>Adding '+ stores[i].url +' customers.</h3>');
+                        blockUiStyled('<h4>Adding '+ stores[i].url +' customers.</h4>');
 
                         for (let j=0; j<orders.length; j++){
                             orders[j].cart_id = stores[i];
@@ -69,7 +76,9 @@
 
                         $.unblockUI();
 
-                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!');
+                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
+
+                        initFilters();
 
                     });
 
@@ -79,11 +88,82 @@
 
 
 
+            }).catch(function (error) {
+                // handle error
+                // console.log(error.response);
+
+                if ( error.response.data.log ){
+                    for (let k=0; k<error.response.data.log.length; k++){
+                        logItems.push( error.response.data.log[k] );
+                    }
+                    calculateLog();
+                }
+
+                $.unblockUI();
+
+                Swal.fire(
+                    'Error!',
+                    'Do not have store info, please check API log.',
+                    'error'
+                )
+
             });
         }
 
 
+        function initFilters()
+        {
+            var names = getUniqueName();
+            var store = getUniqueStore();
 
+            yadcf.init( table , [
+                {
+                    column_number: 3,
+                    select_type: 'select2',
+                    data: names,
+                    select_type_options: { width: '200px' }
+                },
+                {
+                    column_number: 1,
+                    select_type: 'select2',
+                    data: store,
+                    select_type_options: { width: '200px' }
+                },
+
+            ]);
+
+        }
+
+
+        function getUniqueName()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                var name = item.first_name +' '+ item.last_name;
+                if (!~uniqueItem.indexOf(name)) {
+                    uniqueItem.push(name);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+        function getUniqueStore()
+        {
+            var uniqueItem = [];
+            items.filter(function(item){
+                let url = (item.cart_id.url) ? item.cart_id.url : '';
+                if (!~uniqueItem.indexOf(url)) {
+                    uniqueItem.push(url);
+                    return item;
+                }
+            });
+            return uniqueItem;
+        }
+
+
+
+        var table;
 
         $(document).ready(function() {
             $.ajaxSetup({
@@ -92,7 +172,7 @@
                 }
             });
 
-            blockUiStyled('<h3>Loading stores information.</h3>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             loadData();
 
@@ -101,7 +181,7 @@
             // console.log( items );
 
 
-            $('#dtable').DataTable( {
+            table = $('#dtable').DataTable( {
                 processing: true,
                 serverSide: false,
                 // ordering: false,
@@ -114,9 +194,13 @@
 
                             window.location.reload();
 
-                        }
+                        },
+                        className: 'btn btn-primary'
                     }
                 ],
+                language: {
+                    emptyTable: "Data loading or not available in table"
+                },
                 initComplete: function () {
                     $('#dtable_filter input').focus();
                 },
@@ -124,7 +208,9 @@
                     { data: null, render: 'id' },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+                                return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>' +
+                                    '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
                                     '<small>'+data.cart_id.stores_info.store_owner_info.owner+'</small><br>'+
                                     '<small>'+data.cart_id.stores_info.store_owner_info.email+'</small>';
                             }
@@ -137,9 +223,8 @@
                     },
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            return '<a href="#" aria-disabled="true" class="text-secondary disabled"><ion-icon name="open-outline"></ion-icon></a> ' +
-                                '<a href="#" aria-disabled="true" class="text-success disabled"><ion-icon name="pencil-outline"></ion-icon></a> ' +
-                                '<a href="#" aria-disabled="true" class="text-danger disabled"><ion-icon name="trash-outline"></ion-icon></a> ';
+                            return '<i class="far fa-file-alt"></i> ' +
+                                '<i class="fas fa-edit"></i> ';
                         }, orderable : false
                     }
                 ]
@@ -158,7 +243,9 @@
 
             <div class="col-lg-10">
                 <div class="card">
-                    <div class="card-header">Customers <span class="ajax_status"></span></div>
+                    <div class="card-header">Customers <span class="ajax_status"></span>
+                        <span class="float-right"><a target="_blank" href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#operations-tag-customer">Read Customers API methods</a></span>
+                    </div>
 
                     <div class="card-body">
                         <div class="row">

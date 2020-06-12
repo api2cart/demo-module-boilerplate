@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRequest;
 use App\Services\Api2Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,9 @@ class StoresController extends Controller
 
     public function index()
     {
+
+//        $this->api2cart->test();
+
         return view('stores.index');
     }
 
@@ -32,14 +36,15 @@ class StoresController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $allCarts = collect($this->api2cart->getCartsList());
 
-        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
+//        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
+
 
         $result = $carts->map(function ($store) use ($allCarts) {
             $info = $this->api2cart->getCart( $store['store_key'] );
             // put additional info
             $store['stores_info']['store_owner_info']   = [
-                'owner' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getOwner() : null,
-                'email' => ( isset($info['stores_info'][0]['store_owner_info']) ) ? $info['stores_info'][0]['store_owner_info']->getEmail() : null
+                'owner' => ( isset($info['stores_info'][0]['store_owner_info']['owner']) ) ? $info['stores_info'][0]['store_owner_info']['owner'] : null,
+                'email' => ( isset($info['stores_info'][0]['store_owner_info']['email']) ) ? $info['stores_info'][0]['store_owner_info']['email'] : null
             ];
             $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
             return $store;
@@ -57,8 +62,64 @@ class StoresController extends Controller
         return response()->json($data);
     }
 
-    public function storeDetails(Request $request, $id=null)
+    public function fields(Request $request, $id=null)
     {
+        $store = collect($this->api2cart->getCartsList())->where('cart_id',$id)->first();
+
+        return view('stores.store_fields', compact('store'));
 
     }
+
+
+    public function create(Request $request)
+    {
+        // get supported carts
+        $stores = collect($this->api2cart->getCartsList());
+//            ->whereIn('cart_id',['Amazon']);
+
+
+//        Log::debug( print_r($stores,1) );
+
+
+
+        if ( $request->ajax() ){
+            return response()->json( ['data' => view('stores.form', compact('stores'))->render(), 'item' => $stores ] );
+        }
+        return redirect( route('stores.index') );
+    }
+
+
+    public function store(StoreRequest $request)
+    {
+//        Log::debug( $request->all() );
+        //load required store info
+        $store = collect($this->api2cart->getCartsList())->where('cart_id',$request->get('cart_id'))->first();
+
+        $requestData = $request->except(['_token']);
+        $requestData['field']['cart_id'] = $request->get('cart_id');
+
+        //TODO: for bridget carts ftp credentials is optional
+        // 'ftp_host','ftp_user','ftp_password','ftp_port','ftp_store_dir'
+
+//        $this->api2cart->addCart( $requestData['field'] );
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function destroy($id=null)
+    {
+        if ( $this->api2cart->deleteCart( $id ) ){
+            return response()->json([ 'log' => $this->api2cart->getLog() ]);
+        } else {
+            return response()->json([ 'log' => $this->api2cart->getLog() ], 404);
+        }
+
+    }
+
 }
