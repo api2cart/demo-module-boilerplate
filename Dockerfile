@@ -13,6 +13,7 @@ RUN apk add --update libzip-dev curl-dev &&\
 
 RUN docker-php-ext-install pdo pdo_mysql
 
+
 RUN usermod -u 1000 www-data; \
     chown -R www-data:www-data /var/www/html
 
