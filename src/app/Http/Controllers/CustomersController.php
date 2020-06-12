@@ -32,7 +32,14 @@ class CustomersController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $storeInfo = $carts->where('store_key', $store_id)->first();
 
-        $totalCustomers = $this->api2cart->getCustomerCount( $store_id ); Log::debug( $totalCustomers );
+        $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
+        $sort_direct  = ($request->get('sort_direct')) ? true : false;
+        $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
+        $limit        = ($request->get('limit')) ? $request->get('limit') : null;
+
+//        Log::debug( print_r($request->all(),1) );
+
+        $totalCustomers = $this->api2cart->getCustomerCount( $store_id );
 
         $customers = collect([]);
 
@@ -89,5 +96,35 @@ class CustomersController extends Controller
 
     }
 
+
+    public function subscriberList($store_id=null,Request $request)
+    {
+        \Debugbar::disable();
+
+
+        /**
+         * get account carts & extract exact store info
+         */
+        $carts = collect($this->api2cart->getCartList());
+        $storeInfo = $carts->where('store_key', $store_id)->first();
+
+//        Log::debug( $store_id );
+        $result = $this->api2cart->getSubscriberList( $store_id );
+
+
+
+        $data = [
+            "recordsTotal"      => 0,
+            "recordsFiltered"   => 0,
+            "start"             => 0,
+            "length"            => 10,
+            "data"              => [],
+
+            'log'               => $this->api2cart->getLog(),
+        ];
+
+        return response()->json($data);
+
+    }
 
 }
