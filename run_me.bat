@@ -3,6 +3,7 @@
 SET mypath=%cd%
 SET CONFIGFILE=%mypath%\src\.env
 
+copy %mypath%\hooks\pre-commit %mypath%\.git\hooks
 
 copy %mypath%\src\.env.example %CONFIGFILE%
 
