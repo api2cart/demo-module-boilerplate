@@ -41,6 +41,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::post('/orders/statuses/{store_id?}', 'OrdersController@statuses')->name('orders.statuses');
     Route::get('/orders/{store_id?}/{order_id?}', 'OrdersController@orderInfo')->name('orders.info');
     Route::get('/orders/{store_id?}/{order_id?}/products', 'OrdersController@orderProducts')->name('orders.products');
+    Route::post('/orders/abandoned/{store_id?}', 'OrdersController@abandoned')->name('orders.abandoned');
 
     Route::get('/products', 'ProductsController@index')->name('products.index');
     Route::post('/products/list/{store_id?}', 'ProductsController@productList')->name('products.list');
@@ -63,12 +64,14 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::prefix('businessCases')->name('businessCases.')->group(function () {
 
         Route::get('import_orders_automation', 'BusinessCases\ImportOrdersAutomationController@index' )->name('import_orders_automation');
-        Route::get('automatic_email_sending', 'BusinessCases\AutomaticEmailSendingController@index' )->name('automatic_email_sending');
 
+        Route::get('automatic_email_sending', 'BusinessCases\AutomaticEmailSendingController@index' )->name('automatic_email_sending');
         Route::post('automatic_email_sending/compose', 'BusinessCases\AutomaticEmailSendingController@compose')->name('automatic_email_sending.compose');
         Route::post('automatic_email_sending/send', 'BusinessCases\AutomaticEmailSendingController@send')->name('automatic_email_sending.send');
 
-
+        Route::get('abandoned_cart_recovery', 'BusinessCases\AbandonedCartRecoveryController@index' )->name('abandoned_cart_recovery');
+        Route::post('abandoned_cart_recovery/compose', 'BusinessCases\AbandonedCartRecoveryController@compose')->name('abandoned_cart_recovery.compose');
+        Route::post('abandoned_cart_recovery/send', 'BusinessCases\AbandonedCartRecoveryController@send')->name('abandoned_cart_recovery.send');
 
     });
 
