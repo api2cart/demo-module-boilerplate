@@ -152,6 +152,25 @@ class OrdersController extends Controller
 
     }
 
+    public function abandoned($store_id=null, Request $request)
+    {
+        $items = collect( $this->api2cart->getAbandonedCart( $store_id ) );
+
+//        Log::debug( print_r($items,1) );
+
+        $data = [
+            "recordsTotal"      => (is_array($items)) ? count($items) : 0,
+            "recordsFiltered"   => (is_array($items)) ? count($items) : 0,
+            "start"             => 0,
+            "length"            => 10,
+            "data"              => collect($items),
+
+            'log'               => $this->api2cart->getLog(),
+        ];
+
+        return response()->json($data);
+    }
+
     public function statuses($store_id=null, Request $request)
     {
         $statuses = $this->api2cart->getOrderStatuses( $store_id );
