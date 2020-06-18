@@ -23,5 +23,4 @@ before_script:
   - php artisan migrate:fresh --seed --no-interaction -vvv
 
 script:
-  - cd src
   - php artisan test
