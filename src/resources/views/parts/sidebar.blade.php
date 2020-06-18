@@ -53,7 +53,7 @@
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link disabled">
+                    <a href="{{ route('businessCases.abandoned_cart_recovery') }}" class="nav-link {{ (request()->is('businessCases/abandoned_cart_recovery') || request()->is('businessCases/abandoned_cart_recovery/*')) ? 'active' : '' }}">
                         Abandoned cart recovery
                     </a>
                 </li>
