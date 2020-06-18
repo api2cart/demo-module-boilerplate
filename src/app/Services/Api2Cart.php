@@ -324,6 +324,53 @@ class Api2Cart
         }
     }
 
+    public function getAbandonedCart($store_id)
+    {
+
+        $this->setApiKey();
+
+        try{
+
+            $this->cart->getConfig()->setApiKey('store_key', $store_id);
+
+            $result = $this->order->orderAbandonedList(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                'force_all'
+            );
+
+            $this->logApiCall( 'order.abandoned.list.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage() );
+
+            if ( $result->getReturnCode() == 0 ){
+                /**
+                 * return object cause it cant be right maped to array...  swagger issue
+                 */
+                return $this->mapToArray( $result->getResult()->getOrder() );
+//                return json_decode( $result->getResult()->__toString() , true, 512, JSON_OBJECT_AS_ARRAY) ;
+            } else {
+                if ($this->debug) Log::debug( print_r($result,1) );
+                return null;
+            }
+
+
+
+        } catch (\Exception $e){
+
+//            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'order.abandoned.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+
+            return null;
+        }
+    }
 
     public function getCategoryCount( $store_id=null )
     {
