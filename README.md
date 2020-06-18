@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/api2cart/api2cart-php-sdk"><img src="https://poser.pugx.org/api2cart/api2cart-php-sdk/d/total.svg" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/api2cart/api2cart-php-sdk"><img src="https://poser.pugx.org/api2cart/api2cart-php-sdk/d/total.svg" alt="Total Downloads"></a>
 </p>
 
 ## Usage
