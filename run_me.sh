@@ -2,6 +2,10 @@
 
 dir=$(pwd)
 
+# setup user uid:gid for composer
+uid="$(id -u):$(id -g)"
+echo "uid=$uid" > "$dir/.env"
+
 cp "$dir/hooks/pre-commit" "$dir/.git/hooks"
 
 #overwrite config
