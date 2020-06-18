@@ -1,7 +1,7 @@
 ## API2CartBoilerplate
 
 <p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
+<a href="https://github.com/api2cart/php-a2c-demo-module-boilerplate"><img src="https://travis-ci.com/api2cart/php-a2c-demo-module-boilerplate.svg?branch=master" alt="Build Status"></a>
 <a href="https://packagist.org/packages/api2cart/api2cart-php-sdk"><img src="https://poser.pugx.org/api2cart/api2cart-php-sdk/d/total.svg" alt="Total Downloads"></a>
 </p>
 
