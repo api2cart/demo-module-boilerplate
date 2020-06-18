@@ -21,7 +21,7 @@ class CreateLogsTable extends Migration
             $table->integer('user_id')->nullable()->index();
             $table->string('action')->nullable()->index();
             $table->integer('code')->nullable()->index();
-            $table->json('params')->nullable();
+            $table->text('params')->nullable();
             $table->timestamps();
         });
     }
