@@ -362,7 +362,7 @@
                     });
                     reinitActions();
 
-                    //TODO: refill filters here
+
 
 
                 }
