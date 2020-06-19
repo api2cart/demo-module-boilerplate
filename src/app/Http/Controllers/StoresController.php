@@ -66,7 +66,11 @@ class StoresController extends Controller
     {
         $store = collect($this->api2cart->getCartsList())->where('cart_id',$id)->first();
 
-        return view('stores.store_fields', compact('store'));
+        Log::debug( print_r($store,1) );
+
+        return '';
+
+//        return view('stores.store_fields', compact('store'));
 
     }
 
