@@ -189,7 +189,7 @@ class Api2Cart
 //            $result = $this->cart->cartList();
             $result = $this->account->accountSupportedPlatforms();
 
-            $this->logApiCall( 'cart.list.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage()  );
+            $this->logApiCall( 'account.supported_platforms.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage()  );
 
             if ( $result->getReturnCode() == 0 ){
                 return $this->mapToArray( $result->getResult()->getSupportedPlatforms() );
@@ -202,7 +202,7 @@ class Api2Cart
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'cart.list.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
+            $this->logApiCall( 'account.supported_platforms.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage()  );
             return false;
         }
     }
