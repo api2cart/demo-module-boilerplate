@@ -230,8 +230,8 @@
                     },
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            return '<i class="far fa-file-alt"></i> ' +
-                                '<a href="#"  class="text-success editItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/categories/'+data.cart_id.store_key+'/'+data.id+'/edit" ><i class="fas fa-edit"></i></a> '+
+                            // return '<i class="far fa-file-alt"></i> ' +
+                                return '<a href="#"  class="text-success editItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/categories/'+data.cart_id.store_key+'/'+data.id+'/edit" ><i class="fas fa-edit"></i></a> '+
                                 '<a href="#"  class="text-danger deleteItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/categories/'+data.cart_id.store_key+'/'+data.id+'"><i class="fas fa-trash-alt"></i></a> ';
                         }, orderable : false
                     }
