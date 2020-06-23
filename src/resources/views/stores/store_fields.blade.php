@@ -1,16 +1,22 @@
 
-@php $filtered = collect( array_diff($store['params'],['cart_id','verify','ftp_host','ftp_user','ftp_password','ftp_port','ftp_store_dir']) ); @endphp
+@php
+    $required     = collect( $store['params']['required'][0] );
+    $custom     = collect( $store['params']['additional'] );
+@endphp
 
-@foreach( $filtered as $k=>$v )
+@foreach( $required->whereNotIn('name',['cart_id']) as $k=>$v )
 <div class="form-group row">
-    <label for="{{ $v }}" class="col-4 col-form-label">{{ $v }}</label>
+    <label for="field.{{$v['name']}}" class="col-4 col-form-label">{{ $v['name'] }}</label>
     <div class="col-8">
-        <input type="text" class="form-control" id="field.{{$v}}" name="field[{{ $v }}]" value="">
+        <input type="text" class="form-control" id="field.{{$v['name']}}" name="field[{{ $v['name'] }}]" value="">
+        <small id="emailHelp" class="form-text text-muted">{{ $v['description'] }}</small>
         <div class="invalid-feedback"></div>
     </div>
 </div>
 @endforeach
-@if( in_array('verify', $store['params']) )
+
+@if( count($custom) > 0 )
+
     <div class="form-group row">
         <label for="verify" class="col-4 col-form-label"></label>
         <div class="col-8">
@@ -20,54 +26,31 @@
             </div>
         </div>
     </div>
-@endif
-
-@if( in_array('ftp_host', $store['params']) && in_array('ftp_store_dir', $store['params']) )
-
-
-<div class="custom-control custom-checkbox">
-    <input type="checkbox" class="custom-control-input" id="upload_bridge" name="upload_bridge" data-toggle="collapse" data-target="#collapseExample">
-    <label class="custom-control-label" for="upload_bridge">Please upload bridge to my store</label>
-</div>
-
-<div class="collapse" id="collapseExample">
 
     <div class="form-group row">
-        <label for="ftp_host" class="col-4 col-form-label">ftp_host</label>
+        <label for="verify" class="col-4 col-form-label"></label>
         <div class="col-8">
-            <input type="text" class="form-control" id="ftp_host" name="ftp_host" value="">
-            <div class="invalid-feedback"></div>
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="ftp_port" class="col-4 col-form-label">ftp_port</label>
-        <div class="col-8">
-            <input type="text" class="form-control" id="ftp_port" name="ftp_port" value="">
-            <div class="invalid-feedback"></div>
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="ftp_user" class="col-4 col-form-label">ftp_user</label>
-        <div class="col-8">
-            <input type="text" class="form-control" id="ftp_user" name="ftp_user" value="">
-            <div class="invalid-feedback"></div>
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="ftp_password" class="col-4 col-form-label">ftp_password</label>
-        <div class="col-8">
-            <input type="text" class="form-control" id="ftp_password" name="ftp_password" value="">
-            <div class="invalid-feedback"></div>
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="ftp_store_dir" class="col-4 col-form-label">ftp_store_dir</label>
-        <div class="col-8">
-            <input type="text" class="form-control" id="ftp_store_dir" name="ftp_store_dir" value="">
-            <div class="invalid-feedback"></div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="use_additional" name="use_additional" data-toggle="collapse" data-target="#collapseExample" >
+                <label class="custom-control-label" for="use_additional">Use additional params</label>
+            </div>
         </div>
     </div>
 
-</div>
+
+
+    <div class="collapse" id="collapseExample">
+        @foreach( $custom->whereNotIn('name',['verify']) as $item )
+            <div class="form-group row">
+                <label for="custom.{{$item['name']}}" class="col-4 col-form-label">{{ $item['name'] }}</label>
+                <div class="col-8">
+                    <input type="text" class="form-control" id="custom.{{$item['name']}}" name="custom[{{ $item['name'] }}]" value="">
+                    <small id="{{$item['name']}}.Help" class="form-text text-muted">{{ $item['description'] }}</small>
+                    <div class="invalid-feedback"></div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
 
 @endif
