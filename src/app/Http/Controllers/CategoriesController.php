@@ -49,6 +49,7 @@ class CategoriesController extends Controller
                 foreach ($newRes as $item){
                     $newItem = $item;
                     $newItem['cart_id'] = $storeInfo['cart_id'];
+                    if ( !isset($newItem['parent_id']) ) $newItem['parent_id'] = 0;
                     $items->push( $newItem );
                 }
             }
@@ -63,6 +64,7 @@ class CategoriesController extends Controller
                         foreach ($newRes as $item){
                             $newItem = $item;
                             $newItem['cart_id'] = $storeInfo['cart_id'];
+                            if ( !isset($newItem['parent_id']) ) $newItem['parent_id'] = 0;
                             $items->push( $newItem );
                         }
                     }
@@ -74,18 +76,17 @@ class CategoriesController extends Controller
         }
 
 
-        $tree = $this->buildTree( $items->toArray() );
+        $tree = $this->buildTree( $items->sortBy('id')->toArray() );
 
         $items = $items->map(function ($item, $key) use ($tree) {
             $newItem = $item;
             $result = array();
-            if ( intval($item['parent_id']) ){
+            if ( isset($item['parent_id']) && intval($item['parent_id']) ){
                 $this->buildBreadcrumb( $tree, $item['id'], $result);
             }
             $newItem['parent_name'] = implode(" >> ",array_reverse($result));
             return $newItem;
         });
-
 
 
 
@@ -166,8 +167,8 @@ class CategoriesController extends Controller
 
         $branch = array();
 
-        foreach ($elements as $element) {
-            if ($element['parent_id'] == $parentId) {
+        foreach ($elements as $k=>$element) {
+            if (isset($element['parent_id']) && $element['parent_id'] == $parentId) {
                 $children = $this->buildTree($elements, $element['id']);
                 if ($children) {
                     $element['children'] = $children;
