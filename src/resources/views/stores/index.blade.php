@@ -120,8 +120,13 @@
                             })
                                 .then(function (presponse) {
 
-                                    //TODO: store added
-
+                                    Swal.fire(
+                                        'Added!',
+                                        'Store has been added.',
+                                        'success'
+                                    ).then((result) => {
+                                        window.location.reload();
+                                    });
 
                                     return true;
                                 })
@@ -161,26 +166,6 @@
                         axios.get( 'stores/fields/' + item.cart_id ).then(function (cfresponse) {
                             $('#addItemFields').append( cfresponse.data );
                         });
-
-
-
-                        // console.log(  );
-
-                        // for (let value of Object.values( item.params )) {
-                        //     // console.log( value );
-                        //
-                        //     $('#addItemFields').append(
-                        //     '<div class="form-group row">\n' +
-                        //     '                <label for="field.'+value+'" class="col-4 col-form-label">'+value+'</label>\n' +
-                        //     '                <div class="col-8">\n' +
-                        //     '                    <input class="form-control" id="field.'+value+'" name="field['+value+']" required="required" >\n' +
-                        //     '                    <div class="invalid-feedback"></div>\n' +
-                        //     '                </div>\n' +
-                        //     '            </div>'
-                        //     );
-                        // }
-
-
                     });
 
 
