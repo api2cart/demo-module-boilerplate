@@ -398,6 +398,9 @@
             // console.log('check for new orders');
             blockUiStyled('<h4>Loading new orders.</h4>');
 
+            let oldItems = items;
+            let scount = 0;
+
             let datatable = $( '#dtable' ).dataTable().api();
             let last_order = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
 
@@ -418,6 +421,7 @@
                 }).then(function (rep) {
 
                     //console.log( stores[i] );
+                    scount++;
 
                     let orders = rep.data.data;
                     let logs = rep.data.log;
@@ -463,12 +467,31 @@
                     $.unblockUI();
                     $.growlUI('Notification', stor.url + ' data loaded successfull!', 500);
 
+                    if ( scount == stores.length ){
+                        //lastone store finished - compare
 
+                        console.log( JSON.stringify( items ) === JSON.stringify( oldItems ) );
+
+                        if ( JSON.stringify( items ) === JSON.stringify( oldItems ) ){
+
+                            Swal.fire(
+                                'Info!',
+                                'There is no new orders yet. Try bit later.',
+                                'info'
+                            )
+
+                        }
+
+                    }
+
+
+                }).catch(function (error) {
+                    // handle error
+                    console.log(error);
                 });
 
 
             });
-
 
 
 
@@ -616,7 +639,7 @@
                         <div class="row">
                             <div class="col">
                                 <button class="btn btn-primary" id="_btnCreateOrder">Create test order</button>
-                                <button class="btn btn-primary" id="_btnCheckNewOrder">Check for newt orders</button>
+                                <button class="btn btn-primary" id="_btnCheckNewOrder">Check for new orders</button>
                             </div>
                         </div>
 

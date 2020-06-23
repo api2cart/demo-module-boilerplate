@@ -36,6 +36,7 @@ class StoresController extends Controller
         $carts = collect($this->api2cart->getCartList());
         $allCarts = collect($this->api2cart->getCartsList());
 
+//        Log::debug( print_r($allCarts,1));
 //        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
 
 

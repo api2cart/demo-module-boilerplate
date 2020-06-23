@@ -631,7 +631,7 @@ class Api2Cart
 
     }
 
-    public function getOrderList( $store_id=null , $sort_by=null, $sort_direct=null, $limit=null, $created_from=null )
+    public function getOrderList( $store_id=null , $sort_by=null, $sort_direct=null, $limit=10, $created_from=null )
     {
         $this->setApiKey();
 
@@ -644,6 +644,7 @@ class Api2Cart
                 null,
                 null,
                 null,
+                null,
                 $limit,
                 null,
                 $sort_by,
@@ -652,6 +653,7 @@ class Api2Cart
                 null,
                 null,
                 $created_from,
+                null,
                 null,
                 null,
                 null,
@@ -696,7 +698,19 @@ class Api2Cart
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
-            $result = $this->order->orderList( null, null, null, null, null, $page_cursor, null, null, 'force_all' );
+            $result = $this->order->orderList(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $page_cursor,
+                null,
+                null,
+                'force_all',
+                null
+            );
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['page_cursor' => $page_cursor] );
 
@@ -830,7 +844,7 @@ class Api2Cart
                 null,
                 null,
                 $limit,
-                'id,name,description,price,categories_ids,images,u_sku,type,create_at,modify_at',
+                'id,name,description,price,categories_ids,images,u_sku,type,create_at,modify_at,quantity',
                 null,
                 null,
                 $created_from,
@@ -883,7 +897,7 @@ class Api2Cart
                 $page_cursor,
                 null,
                 null,
-                'id,name,description,price,categories_ids,images,u_sku,type,create_at,modify_at',
+                'id,name,description,price,categories_ids,images,u_sku,type,create_at,modify_at,quantity',
                 null,
                 null,
                 null,
@@ -1392,12 +1406,16 @@ class Api2Cart
         // for Unittest do not log
         if ( $this->isTest ) return;
 
-        $p = (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key'), 'msg' => $msg ] : [];
+        $p = (is_object($config)) ? ['api_key' => $config->getApiKey('api_key'), 'store_key' => $config->getApiKey('store_key') ] : [];
 
         if ( is_array($params) ){
             foreach ($params as $k=>$v){
                 $p[ $k ] = $v;
             }
+        }
+
+        if ( $msg ){
+            $p['msg'] = $msg;
         }
 
         $log = Logger::create([
