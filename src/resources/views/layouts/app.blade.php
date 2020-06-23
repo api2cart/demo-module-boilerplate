@@ -554,7 +554,7 @@
                                         });
 
                                     } else {
-                                        mr += '<small><strong>'+ index + '</strong> : ' + value.trunc(40) +'</small><br>';
+                                        if ( data.code == 0 )  mr += '<small><strong>'+ index + '</strong> : ' + value.trunc(40) +'</small><br>';
                                     }
 
                                 });
@@ -562,7 +562,17 @@
                                 return mr;
                             }
                     },
-                    { data: null, render: 'code'},
+                    { data: null, render: function ( data, type, row, meta ){
+
+                            if ( data.code == 0){
+                                return data.code;
+                            } else {
+
+                                return data.code + "<br>" + data.params.msg;
+
+                            }
+                        }
+                    },
                 ],
                 "drawCallback": function( settings ) {
                     // console.log( settings );
