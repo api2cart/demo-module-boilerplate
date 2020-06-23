@@ -295,9 +295,9 @@
                     },
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            return '<i class="far fa-file-alt"></i> ' +
-                                '<i class="fas fa-edit"></i> '+
-                                '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'"><i class="fas fa-shipping-fast"></i></a> '+
+                            // return '<i class="far fa-file-alt"></i> ' +
+                            //     '<i class="fas fa-edit"></i> '+
+                                return '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'"><i class="fas fa-shipping-fast"></i></a> '+
                                 '<a href="#" class="text-primary productsItem" title="Products" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'/products"><i class="fas fa-shopping-cart"></i></a> ';
                         }, orderable : false
                     }
