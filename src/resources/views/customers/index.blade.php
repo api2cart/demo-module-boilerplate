@@ -220,12 +220,6 @@
                             function ( data, type, row, meta ){
                                 return data.first_name +' '+ data.last_name;
                             }
-                    },
-                    {
-                        data: null, render: function ( data, type, row, meta ){
-                            return '<i class="far fa-file-alt"></i> ' +
-                                '<i class="fas fa-edit"></i> ';
-                        }, orderable : false
                     }
                 ]
             } );
@@ -261,7 +255,6 @@
                                     <th>Store</th>
                                     <th>Email</th>
                                     <th>Name</th>
-                                    <th>Action</th>
                                 </tr>
                                 </thead>
                             </table>
