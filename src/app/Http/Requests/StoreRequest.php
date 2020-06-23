@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\Api2CartStoreFields;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreRequest extends FormRequest
 {
@@ -24,9 +25,19 @@ class StoreRequest extends FormRequest
      */
     public function rules()
     {
+//        Log::debug( print_r( request()->all(),1) );
+
         return [
             'cart_id'   => ['required'],
             'field.*'   => ['required']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'required'  => 'The field is required.'
+        ];
+    }
+
 }
