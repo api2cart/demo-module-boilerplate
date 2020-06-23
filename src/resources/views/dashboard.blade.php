@@ -14,9 +14,9 @@
 
                         <p>You will be able to check how you can work with orders, products, customers, categories, and other store data by using test stores of the most popular shopping platforms. You can also create an API2Cart account and use your own stores for a demo module.</p>
 
-                        <p>With the help of <a href="https://api2cart.com/e-commerce-api-integration-benefits-for-development/" >unified API</a> provided by <strong>APICart</strong> you can integrate with more than 40 eCommerce platforms at once. Instead of developing separate integration with each shopping platform, you will be able to <a href="https://api2cart.com/e-commerce-api-integration-benefits-for-business/" >save time, money, and resources</a>. API2Cart has already established integration with the most popular eCommerce platforms and developed over 100 API methods to work with needed store data.</p>
+                        <p>With the help of <a href="https://api2cart.com/e-commerce-api-integration-benefits-for-development/" target="_blank">unified API</a> provided by <strong>APICart</strong> you can integrate with more than 40 eCommerce platforms at once. Instead of developing separate integration with each shopping platform, you will be able to <a href="https://api2cart.com/e-commerce-api-integration-benefits-for-business/" target="_blank">save time, money, and resources</a>. API2Cart has already established integration with the most popular eCommerce platforms and developed over 100 API methods to work with needed store data.</p>
 
-                        <p>All you have to do is <a href="https://app.api2cart.com/#register" >register an API2Cart account</a> and write integration between your software and API2Cart.</p>
+                        <p>All you have to do is <a href="https://app.api2cart.com/#register" target="_blank">register an API2Cart account</a> and write integration between your software and API2Cart.</p>
 
                         <p>Watch this video that shows the basic logic of how API2Cart works.</p>
 
@@ -32,7 +32,7 @@
 
                         <br>
 
-                        <p>API2Cart lets you easily implement your <a href="https://api2cart.com/business-cases/">business cases</a> of different types:</p>
+                        <p>API2Cart lets you easily implement your <a href="https://api2cart.com/business-cases/" target="_blank">business cases</a> of different types:</p>
                         <ul>
                             <li>order import automation;</li>
                             <li>automatic emails sending;</li>
@@ -46,7 +46,7 @@
                             <li>automatic coupon creation</li>
                         </ul>
 
-                        <p>It is an amazing option for those businesses that work in the fields of order and inventory management, warehouse management, shipping software, marketing automation, and <a href="https://api2cart.com/use-cases/">much more</a>.</p>
+                        <p>It is an amazing option for those businesses that work in the fields of order and inventory management, warehouse management, shipping software, marketing automation, and <a href="https://api2cart.com/use-cases/" target="_blank">much more</a>.</p>
 
                     </div>
                 </div>

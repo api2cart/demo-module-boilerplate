@@ -126,24 +126,24 @@
 
             yadcf.init( table , [
                 {
-                    column_number: 2,
+                    column_number: 3,
                     select_type: 'select2',
                     data: names,
                     select_type_options: { width: '200px' }
                 },
                 {
-                    column_number: 3,
+                    column_number: 4,
                     select_type: 'select2',
                     data: sku,
                 },
                 {
-                    column_number: 4,
+                    column_number: 5,
                     select_type: 'select2',
                     data: owner,
                     select_type_options: { width: '200px' }
                 },
                 {
-                    column_number: 5,
+                    column_number: 6,
                     select_type: 'select2',
                     data: store,
                     select_type_options: { width: '200px' }
@@ -307,6 +307,11 @@
                                 return '<input type="checkbox" class="dt-checkboxes" value="'+data.cart_id.store_key+':'+data.id+'" >';
                             },orderable : false,  "searchable": false,
                     },
+                    { data: null, render:
+                            function(data, type, row, meta){
+                                return data.id;
+                            },orderable : true,  "searchable": false,
+                    },
                     { data: null, render: function ( data, type, row, meta ){
                             let imgurl = (data.images[0])? data.images[0].http_path : '{{ asset('css/img/no_image_275x275.jpg') }}';
                             return '<img src="'+imgurl+'" style="max-width: 60px; max-height: 60px;">'
@@ -319,7 +324,7 @@
                     },
                     { data: null, render: function ( data, type, row, meta ){
                             return (typeof data.u_sku != 'undefined') ? data.u_sku : '';
-                        }},
+                        }, "width": "160px"},
                     { data: null, render: function ( data, type, row, meta ){
                             let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
                             let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
@@ -332,25 +337,29 @@
                                     '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
                                     '<small>'+data.cart_id.cart_info.cart_versions+'</small>';
 
-                    }},
+                    }, "width": "160px"},
                     { data: null, render: function ( data, type, row, meta ){
                             let Pprice = '';
                             if ( typeof data.children != 'undefined' && data.children.length ){
 
                                 $.each(data.children, function(i, v) {
-                                    Pprice += v.default_price + '&nbsp;' + data.currency + '&nbsp;<i class="fas fa-tags" style="font-size: 8px;" title="This is price of product vsriant '+ v.name +'"></i><br>';
+                                    var vname = (typeof v.name != 'undefined' && v.name != '') ? v.name : '';
+                                    Pprice += v.default_price + '&nbsp;' + data.currency + '&nbsp;<i class="fas fa-tags" style="font-size: 8px;" title="This is price of product variant '+ vname +'"></i><br>';
                                 });
 
                             } else {
                                 Pprice = data.price + '&nbsp;' + data.currency;
                             }
                             return Pprice;
-                        }
+                        }, "width": "160px"
                     },
+                    { data: null, render: function ( data, type, row, meta ){
+                            return (typeof data.quantity != 'undefined') ? data.quantity : '';
+                        }, "width": "100px"},
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            return '<a href="#" aria-disabled="true" class="text-secondary disabled"><i class="far fa-file-alt"></i></a> ' +
-                                '<a href="#"  class="text-success editItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/products/'+data.cart_id.store_key+'/'+data.id+'/edit" data-deleteimages="/products/'+data.cart_id.store_key+'/'+data.id+'/delete_image"><i class="fas fa-edit"></i></a> ' +
+                            // return '<a href="#" aria-disabled="true" class="text-secondary disabled"><i class="far fa-file-alt"></i></a> ' +
+                                return '<a href="#"  class="text-success editItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/products/'+data.cart_id.store_key+'/'+data.id+'/edit" data-deleteimages="/products/'+data.cart_id.store_key+'/'+data.id+'/delete_image"><i class="fas fa-edit"></i></a> ' +
                                 '<a href="#"  class="text-danger deleteItem" data-id="'+data.id+'" data-name="'+data.name+'" data-action="/products/'+data.cart_id.store_key+'/'+data.id+'"><i class="fas fa-trash-alt"></i></a> ';
                         }, orderable : false
                     }
@@ -406,12 +415,14 @@
                                 <thead>
                                 <tr>
                                     <th></th>
+                                    <th>Id</th>
                                     <th>Image<br></th>
                                     <th>Name/Description<br></th>
                                     <th>SKU<br></th>
                                     <th>Store Owner<br></th>
                                     <th>Store<br></th>
                                     <th>Price<br></th>
+                                    <th>Quantity<br></th>
                                     <th>Action<br></th>
                                 </tr>
                                 </thead>
