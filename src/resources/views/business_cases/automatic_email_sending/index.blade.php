@@ -377,12 +377,6 @@
                             function ( data, type, row, meta ){
                                 return data.first_name +' '+ data.last_name;
                             }
-                    },
-                    {
-                        data: null, render: function ( data, type, row, meta ){
-                            return '<i class="far fa-file-alt"></i> ' +
-                                '<i class="fas fa-edit"></i> ';
-                        }, orderable : false
                     }
                 ]
             } );
@@ -590,7 +584,7 @@
                             <div class="col">
                                 <h1>Automatic emails sending</h1>
                                 <p>Example: Send emails to e-stores’ customers and subscribers featuring new products</p>
-                                <p>Providing e-store owners with the possibility to send emails automatically to their customers and subscribers is one of the crucial functions of marketing automation software providers. With API2Cart product.list, customer.list and subscriber.list methods you can do it easily!</p>
+                                <p>Providing e-store owners with the possibility to send emails automatically to their customers and subscribers is one of the crucial functions of marketing automation software providers. With API2Cart <a href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#/product/ProductList" target="_blank">product.list</a>, <a href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#/customer/CustomerList" target="_blank">customer.list</a> and <a href="https://docs.api2cart.com/post/interactive-docs?version=v1.1#/subscriber/SubscriberList" target="_blank">subscriber.list</a> methods you can do it easily!</p>
                                 <p class="text-center"><img class="img-fluid" src="{{ asset('images/automatuc-emails-sending.jpg') }}" style="max-height: 300px;"></p>
                             </div>
                         </div>
@@ -661,7 +655,6 @@
                                                     <th>Store</th>
                                                     <th>Email</th>
                                                     <th>Name</th>
-                                                    <th>Action</th>
                                                 </tr>
                                                 </thead>
                                             </table>
