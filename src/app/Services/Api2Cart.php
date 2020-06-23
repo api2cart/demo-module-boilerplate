@@ -304,12 +304,12 @@ class Api2Cart
                 (isset($fields['squarespace_api_key'])) ? $fields['squarespace_api_key'] : null
             );
 
-            Log::debug( print_r($result,1) );
+//            Log::debug( print_r($result,1) );
 
             $this->logApiCall( 'account.cart.add.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage(), $fields  );
 
             if ( $result->getReturnCode() == 0 ){
-                return $this->mapToArray( $result->getResult()->getSupportedPlatforms() );
+                return $result->getResult();
             } else {
                 if ($this->debug) Log::debug( print_r($result,1) );
                 return null;
