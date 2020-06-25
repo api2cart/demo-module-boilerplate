@@ -60,6 +60,9 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::post('/categories/{store_id?}/{category_id?}', 'CategoriesController@update')->name('categories.update');
     Route::delete('/categories/{store_id?}/{category_id?}', 'CategoriesController@destroy')->name('categories.delete');
 
+    Route::any('businessCases', function (){
+        return redirect( '/home' );
+    });
 
     Route::prefix('businessCases')->name('businessCases.')->group(function () {
 
@@ -72,6 +75,9 @@ Route::middleware(['auth', 'apikey'])->group(function () {
         Route::get('abandoned_cart_recovery', 'BusinessCases\AbandonedCartRecoveryController@index' )->name('abandoned_cart_recovery');
         Route::post('abandoned_cart_recovery/compose', 'BusinessCases\AbandonedCartRecoveryController@compose')->name('abandoned_cart_recovery.compose');
         Route::post('abandoned_cart_recovery/send', 'BusinessCases\AbandonedCartRecoveryController@send')->name('abandoned_cart_recovery.send');
+
+        Route::get('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@index")->name('automatic_price_updating');
+        Route::get('automatic_price_updating/create', "BusinessCases\AutomaticPriceUpdatingController@create")->name('automatic_price_updating.create');
 
     });
 
