@@ -58,7 +58,7 @@
                     </a>
                 </li>
                 <li class="nav-item" >
-                    <a href="#" class="nav-link disabled ">
+                    <a href="{{ route('businessCases.automatic_price_updating') }}" class="nav-link {{ (request()->is('businessCases/automatic_price_updating') || request()->is('businessCases/automatic_price_updating/*')) ? 'active' : '' }} ">
                         Automatic Price Updating
                     </a>
                 </li>
