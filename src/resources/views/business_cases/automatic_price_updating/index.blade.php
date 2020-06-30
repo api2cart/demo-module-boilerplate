@@ -165,6 +165,24 @@
 
                                 console.log( pconfirm );
 
+                                $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
+                                $( $(document.getElementById('_form_errors')).parent() ).hide();
+
+                                let fact = $('.swal2-content form')[0].action;
+                                var formData = getFormData( $('.swal2-content form') );
+
+
+                                return axios.post( fact , formData , {
+                                    headers: {
+                                        'Content-Type': 'multipart/form-data'
+                                    }
+                                }).then(function (presponse) {
+
+                                    console.log( presponse );
+
+                                });
+
+
                             },
                         });
 
@@ -196,6 +214,8 @@
                 return false;
             });
 
+
+
         } );
     </script>
 @endsection
@@ -223,7 +243,7 @@
 
                         <div class="row">
                             <div class="col">
-                                <button class="btn btn-primary" id="_btnCreateProducts">Create new products</button>
+                                <button class="btn btn-primary" id="_btnCreateProducts" data-action="{{ route('businessCases.automatic_price_updating.create') }}">Create new products</button>
                             </div>
                         </div>
 
