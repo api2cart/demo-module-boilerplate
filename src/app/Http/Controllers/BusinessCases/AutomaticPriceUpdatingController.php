@@ -100,6 +100,7 @@ class AutomaticPriceUpdatingController extends Controller
 
 //        Log::debug( print_r($products_ids,1) );
 
+        if ( !$products_ids ) return response(null, 404);
 
         foreach ($products_ids as $item){
             $tmp = $this->api2cart->getProductInfo( $item['store_key'], $item['product_id'] );
