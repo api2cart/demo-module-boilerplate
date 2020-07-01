@@ -1,8 +1,8 @@
 @php
     $faker = Faker\Factory::create();
 @endphp
-@if(isset($product_id))
-    {!! Form::open(['url' => route('businessCases.automatic_price_updating.update', [$store_id, $product_id]), 'id' => 'form' ]) !!}
+@if(isset($product))
+    {!! Form::open(['url' => route('businessCases.automatic_price_updating.update'), 'id' => 'form', 'method' => 'put' ]) !!}
 @else
     {!! Form::open(['url' => route('businessCases.automatic_price_updating.store'),'id' => 'form' ]) !!}
 @endif
@@ -28,7 +28,7 @@
         <div class="form-group row">
             <label for="name" class="col-4 col-form-label">SKU</label>
             <div class="col-8">
-                <input type="text" required class="form-control" id="sku" name="sku" value="{{ (isset($product['sku'])) ? $product['sku'] : $faker->uuid }}">
+                <input type="text" required class="form-control" id="sku" name="sku" value="{{ (isset($product['u_sku'])) ? $product['u_sku'] : $faker->uuid }}">
                 <div class="invalid-feedback"></div>
             </div>
         </div>
