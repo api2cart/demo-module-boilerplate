@@ -23,7 +23,7 @@ class Api2Cart
 {
     private $config;
 
-    private $debug = true;
+    public $debug = true;
 
     private $account;
     private $cart;
@@ -1272,7 +1272,7 @@ class Api2Cart
                     null
                 );
 
-//                $this->logApiCall( 'product.add.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), $fields  );
+                $this->logApiCall( 'product.image.add.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), array_merge(['product_id'=>$product_id],$fields)  );
 
                 if ( $result->getReturnCode() == 0 ){
 
@@ -1292,7 +1292,7 @@ class Api2Cart
         } catch (\Exception $e){
 
             Log::debug( $e->getMessage() );
-            $this->logApiCall( 'product.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), $fields  );
+            $this->logApiCall( 'product.image.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), array_merge(['product_id'=>$product_id],$fields)  );
             return false;
         }
     }

@@ -4,6 +4,217 @@
     <script type="text/javascript">
         var table;
 
+        function reinitAct()
+        {
+            $('.editBItem').unbind();
+            $('.editBItem').click(function(){
+                blockUiStyled('<h4>Loading products details.</h4>');
+
+                axios.get( '{{ route('businessCases.automatic_price_updating.edit') }}' )
+                    .then(function (response) {
+                        // handle success
+                        // console.log(response);
+                        $.unblockUI();
+
+                        Swal.fire({
+                            title: 'Create product',
+                            html: response.data.data,
+                            buttonsStyling: false,
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                                cancelButton: 'btn btn-danger'
+                            },
+                            showCancelButton: true,
+                            showCloseButton: true,
+                            confirmButtonText: 'Update in All Stores',
+                            width: '70%',
+                            allowOutsideClick: false,
+                            preConfirm: ( pconfirm ) => {
+
+                                // console.log( pconfirm );
+                                // return;
+
+                                $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
+                                $( $(document.getElementById('_form_errors')).parent() ).hide();
+
+                                let fact = $('.swal2-content form')[0].action;
+                                var formData = getFormData( $('.swal2-content form') );
+
+                                blockUiStyled('<h4>Processing update.</h4>');
+
+                                return axios.post( fact , formData , {
+                                    headers: {
+                                        'Content-Type': 'multipart/form-data'
+                                    }
+                                }).then(function (presponse) {
+
+                                    $.unblockUI();
+
+                                    // console.log( presponse );
+
+                                    //update log count
+                                    if ( presponse.data.log ){
+                                        for (let k=0; k<presponse.data.log.length; k++){
+                                            logItems.push( presponse.data.log[k] );
+                                        }
+                                        calculateLog();
+                                    }
+
+
+                                    Swal.fire(
+                                        'Success!',
+                                        'Update all product done.',
+                                        'success'
+                                    ).then((result) => {
+
+                                        // console.log( 'load product details' );
+                                        loadData();
+
+                                    });
+
+                                });
+
+
+                            },
+                        });
+
+
+
+                        // $.unblockUI();
+
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                        $.unblockUI();
+
+                        Swal.fire(
+                            'Info!',
+                            'Looks stores do not have product scope or store reseting right now.',
+                            'info'
+                        ).then((result) => {
+
+                            $('#_btnCreateProducts').click();
+
+                        });
+
+                    });
+
+
+                return false;
+
+            });
+        }
+
+        function loadData( created_from=null , product_only=false ){
+
+            blockUiStyled('<h4>Loading products information.</h4>');
+
+            items = [];
+
+            return axios({
+                method: 'post',
+                url: '{{ route('stores.list') }}',
+                data: {
+                    length: 10,
+                    start: 0
+                }
+            }).then(function (response) {
+
+                stores = response.data.data;
+
+                if ( response.data.log ){
+                    for (let k=0; k<response.data.log.length; k++){
+                        logItems.push( response.data.log[k] );
+                    }
+                    calculateLog();
+                }
+
+                if ( stores.length == 0 ){
+                    Swal.fire(
+                        'Error!',
+                        'Do not have store info, please check API log.',
+                        'error'
+                    );
+                    $.unblockUI();
+                    return;
+                }
+
+                axios.get( '{{ route('businessCases.automatic_price_updating.products') }}' )
+                    .then(function (response) {
+                        // handle success
+                        // console.log(response);
+
+                        if ( typeof response.data.items == 'undefined' || response.data.items.length < 1 ){
+                            // looks not items - show message to
+
+                            return;
+                        }
+
+                        items[0] = response.data.items[0];
+                        items[0]['product_stores'] = [];
+                        items[0]['product_stores_url'] = [];
+
+                        $.each( response.data.items , function( index, value ) {
+
+                            let stor = stores.find(el => el.store_key === value.store_key);
+                            items[0]['product_stores'][index] = stor;
+                            items[0]['product_stores_url'][index] = value['url'];
+                            // console.log( index , value, stor );
+                        });
+
+                        // console.log( items[0] );
+
+                        ptatable = $('#pdtable').dataTable().api();
+                        ptatable.clear();
+                        ptatable.rows.add( items );
+                        ptatable.draw();
+
+                        $.unblockUI();
+
+                        reinitAct();
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        // console.log(error);
+                        Swal.fire(
+                            'Info!',
+                            'Looks stores do not have product scope or store reseting right now.',
+                            'info'
+                        ).then((result) => {
+
+                            $('#_btnCreateProducts').click();
+
+                        });
+
+                    })
+
+
+
+
+            }).catch(function (error) {
+                // handle error
+                // console.log(error.response);
+
+                if ( error.response.data.log ){
+                    for (let k=0; k<error.response.data.log.length; k++){
+                        logItems.push( error.response.data.log[k] );
+                    }
+                    calculateLog();
+                }
+
+                $.unblockUI();
+
+                Swal.fire(
+                    'Error!',
+                    'Do not have store info, please check API log.',
+                    'error'
+                )
+
+            });
+        }
+
+
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {
@@ -13,7 +224,7 @@
 
             // blockUiStyled('<h4>Loading stores information.</h4>');
 
-            // loadData();
+            loadData();
 
             table = $('#pdtable').DataTable( {
                 processing: true,
@@ -94,35 +305,27 @@
                         }
                     },
                     { data: null, render: function ( data, type, row, meta ){
-                            let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
-                            return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>' +
-                                '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
-                                '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
-                                '<small>'+data.cart_id.cart_info.cart_versions+'</small>';
+                            let st = '';
+                            $.each( data.product_stores , function( index, value ) {
 
+                                let imgName = value.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+                                st += '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>';
+                                st += '<small><a href="'+ data.product_stores_url[index] +'" target="_blank">'+ data.product_stores_url[index] +'</a></small><br>'
+                            });
+                            return st;
                         }},
                     { data: null, render: function ( data, type, row, meta ){
-                            let Pprice = '';
-                            if ( typeof data.children != 'undefined' && data.children.length ){
-
-                                $.each(data.children, function(i, v) {
-                                    Pprice += v.default_price + '&nbsp;' + data.currency + '&nbsp;<i class="fas fa-tags" style="font-size: 8px;" title="This is price of product vsriant '+ v.name +'"></i><br>';
-                                });
-
-                            } else {
-                                Pprice = data.price + '&nbsp;' + data.currency;
-                            }
-                            return Pprice;
+                            return data.price;
                         },orderable : false,  "searchable": false,
                     },
                     { data: null, render:
                             function(data, type, row, meta){
-                                return '';
+                                return data.quantity;
                             },orderable : false,  "searchable": false,
                     },
                     { data: null, render:
                             function(data, type, row, meta){
-                                return '';
+                                return '<a href="#"  class="text-success editBItem" data-action="{{ route('businessCases.automatic_price_updating.edit') }}" data-id="'+data.u_sku+'" ><i class="fas fa-edit"></i></a> ';
                             },orderable : false,  "searchable": false,
                     },
 
@@ -147,7 +350,6 @@
                     .then(function (response) {
                         // handle success
                         // console.log(response);
-
                         Swal.fire({
                             title: 'Create product',
                             html: response.data.data,
@@ -163,7 +365,7 @@
                             allowOutsideClick: false,
                             preConfirm: ( pconfirm ) => {
 
-                                console.log( pconfirm );
+                                // console.log( pconfirm );
 
                                 $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
                                 $( $(document.getElementById('_form_errors')).parent() ).hide();
@@ -171,6 +373,7 @@
                                 let fact = $('.swal2-content form')[0].action;
                                 var formData = getFormData( $('.swal2-content form') );
 
+                                blockUiStyled('<h4>Processing new product and load info.</h4>');
 
                                 return axios.post( fact , formData , {
                                     headers: {
@@ -178,7 +381,29 @@
                                     }
                                 }).then(function (presponse) {
 
-                                    console.log( presponse );
+                                    $.unblockUI();
+
+                                    // console.log( presponse );
+
+                                    //update log count
+                                    if ( presponse.data.log ){
+                                        for (let k=0; k<presponse.data.log.length; k++){
+                                            logItems.push( presponse.data.log[k] );
+                                        }
+                                        calculateLog();
+                                    }
+
+
+                                    Swal.fire(
+                                        'Success!',
+                                        'Sample product created',
+                                        'success'
+                                    ).then((result) => {
+
+                                        // console.log( 'load product details' );
+                                        loadData();
+
+                                    });
 
                                 });
 
@@ -187,13 +412,7 @@
                         });
 
 
-                        //update log count
-                        // if ( response.data.log ){
-                        //     for (let k=0; k<response.data.log.length; k++){
-                        //         logItems.push( response.data.log[k] );
-                        //     }
-                        //     calculateLog();
-                        // }
+
                         // $.unblockUI();
 
                     })
