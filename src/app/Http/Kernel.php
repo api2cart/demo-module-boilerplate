@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\Api2Cart;
+use App\Http\Middleware\CheckSMTPConnection;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -64,5 +65,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'apikey'    => Api2Cart::class,
+        'checkSMTP'  =>CheckSMTPConnection::class,
     ];
 }

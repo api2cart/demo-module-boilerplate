@@ -30,6 +30,10 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'apikey'])->group(function () {
 
+    Route::get('/mail_settings', function () {
+        return view( 'email_settings' );
+    });
+
     Route::get('/home', 'HomeController@index')->name('home');
 
     Route::resource('stores', 'StoresController');
@@ -64,7 +68,10 @@ Route::middleware(['auth', 'apikey'])->group(function () {
         return redirect( '/home' );
     });
 
-    Route::prefix('businessCases')->name('businessCases.')->group(function () {
+    Route::prefix('businessCases')
+        ->name('businessCases.')
+        ->middleware(['checkSMTP'])
+        ->group(function () {
 
         Route::get('import_orders_automation', 'BusinessCases\ImportOrdersAutomationController@index' )->name('import_orders_automation');
 
@@ -78,6 +85,10 @@ Route::middleware(['auth', 'apikey'])->group(function () {
 
         Route::get('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@index")->name('automatic_price_updating');
         Route::get('automatic_price_updating/create', "BusinessCases\AutomaticPriceUpdatingController@create")->name('automatic_price_updating.create');
+        Route::get('automatic_price_updating/edit', "BusinessCases\AutomaticPriceUpdatingController@edit")->name('automatic_price_updating.edit');
+        Route::post('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@store")->name('automatic_price_updating.store');
+        Route::put('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@update")->name('automatic_price_updating.update');
+        Route::get('automatic_price_updating/products', "BusinessCases\AutomaticPriceUpdatingController@products")->name('automatic_price_updating.products');
 
     });
 
