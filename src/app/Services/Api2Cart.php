@@ -23,7 +23,7 @@ class Api2Cart
 {
     private $config;
 
-    private $debug = true;
+    public $debug = true;
 
     private $account;
     private $cart;
@@ -1042,6 +1042,45 @@ class Api2Cart
 
     }
 
+    public function addProduct( $store_id=null, $fields=[] ){
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            if ( $fields ){
+
+                $result = $this->product->productAdd(
+                    $fields
+
+                );
+
+                $this->logApiCall( 'product.add.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), $fields  );
+
+                if ( $result->getReturnCode() == 0 ){
+
+                    return $result;
+
+                } else {
+                    if ($this->debug) Log::debug( print_r($result,1) );
+                    return null;
+                }
+
+
+            } else {
+                return null;
+            }
+
+
+        } catch (\Exception $e){
+
+            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), $fields  );
+            return false;
+        }
+    }
+
     public function getProductVariants($store_id=null, $product_id=null)
     {
         $this->setApiKey();
@@ -1207,6 +1246,55 @@ class Api2Cart
             return false;
         }
 
+    }
+
+    public function addProductImage($store_id=null, $product_id=null, $fields=[])
+    {
+        $this->setApiKey();
+
+        try{
+
+            $this->order->getConfig()->setApiKey('store_key', $store_id);
+
+            if ( $fields ){
+
+                $result = $this->product->productImageAdd(
+                    $product_id,
+                    $fields['image_name'],
+                    $fields['type'],
+                    $fields['url'],
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                );
+
+                $this->logApiCall( 'product.image.add.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), array_merge(['product_id'=>$product_id],$fields)  );
+
+                if ( $result->getReturnCode() == 0 ){
+
+                    return $result;
+
+                } else {
+                    if ($this->debug) Log::debug( print_r($result,1) );
+                    return null;
+                }
+
+
+            } else {
+                return null;
+            }
+
+
+        } catch (\Exception $e){
+
+            Log::debug( $e->getMessage() );
+            $this->logApiCall( 'product.image.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), array_merge(['product_id'=>$product_id],$fields)  );
+            return false;
+        }
     }
 
     public function getCustomerCount($store_id=null)
