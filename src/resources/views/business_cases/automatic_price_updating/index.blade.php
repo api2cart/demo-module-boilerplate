@@ -130,20 +130,26 @@
                     calculateLog();
                 }
 
+                $.unblockUI();
+
                 if ( stores.length == 0 ){
+
                     Swal.fire(
                         'Error!',
                         'Do not have store info, please check API log.',
                         'error'
                     );
-                    $.unblockUI();
                     return;
                 }
+
 
                 axios.get( '{{ route('businessCases.automatic_price_updating.products') }}' )
                     .then(function (response) {
                         // handle success
                         // console.log(response);
+
+                        $.unblockUI();
+
 
                         if ( typeof response.data.items == 'undefined' || response.data.items.length < 1 ){
                             // looks not items - show message to
@@ -170,22 +176,15 @@
                         ptatable.rows.add( items );
                         ptatable.draw();
 
-                        $.unblockUI();
+
 
                         reinitAct();
                     })
                     .catch(function (error) {
                         // handle error
                         // console.log(error);
-                        Swal.fire(
-                            'Info!',
-                            'Looks stores do not have product scope or store reseting right now.',
-                            'info'
-                        ).then((result) => {
 
-                            $('#_btnCreateProducts').click();
-
-                        });
+                        $('#_btnCreateProducts').click();
 
                     })
 
