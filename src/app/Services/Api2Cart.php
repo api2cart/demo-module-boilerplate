@@ -984,7 +984,7 @@ class Api2Cart
                     null,
                     null,
                     null,
-                    null,
+                    (isset($fields['quantity'])) ? $fields['quantity'] : null,
                     null,
                     null,
                     null,
