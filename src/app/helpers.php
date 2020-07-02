@@ -20,3 +20,12 @@ function array_diff_assoc_recursive($array1, $array2) {
     }
     return $difference;
 }
+
+if ( !function_exists('str_finish')){
+
+    function str_finish($value, $cap)
+    {
+        return \Illuminate\Support\Str::finish($value, $cap);
+    }
+
+}
