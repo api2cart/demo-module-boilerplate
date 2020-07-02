@@ -11,7 +11,13 @@ cp "$dir/hooks/pre-commit" "$dir/.git/hooks"
 #overwrite config
 CONFIGFILE="$dir/src/.env"
 
-cp "$dir/src/.env.example" "$dir/src/.env"
+if [ -f "$CONFIGFILE" ]; then
+    echo "config $CONFIGFILE exist"
+else
+    echo "config do not exists"
+    cp "$dir/src/.env.example" "$dir/src/.env"
+fi
+# cp "$dir/src/.env.example" "$dir/src/.env"
 
 # give rw permissions for temorary folder
 sudo chmod -R 777 $dir/src/storage
