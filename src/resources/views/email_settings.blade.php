@@ -28,14 +28,58 @@
                         <p>It equal files, but you need change in both next lines (from 33 to 37)</p>
                         <p>and fill with your credentials (hostname, port, username,password) :</p>
                         <p>
-                            <pre><code>
-                                MAIL_HOST=hostname
-                                MAIL_PORT=port
-                                MAIL_USERNAME=username
-                                MAIL_PASSWORD=password
-                                MAIL_ENCRYPTION=tls
-                            </code></pre>
-                        </p>
+                        <br>
+                        <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-8">
+                                @if(isset($error))
+                                    <div class="alert alert-danger" role="alert">
+                                        {{ $error }}
+                                    </div>
+                                @endif
+                                <form method="post" action="{{ route('smtp_update') }}">
+                                    @csrf
+                                    <div class="form-group row">
+                                        <label for="MAIL_HOST" class="col-sm-4 col-form-label">MAIL_HOST</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="MAIL_HOST" name="MAIL_HOST" value="{{ env('MAIL_HOST') }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="MAIL_PORT" class="col-sm-4 col-form-label">MAIL_PORT</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="MAIL_PORT" name="MAIL_PORT" value="{{ env('MAIL_PORT') }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="MAIL_USERNAME" class="col-sm-4 col-form-label">MAIL_USERNAME</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="MAIL_USERNAME" name="MAIL_USERNAME" value="{{ env('MAIL_USERNAME') }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="MAIL_PASSWORD" class="col-sm-4 col-form-label">MAIL_PASSWORD</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="MAIL_PASSWORD" name="MAIL_PASSWORD" value="{{ env('MAIL_PASSWORD') }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="MAIL_ENCRYPTION" class="col-sm-4 col-form-label">MAIL_ENCRYPTION</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="MAIL_ENCRYPTION" name="MAIL_ENCRYPTION" value="{{ env('MAIL_ENCRYPTION') }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-10">
+                                            <button type="submit" class="btn btn-primary">Update</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+
                     </div>
                 </div>
             </div>
