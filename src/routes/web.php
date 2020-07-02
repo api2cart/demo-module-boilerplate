@@ -33,6 +33,8 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::get('/mail_settings', function () {
         return view( 'email_settings' );
     });
+    Route::post('/mail_settings', 'HomeController@test')->name('smtp_update');
+    Route::get('/test_mail_settings','HomeController@checkSMTP')->name('test_mail_settings');
 
     Route::get('/home', 'HomeController@index')->name('home');
 
