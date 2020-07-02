@@ -5,7 +5,11 @@ SET CONFIGFILE=%mypath%\src\.env
 
 copy %mypath%\hooks\pre-commit %mypath%\.git\hooks
 
-copy %mypath%\src\.env.example %CONFIGFILE%
+IF EXIST %CONFIGFILE% (
+    echo Config exists
+) ELSE (
+    copy %mypath%\src\.env.example %CONFIGFILE%
+)
 
 docker-compose down
 
