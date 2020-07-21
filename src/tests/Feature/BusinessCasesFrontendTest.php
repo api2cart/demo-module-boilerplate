@@ -34,4 +34,27 @@ class BusinessCasesFrontendTest extends TestCase
         $response->assertStatus(200);
 
     }
+
+    public function testAutomaticPriceUpdatingTest()
+    {
+        $user = factory(User::class)->make();
+
+        $response = $this->actingAs($user)
+            ->get( '/businessCases/automatic_price_updating' );
+        $response->assertStatus(200);
+
+    }
+
+
+    public function testAbandonedCartRecoveryTest()
+    {
+        $user = factory(User::class)->make();
+
+        $response = $this->actingAs($user)
+            ->get( '/businessCases/abandoned_cart_recovery' );
+        $response->assertStatus(200);
+
+    }
+
+
 }
