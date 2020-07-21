@@ -17,7 +17,7 @@
                         $.unblockUI();
 
                         Swal.fire({
-                            title: 'Create product',
+                            title: 'Edit product',
                             html: response.data.data,
                             buttonsStyling: false,
                             customClass: {
