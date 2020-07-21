@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\BusinessCases;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BusinessCases\AutomaticPriceUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -44,9 +45,9 @@ class AutomaticPriceUpdatingController extends Controller
         return redirect(route('business_cases.automatic_price_updating'));
     }
 
-    public function store(Request $request)
+    public function store(AutomaticPriceUpdateRequest $request)
     {
-//        Log::debug( $request->all() );
+        Log::debug( $request->all() );
 
         $products = [];
         $carts = collect($this->api2cart->getCartList());
@@ -147,7 +148,7 @@ class AutomaticPriceUpdatingController extends Controller
     }
 
 
-    public function update(Request $request)
+    public function update(AutomaticPriceUpdateRequest $request)
     {
         $products_ids = session()->get('automatic_price_updating');
         $formData = $request->except('_token','_method');
