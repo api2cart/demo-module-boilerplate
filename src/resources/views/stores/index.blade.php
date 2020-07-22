@@ -131,7 +131,8 @@
                                     return true;
                                 })
                                 .catch(function (error) {
-                                    console.log( error );
+
+                                    // console.log( error.response.data );
 
                                     if ( typeof error.response.data.errors != 'undefined'){
 
@@ -139,9 +140,18 @@
                                             let obj = $( document.getElementById(index) );
                                             let err = $(obj).parent().parent().find('.invalid-feedback');
                                             $(err).empty().append( value.shift() );
-                                            $(obj).addClass('is-invalid')
+                                            $(obj).addClass('is-invalid');
                                         });
 
+                                    }
+
+                                    if ( typeof error.response.data.msg != 'undefined'){
+                                        let obj = document.getElementById( 'field.store_url' );
+                                        let err = $(obj).parent().parent().find('.invalid-feedback');
+                                        $(err).empty().append( error.response.data.msg );
+                                        $(obj).addClass('is-invalid');
+                                        $('#_form_errors').empty().append( error.response.data.msg );
+                                        $('#_form_errors').parent().show().fadeOut(9000);
                                     }
 
 
