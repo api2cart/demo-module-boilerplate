@@ -131,7 +131,7 @@
                                     return true;
                                 })
                                 .catch(function (error) {
-                                    // console.log( error );
+                                    console.log( error );
 
                                     if ( typeof error.response.data.errors != 'undefined'){
 
