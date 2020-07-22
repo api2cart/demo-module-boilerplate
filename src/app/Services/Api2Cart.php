@@ -309,10 +309,10 @@ class Api2Cart
             $this->logApiCall( 'account.cart.add.json', $result->getReturnCode(), $this->cart->getConfig(), null, null, null, $result->getReturnMessage(), $fields  );
 
             if ( $result->getReturnCode() == 0 ){
-                return $result->getResult();
+                return $this->mapToArray($result);
             } else {
                 if ($this->debug) Log::debug( print_r($result,1) );
-                return null;
+                return $this->mapToArray($result);
             }
 
 
