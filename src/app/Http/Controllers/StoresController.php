@@ -103,13 +103,17 @@ class StoresController extends Controller
         $requestData = $request->except(['_token']);
         $requestData['field']['cart_id'] = $request->get('cart_id');
 
-        $fields = array_merge( $requestData['field'], $requestData['custom'] );
+        $fields = (isset($requestData['custom'])) ? array_merge( $requestData['field'], $requestData['custom'] ) : $requestData['field'];
 
         $id = $this->api2cart->addCart( $fields );
 
 
         if ( $request->ajax() ){
-            return response()->json( ['data' => $id, 'log' => $this->api2cart->getLog() ] );
+            if ( $id )  {
+                return response()->json( ['data' => $id, 'log' => $this->api2cart->getLog() ] );
+            } else {
+                return response()->json( ['data' => $id, 'log' => $this->api2cart->getLog() ] , 404 );
+            }
         }
 
         return redirect( route('stores.index') );
