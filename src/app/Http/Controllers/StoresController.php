@@ -105,14 +105,17 @@ class StoresController extends Controller
 
         $fields = (isset($requestData['custom'])) ? array_merge( $requestData['field'], $requestData['custom'] ) : $requestData['field'];
 
-        $id = $this->api2cart->addCart( $fields );
+        $result = $this->api2cart->addCart( $fields );
 
 
         if ( $request->ajax() ){
-            if ( $id )  {
-                return response()->json( ['data' => $id, 'log' => $this->api2cart->getLog() ] );
+
+            Log::debug( print_r($result,1));
+
+            if ( intval($result['return_code']) == 0 )  {
+                return response()->json( ['data' => $result, 'log' => $this->api2cart->getLog() ] );
             } else {
-                return response()->json( ['data' => $id, 'log' => $this->api2cart->getLog() ] , 404 );
+                return response()->json( ['msg' => $result['return_message'], 'log' => $this->api2cart->getLog() ] , 404 );
             }
         }
 
