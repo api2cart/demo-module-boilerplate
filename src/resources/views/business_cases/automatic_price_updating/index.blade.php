@@ -17,7 +17,7 @@
                         $.unblockUI();
 
                         Swal.fire({
-                            title: 'Create product',
+                            title: 'Edit product',
                             html: response.data.data,
                             buttonsStyling: false,
                             customClass: {
@@ -31,8 +31,6 @@
                             allowOutsideClick: false,
                             preConfirm: ( pconfirm ) => {
 
-                                // console.log( pconfirm );
-                                // return;
 
                                 $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
                                 $( $(document.getElementById('_form_errors')).parent() ).hide();
@@ -72,6 +70,31 @@
 
                                     });
 
+                                }).catch(function (error) {
+                                    // console.log(error);
+                                    $.unblockUI();
+
+                                    if ( typeof error.response.data.errors != 'undefined'){
+                                        var err_msg = '<ul>';
+                                        $.each(error.response.data.errors, function(index, value) {
+                                            let obj = document.getElementById( index ); // $('#'+index)
+                                            let err = $(obj).parent().parent().find('.invalid-feedback');
+                                            let msg = value.shift();
+
+                                            $(err).empty().append( msg );
+                                            $(obj).addClass('is-invalid')
+
+                                            err_msg += '<li>' + msg + '</li>';
+                                        });
+                                        err_msg += '</ul>';
+
+                                        let awin = document.getElementById('_form_errors');
+                                        $(awin).empty().append(err_msg).parent();
+                                        $( $(awin).parent() ).show().fadeOut(9000);
+                                    }
+
+
+                                    return false;
                                 });
 
 
@@ -404,6 +427,31 @@
 
                                     });
 
+                                }).catch(function (error) {
+                                    // console.log(error);
+                                    $.unblockUI();
+
+                                    if ( typeof error.response.data.errors != 'undefined'){
+                                        var err_msg = '<ul>';
+                                        $.each(error.response.data.errors, function(index, value) {
+                                            let obj = document.getElementById( index ); // $('#'+index)
+                                            let err = $(obj).parent().parent().find('.invalid-feedback');
+                                            let msg = value.shift();
+
+                                            $(err).empty().append( msg );
+                                            $(obj).addClass('is-invalid')
+
+                                            err_msg += '<li>' + msg + '</li>';
+                                        });
+                                        err_msg += '</ul>';
+
+                                        let awin = document.getElementById('_form_errors');
+                                        $(awin).empty().append(err_msg).parent();
+                                        $( $(awin).parent() ).show().fadeOut(9000);
+                                    }
+
+
+                                    return false;
                                 });
 
 
