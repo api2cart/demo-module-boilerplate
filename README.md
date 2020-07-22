@@ -50,3 +50,7 @@ Containers created and their ports (if used) are as follows:
 - **npm**
 - **composer**
 - **artisan**
+
+## Testing
+
+- `docker-compose run app php artisan test` 
