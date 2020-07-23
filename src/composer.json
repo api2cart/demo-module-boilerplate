@@ -9,7 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
-        "api2cart/api2cart-php-sdk": "2.0.0.x-dev",
+        "api2cart/api2cart-php-sdk": "dev-master",
         "brotzka/laravel-dotenv-editor": "^2.1",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^1.0",
