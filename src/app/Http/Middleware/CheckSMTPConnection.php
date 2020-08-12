@@ -54,7 +54,7 @@ class CheckSMTPConnection
 
     public function checkSMTP()
     {
-        $mailer = env('MAIL_DRIVER');
+        $mailer = env('MAIL_DRIVER','smtp');
         $s = Mail::createTransport( config("mail.mailers.{$mailer}") );
         $s->start();
 
