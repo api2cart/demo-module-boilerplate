@@ -808,10 +808,10 @@
     </div>
 
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm _magMenu" style="background-color: cadetblue !important;">
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm _magMenu" style="background-color: cadetblue !important; padding: 5px;margin-left: 15px;margin-right: 15px;margin-bottom: 5px;border-radius: 5px;">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo.png') }}"> {{ config('app.name', 'Laravel') }}
+                    <img src="{{ asset('images/logo.png') }}"> Demo
                 </a>
                 <div><small>In this demo account, all data will reset every hour</small></div>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
