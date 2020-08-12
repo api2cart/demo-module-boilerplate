@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<br><br><br>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -10,7 +11,7 @@
                 <div class="card-body">
 
                     <div class="text-center">
-                        <strong>This Demo Module demonstrates how you can use API of API2Cart <br>service to achieve your business goals</strong>
+                        <p class="">Please use email <strong>admin@local.com</strong> with password <strong>123456</strong> for first enter.</p>
                     </div>
                     <br>
 
@@ -21,7 +22,7 @@
                             <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="off" autofocus>
+                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="admin@local.com" required autocomplete="off" autofocus>
 
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
@@ -35,7 +36,7 @@
                             <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
 
                             <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="off">
+                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" value="123456" required autocomplete="off">
 
                                 @error('password')
                                     <span class="invalid-feedback" role="alert">
@@ -80,7 +81,6 @@
 
                         <div class="form-group row">
                             <div class="col-md-12 text-center">
-                                <small class="text-muted">Please use email <strong>admin@local.com</strong> with password <strong>123456</strong> for first enter.</small>
                             </div>
                         </div>
 
@@ -103,4 +103,5 @@
         </div>
     </div>
 </div>
+<br><br><br><br><br><br>
 @endsection
