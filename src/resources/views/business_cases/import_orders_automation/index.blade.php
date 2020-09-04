@@ -222,28 +222,35 @@
                             })
                                 .then(function (presponse) {
 
-                                    // console.log( presponse );
+                                    console.log( presponse );
 
-                                    let st = stores.find(el => el.store_key === store_key);
-                                    let newItem = presponse.data.item;
+                                    Swal.fire(
+                                        'OK!',
+                                        'New order created succesfully! ',
+                                        'success'
+                                    )
 
-                                    newItem.cart_id = st;
-                                    items.push( newItem );
 
-                                    var datatable = $( '#dtable' ).dataTable().api();
-                                    datatable.clear();
-                                    datatable.rows.add( items );
-                                    datatable.order([ 1, "desc" ]).draw();
-
-                                    datatable.rows().every(function(){
-                                        var tobj  = this;
-                                        var tnode = tobj.node();
-                                        var tdata = tobj.data();
-
-                                        if ( tdata.cart_id.store_key == st.store_key && tdata.id == newItem.id ){
-                                            $(tnode).addClass('table-info');
-                                        }
-                                    });
+                                    // let st = stores.find(el => el.store_key === store_key);
+                                    // let newItem = presponse.data.item;
+                                    //
+                                    // newItem.cart_id = st;
+                                    // items.push( newItem );
+                                    //
+                                    // var datatable = $( '#dtable' ).dataTable().api();
+                                    // datatable.clear();
+                                    // datatable.rows.add( items );
+                                    // datatable.order([ 1, "desc" ]).draw();
+                                    //
+                                    // datatable.rows().every(function(){
+                                    //     var tobj  = this;
+                                    //     var tnode = tobj.node();
+                                    //     var tdata = tobj.data();
+                                    //
+                                    //     if ( tdata.cart_id.store_key == st.store_key && tdata.id == newItem.id ){
+                                    //         $(tnode).addClass('table-info');
+                                    //     }
+                                    // });
 
 
                                     // let lobj = $( '#dtable' ).find('.'+store_key+':'+newItem.order_id);
@@ -398,11 +405,15 @@
             // console.log('check for new orders');
             blockUiStyled('<h4>Loading new orders.</h4>');
 
+
             let oldItems = items;
             let scount = 0;
+            let isNew = false;
 
             let datatable = $( '#dtable' ).dataTable().api();
             let last_order = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+
+            $('#dtable tr').removeClass('table-info');
 
             $.each( stores , function( i, stor ) {
                 blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
@@ -458,6 +469,7 @@
                                 }
                             });
 
+                            isNew = true;
 
                         }
 
@@ -470,9 +482,12 @@
                     if ( scount == stores.length ){
                         //lastone store finished - compare
 
-                        console.log( JSON.stringify( items ) === JSON.stringify( oldItems ) );
+                        // console.log( items );
+                        // console.log( oldItems );
+                        //
+                        // console.log( JSON.stringify( items ) === JSON.stringify( oldItems ) );
 
-                        if ( JSON.stringify( items ) === JSON.stringify( oldItems ) ){
+                        if ( JSON.stringify( items ) === JSON.stringify( oldItems ) && isNew == false ){
 
                             Swal.fire(
                                 'Info!',
