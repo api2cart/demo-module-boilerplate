@@ -439,8 +439,8 @@
 
                     if (scount == stores.length) {
                         //lastone store finished - compare
-                        console.log( items );
-                        console.log( oldItems );
+                        // console.log( items );
+                        // console.log( oldItems );
                         if (isNew == false && JSON.stringify(items) === JSON.stringify(oldItems)) {
 
                             Swal.fire(
