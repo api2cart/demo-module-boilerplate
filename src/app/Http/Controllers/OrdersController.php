@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
 use App\Services\Api2Cart;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -26,7 +27,7 @@ class OrdersController extends Controller
     public function orderList($store_id=null,Request $request)
     {
         \Debugbar::disable();
-
+//        Log::debug($request->all());
 
         /**
          * get account carts & extract exact store info
@@ -36,17 +37,23 @@ class OrdersController extends Controller
 
         $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
         $sort_direct  = ($request->get('sort_direct')) ? true : false;
-        $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
+        $created_from = ($request->get('created_from')) ? Carbon::parse($request->get('created_from'))->format("Y-m-d\TH:i:sO") : null;
         $limit        = ($request->get('limit')) ? $request->get('limit') : null;
 
         $totalOrders = $this->api2cart->getOrderCount( $store_id );
 
         $orders = collect([]);
 
-
+        //Log::debug( $created_from );
         if ( $totalOrders ){
 
-            $result = $this->api2cart->getOrderList( $store_id, null, null, null, $created_from );
+            $result = $this->api2cart->getOrderList(
+                $store_id,
+                null,
+                null,
+                null,
+                $created_from,
+            );
 
             $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
             // put additional information
@@ -81,7 +88,7 @@ class OrdersController extends Controller
 
 //        $result = $this->api2cart->getOrderList( $store_id , 'create_at.value', null,$limit);
 //        Log::debug('raw api result');
-//        Log::debug( print_r($result,1) );
+//        if ( $store_id == '4730d110180d4b67449f00b44608cb9d' )  Log::debug( print_r($result,1) );
 
         if ( $sort_by  ){
             switch ($sort_by){
