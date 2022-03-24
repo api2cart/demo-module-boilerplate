@@ -7,15 +7,13 @@ services:
   nginx:
     image: nginx:stable-alpine
     container_name: nginx
-    restart: unless-stopped
-    tty: true
     ports:
       - "8080:80"
-      - "443:443"
+      - "8443:443"
     volumes:
       - ./src:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx:/etc/nginx/ssl
+      - ./nginx/ssl:/etc/ssl
     depends_on:
       - php
       - mysql
@@ -41,7 +39,6 @@ services:
     networks:
       - laravel
   php:
-    image: php:8-fpm
     build:
       context: .
       dockerfile: Dockerfile

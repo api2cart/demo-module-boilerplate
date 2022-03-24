@@ -53,7 +53,7 @@ else
 fi
 
 if ! [ -x "$(command -v xdg-open)" ]; then
-    open http://localhost:8080
+    open https://localhost:8443
     exit 0
 fi
-xdg-open http://localhost:8080
+xdg-open https://localhost:8443
