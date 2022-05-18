@@ -263,10 +263,12 @@
                     { data: null, render:
                             function ( data, type, row, meta ){
                                 let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
-                                return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>' +
-                                    '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
-                                    '<small>'+data.cart_id.stores_info.store_owner_info.owner+'</small><br>'+
-                                    '<small>'+data.cart_id.stores_info.store_owner_info.email+'</small>';
+                                return '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>' +
+                                       '<div class="cartInfo">' +
+                                           '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                           '<small>'+data.cart_id.stores_info.store_owner_info.owner+'<br>'+
+                                           data.cart_id.stores_info.store_owner_info.email+'</small>' +
+                                       '</div>';
                             }
                     },
                     { data: null, render:
