@@ -5,7 +5,7 @@
 
         var curentProducts = [];
 
-        function loadData(created_from=null){
+        function loadData(created_from = null) {
 
             items = [];
 
@@ -20,14 +20,14 @@
 
                 stores = response.data.data;
 
-                if ( response.data.log ){
-                    for (let k=0; k<response.data.log.length; k++){
-                        logItems.push( response.data.log[k] );
+                if (response.data.log) {
+                    for (let k = 0; k < response.data.log.length; k++) {
+                        logItems.push(response.data.log[k]);
                     }
                     calculateLog();
                 }
 
-                if ( stores.length == 0 ){
+                if (stores.length == 0) {
                     Swal.fire(
                         'Error!',
                         'Do not have store info, please check API log.',
@@ -38,13 +38,13 @@
                 }
 
 
-                for (let i=0; i<stores.length; i++){
+                for (let i = 0; i < stores.length; i++) {
 
-                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
+                    blockUiStyled('<h4>Loading ' + stores[i].url + ' information.</h4>');
 
                     axios({
                         method: 'post',
-                        url: '{{ route('orders.list') }}/'+stores[i].store_key,
+                        url: '{{ route('orders.list') }}/' + stores[i].store_key,
                         data: {
                             length: 10,
                             start: 0,
@@ -55,33 +55,30 @@
                         }
                     }).then(function (rep) {
 
-                        //console.log( stores[i] );
-
                         let orders = rep.data.data;
                         let logs = rep.data.log;
 
-                        blockUiStyled('<h4>Adding '+ stores[i].url +' orders.</h4>');
+                        blockUiStyled('<h4>Adding ' + stores[i].url + ' orders.</h4>');
 
-                        $.each( orders , function( index, value ) {
+                        $.each(orders, function (index, value) {
                             value.cart_id = stores[i];
-                            items.push( value );
+                            items.push(value);
                         });
 
                         //update log count
-                        if ( rep.data.log ){
-                            for (let k=0; k<rep.data.log.length; k++){
-                                logItems.push( rep.data.log[k] );
+                        if (rep.data.log) {
+                            for (let k = 0; k < rep.data.log.length; k++) {
+                                logItems.push(rep.data.log[k]);
                             }
                             calculateLog();
                         }
 
 
-
-                        var datatable = $( '#dtable' ).dataTable().api();
+                        var datatable = $('#dtable').dataTable().api();
 
                         datatable.clear();
-                        datatable.rows.add( items );
-                        datatable.order([ 1, "desc" ]).draw();
+                        datatable.rows.add(items);
+                        datatable.order([1, "desc"]).draw();
 
 
                         $.unblockUI();
@@ -95,15 +92,13 @@
                 }
 
 
-
-
             }).catch(function (error) {
                 // handle error
                 // console.log(error.response);
 
-                if ( error.response.data.log ){
-                    for (let k=0; k<error.response.data.log.length; k++){
-                        logItems.push( error.response.data.log[k] );
+                if (error.response.data.log) {
+                    for (let k = 0; k < error.response.data.log.length; k++) {
+                        logItems.push(error.response.data.log[k]);
                     }
                     calculateLog();
                 }
@@ -119,29 +114,25 @@
             });
         }
 
-        function loadCustomers(store_key)
-        {
-            return axios.post( '/customers/list/' + store_key );
+        function loadCustomers(store_key) {
+            return axios.post('/customers/list/' + store_key);
         }
 
-        function loadProducts(store_key)
-        {
-            return axios.post( '/products/list/' + store_key );
+        function loadProducts(store_key) {
+            return axios.post('/products/list/' + store_key);
         }
 
-        function loadStatuses(store_key)
-        {
-            return axios.post( '/orders/statuses/' + store_key );
+        function loadStatuses(store_key) {
+            return axios.post('/orders/statuses/' + store_key);
         }
 
-        function productQuantityProcess()
-        {
+        function productQuantityProcess() {
             $('.product_quantity').unbind();
-            $('.product_quantity').change(function(){
+            $('.product_quantity').change(function () {
                 let quantity = $(this).val();
                 let check = $(this).parent().parent().parent().find('.d-none');
 
-                if ( quantity == 0 ){
+                if (quantity == 0) {
                     $(check).prop('checked', false);
                 } else {
                     $(check).prop('checked', true);
@@ -153,26 +144,24 @@
 
         }
 
-        function calculateTotalPrice()
-        {
+        function calculateTotalPrice() {
             let store_id = $('#cart_id').val();
             let total = 0;
-            $.each( $('.product_quantity'), function(key, value) {
+            $.each($('.product_quantity'), function (key, value) {
                 let check = $(this).parent().parent().parent().find('.d-none');
                 let quantity = $(this).val();
-                if ( quantity > 0 ){
-                    let price = curentProducts.find(el => el.id === $(check).val() )['price'];
-                    total += price *quantity;
+                if (quantity > 0) {
+                    let price = curentProducts.find(el => el.id === $(check).val())['price'];
+                    total += price * quantity;
                 }
             });
-            $('#product_total').val( total );
+            $('#product_total').val(total);
         }
 
-        function addOrder()
-        {
+        function addOrder() {
             let action = "{{ route('orders.create') }}";
 
-            axios.get( action )
+            axios.get(action)
                 .then(function (response) {
                     // handle success
                     // console.log(response);
@@ -192,21 +181,21 @@
                         confirmButtonText: 'Create',
                         width: '70%',
                         allowOutsideClick: false,
-                        preConfirm: ( pconfirm ) => {
+                        preConfirm: (pconfirm) => {
 
                             $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
-                            $( $(document.getElementById('_form_errors')).parent() ).hide();
+                            $($(document.getElementById('_form_errors')).parent()).hide();
 
                             let fact = $('.swal2-content form')[0].action;
                             let store_key = $('#cart_id').val();
-                            var formData = getFormData( $('.swal2-content form') );
+                            var formData = getFormData($('.swal2-content form'));
 
-                            $.each( $('.product_quantity'), function(key, value) {
+                            $.each($('.product_quantity'), function (key, value) {
 
                                 let check = $(this).parent().parent().parent().find('.d-none');
                                 let quantity = $(this).val();
 
-                                if ( quantity == 0 ){
+                                if (quantity == 0) {
                                     $(check).prop('checked', false);
                                 } else {
                                     $(check).prop('checked', true);
@@ -214,8 +203,7 @@
                             });
 
 
-
-                            return axios.post( fact , formData , {
+                            return axios.post(fact, formData, {
                                 headers: {
                                     'Content-Type': 'multipart/form-data'
                                 }
@@ -224,35 +212,11 @@
 
                                     // console.log( presponse );
 
-                                    let st = stores.find(el => el.store_key === store_key);
-                                    let newItem = presponse.data.item;
-
-                                    newItem.cart_id = st;
-                                    items.push( newItem );
-
-                                    var datatable = $( '#dtable' ).dataTable().api();
-                                    datatable.clear();
-                                    datatable.rows.add( items );
-                                    datatable.order([ 1, "desc" ]).draw();
-
-                                    datatable.rows().every(function(){
-                                        var tobj  = this;
-                                        var tnode = tobj.node();
-                                        var tdata = tobj.data();
-
-                                        if ( tdata.cart_id.store_key == st.store_key && tdata.id == newItem.id ){
-                                            $(tnode).addClass('table-info');
-                                        }
-                                    });
-
-
-                                    // let lobj = $( '#dtable' ).find('.'+store_key+':'+newItem.order_id);
-                                    //
-                                    // console.log( lobj );
-                                    //
-                                    // if ( typeof lobj != 'undefined'){
-                                    //     $(lobj).parent().parent().addClass('table-info');
-                                    // }
+                                    Swal.fire(
+                                        'OK!',
+                                        'New order created succesfully! ',
+                                        'success'
+                                    )
 
 
                                     return true;
@@ -260,21 +224,21 @@
                                 .catch(function (error) {
 
                                     // console.log( error.response.data.errors.checked_id );
-                                    if( typeof error.response.data.errors.checked_id != 'undefined' ){
-                                        $('#_form_errors').empty().append( error.response.data.errors.checked_id[0] )
-                                        $( $(document.getElementById('_form_errors')).parent() ).show();
-                                        $( $(document.getElementById('_form_errors')).parent() ).fadeOut(9000);
+                                    if (typeof error.response.data.errors.checked_id != 'undefined') {
+                                        $('#_form_errors').empty().append(error.response.data.errors.checked_id[0])
+                                        $($(document.getElementById('_form_errors')).parent()).show();
+                                        $($(document.getElementById('_form_errors')).parent()).fadeOut(9000);
                                     }
 
 
                                     if ( typeof error.response.data.errors != 'undefined'){
 
-                                        $.each(error.response.data.errors, function(index, value) {
-                                            if (typeof index !== 'undefined' || typeof value !== 'undefined'){
+                                        $.each(error.response.data.errors, function (index, value) {
+                                            if (typeof index !== 'undefined' || typeof value !== 'undefined') {
 
-                                                let obj = $( document.getElementById(index) );
+                                                let obj = $(document.getElementById(index));
                                                 let err = $(obj).parent().parent().find('.invalid-feedback');
-                                                $(err).empty().append( value.shift() );
+                                                $(err).empty().append(value.shift());
                                                 $(obj).addClass('is-invalid')
                                             }
 
@@ -290,65 +254,67 @@
                         },
                     });
 
-                    $('#cart_id').change(function(e){
+                    $('#cart_id').change(function (e) {
 
                         let selected = this.value;
-                        let item = Object.values( selectItems ).find( obj =>{ return obj.store_key === selected } );
+                        let item = Object.values(selectItems).find(obj => {
+                            return obj.store_key === selected
+                        });
 
                         $('#addItemFields').empty();
                         $('#customer_id').empty();
                         $('#productsList').empty();
                         $('#status_id').empty();
-                        $('#customer_id').prop( "disabled", true );
+                        $('#customer_id').prop("disabled", true);
 
                         blockUiStyled('<h4>Loading store customers and products.</h4>');
 
-                        axios.all([ loadCustomers( item.store_key ), loadProducts( item.store_key ), loadStatuses( item.store_key ) ])
-                            .then(axios.spread(function ( users, products, statuses) {
+                        axios.all([loadCustomers(item.store_key), loadProducts(item.store_key), loadStatuses(item.store_key)])
+                            .then(axios.spread(function (users, products, statuses) {
                                 // Both requests are now complete
 
-                                if (users.data.data.length){
-                                    $.each(users.data.data, function(key, value) {
+                                if (users.data.data.length) {
+                                    $.each(users.data.data, function (key, value) {
                                         $('#customer_id')
                                             .append($("<option></option>")
-                                                .attr("value", value.id )
-                                                .text( value.first_name +' '+ value.last_name +'[ ' + value.email +' ]' ));
+                                                .attr("value", value.id)
+                                                .text(value.first_name + ' ' + value.last_name + '[ ' + value.email + ' ]'));
                                     });
-                                    $('#customer_id').prop( "disabled", false );
+                                    $('#customer_id').prop("disabled", false);
                                 }
 
                                 // console.log( statuses );
-                                if (statuses.data.data.length){
-                                    $.each(statuses.data.data, function(key, value) {
+                                if (statuses.data.data.length) {
+                                    $.each(statuses.data.data, function (key, value) {
                                         $('#status_id')
                                             .append($("<option></option>")
-                                                .attr("value", value.id )
-                                                .text( value.name ));
+                                                .attr("value", value.id)
+                                                .text(value.name));
                                     });
-                                    $('#status_id').prop( "disabled", false );
+                                    $('#status_id').prop("disabled", false);
                                 }
 
-                                if ( products.data.data.length ){
+                                if (products.data.data.length) {
 
                                     curentProducts = products.data.data;
 
-                                    $.each(curentProducts, function(key, value) {
+                                    $.each(curentProducts, function (key, value) {
 
                                         let html = '<label class="col-lg-6">\n' +
-                                            '                        <input type="checkbox" name="checked_id[]" class="card-input-element d-none" value="'+value.id+'">\n' +
+                                            '                        <input type="checkbox" name="checked_id[]" class="card-input-element d-none" value="' + value.id + '">\n' +
                                             '                        <div class="card card-body bg-light d-flex ">\n' +
-                                            '                            <h5>'+value.name+'</h5>\n' +
+                                            '                            <h5>' + value.name + '</h5>\n' +
                                             '                            <small>\n' +
-                                            '                                Price: ' +value.price +' '+ value.currency +
+                                            '                                Price: ' + value.price + ' ' + value.currency +
                                             '                            </small>\n' +
                                             '                            <small>\n' +
-                                            '                                Quantity: <input type="number" class="product_quantity" name="product_quantity[]"  min="0" max="'+ value.quantity +'" step="1" value="0">\n' +
+                                            '                                Quantity: <input type="number" class="product_quantity" name="product_quantity[]"  min="0" max="' + value.quantity + '" step="1" value="0">\n' +
                                             '                            </small>\n' +
-                                            '                        <input type="hidden" name="product_id[]" value="'+value.id+'">\n' +
+                                            '                        <input type="hidden" name="product_id[]" value="' + value.id + '">\n' +
                                             '                        </div>\n' +
                                             '                    </label>';
 
-                                        $('#productsList').append( html );
+                                        $('#productsList').append(html);
 
                                     });
 
@@ -363,15 +329,15 @@
 
                     });
 
-                    $('#cart_id').change(function(){
+                    $('#cart_id').change(function () {
                         $(this).removeClass('is-invalid');
                         $('#customer_id,#status_id').removeClass('is-invalid');
                     });
 
                     //update log count
-                    if ( response.data.log ){
-                        for (let k=0; k<response.data.log.length; k++){
-                            logItems.push( response.data.log[k] );
+                    if (response.data.log) {
+                        for (let k = 0; k < response.data.log.length; k++) {
+                            logItems.push(response.data.log[k]);
                         }
                         calculateLog();
 
@@ -393,23 +359,26 @@
                 });
         }
 
-        function checkNewOrders()
-        {
+        function checkNewOrders() {
             // console.log('check for new orders');
             blockUiStyled('<h4>Loading new orders.</h4>');
 
+
             let oldItems = items;
             let scount = 0;
+            let isNew = false;
 
-            let datatable = $( '#dtable' ).dataTable().api();
-            let last_order = datatable.column( 1,{order:'applied'} ).data()[0].create_at.value;
+            let datatable = $('#dtable').dataTable().api();
+            let last_order = datatable.column(1, {order: 'applied'}).data()[0].create_at.value;
 
-            $.each( stores , function( i, stor ) {
-                blockUiStyled('<h4>Loading '+ stor.url +' information.</h4>');
+            $('#dtable tr').removeClass('table-info');
+
+            $.each(stores, function (i, stor) {
+                blockUiStyled('<h4>Loading ' + stor.url + ' information.</h4>');
 
                 axios({
                     method: 'post',
-                    url: '{{ route('orders.list') }}/'+stor.store_key,
+                    url: '{{ route('orders.list') }}/' + stor.store_key,
                     data: {
                         length: 10,
                         start: 0,
@@ -426,38 +395,39 @@
                     let orders = rep.data.data;
                     let logs = rep.data.log;
 
-                    if ( rep.data.log ){
-                        for (let k=0; k<rep.data.log.length; k++){
-                            logItems.push( rep.data.log[k] );
+                    if (rep.data.log) {
+                        for (let k = 0; k < rep.data.log.length; k++) {
+                            logItems.push(rep.data.log[k]);
                         }
                         calculateLog();
 
                     }
 
-                    $.each( orders , function( oi, order ) {
+                    $.each(orders, function (oi, order) {
 
                         order.cart_id = stor;
 
-                        let elexist =  items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key );
+                        let elexist = items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key);
 
-                        if ( typeof elexist == 'undefined' ){
+                        if (typeof elexist == 'undefined') {
 
                             // add new order to table and highlight it
-                            items.push( order );
+                            items.push(order);
 
                             datatable.clear();
-                            datatable.rows.add( items );
-                            datatable.order([ 1, "desc" ]).draw();
+                            datatable.rows.add(items);
+                            datatable.order([1, "desc"]).draw();
 
-                            datatable.rows().every(function(){
-                                var tobj  = this;
+                            datatable.rows().every(function () {
+                                var tobj = this;
                                 var tnode = tobj.node();
                                 var tdata = tobj.data();
-                                if ( tdata.cart_id.store_key == stor.store_key && tdata.id == order.id ){
+                                if (tdata.cart_id.store_key == stor.store_key && tdata.id == order.id) {
                                     $(tnode).addClass('table-info');
                                 }
                             });
 
+                            isNew = true;
 
                         }
 
@@ -467,12 +437,11 @@
                     $.unblockUI();
                     $.growlUI('Notification', stor.url + ' data loaded successfull!', 500);
 
-                    if ( scount == stores.length ){
+                    if (scount == stores.length) {
                         //lastone store finished - compare
-
-                        console.log( JSON.stringify( items ) === JSON.stringify( oldItems ) );
-
-                        if ( JSON.stringify( items ) === JSON.stringify( oldItems ) ){
+                        // console.log( items );
+                        // console.log( oldItems );
+                        if (isNew == false && JSON.stringify(items) === JSON.stringify(oldItems)) {
 
                             Swal.fire(
                                 'Info!',
@@ -494,14 +463,13 @@
             });
 
 
-
             // $.unblockUI();
         }
 
 
         var table;
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -512,7 +480,7 @@
 
             loadData();
 
-            table = $('#dtable').DataTable( {
+            table = $('#dtable').DataTable({
                 processing: true,
                 serverSide: false,
                 // ordering: false,
@@ -521,7 +489,7 @@
                 buttons: [
                     {
                         text: 'Reload',
-                        action: function ( e, dt, node, config ) {
+                        action: function (e, dt, node, config) {
 
                             window.location.reload();
 
@@ -534,22 +502,24 @@
                 initComplete: function () {
                     $('#dtable_filter input').focus();
                 },
-                order: [[ 1, "desc" ]],
+                order: [[1, "desc"]],
 
                 // iDisplayLength: 10,
                 // bLengthChange: false,
 
                 columns: [
-                    { data: null, render:
-                            function ( data, type, row, meta ){
-                                return data.order_id + '<input type="hidden" value="'+ data.cart_id.store_key +':'+ data.order_id +'" class="'+ data.cart_id.store_key +':'+ data.order_id +'">';
-                            }, orderable : false
+                    {
+                        data: null, render:
+                            function (data, type, row, meta) {
+                                return data.order_id + '<input type="hidden" value="' + data.cart_id.store_key + ':' + data.order_id + '" class="' + data.cart_id.store_key + ':' + data.order_id + '">';
+                            }, orderable: false
                     },
-                    { data: null, render:
-                            function ( data, type, row, meta ){
+                    {
+                        data: null, render:
+                            function (data, type, row, meta) {
                                 return type === 'sort' ? data.create_at.value : moment(data.create_at.value).format('lll');
                                 // return moment(data.create_at.value).format('D/MM/YYYY HH:mm');
-                            }, orderable : false
+                            }, orderable: false
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
@@ -562,29 +532,32 @@
                                         '</div>';
                             }, orderable : false
                     },
-                    { data: null, render:
-                            function ( data, type, row, meta ){
-                                return data.customer.email + '<br><small class="text-muted">'+data.customer.first_name +' '+data.customer.last_name+'</small>';
-                            }, orderable : false
+                    {
+                        data: null, render:
+                            function (data, type, row, meta) {
+                                return data.customer.email + '<br><small class="text-muted">' + data.customer.first_name + ' ' + data.customer.last_name + '</small>';
+                            }, orderable: false
                     },
-                    { data: null, render:
-                            function ( data, type, row, meta ){
+                    {
+                        data: null, render:
+                            function (data, type, row, meta) {
 
                                 let state = (data.shipping_address.state) ? data.shipping_address.state.code : '';
                                 let country = (data.shipping_address.country) ? data.shipping_address.country.name : '';
 
-                                return data.shipping_address.first_name +' '+data.shipping_address.last_name +'<br>'+
-                                    data.shipping_address.address1+'<br>'+
-                                    data.shipping_address.city+', '+state+'<br>'+
+                                return data.shipping_address.first_name + ' ' + data.shipping_address.last_name + '<br>' +
+                                    data.shipping_address.address1 + '<br>' +
+                                    data.shipping_address.city + ', ' + state + '<br>' +
                                     country;
-                            }, orderable : false
+                            }, orderable: false
                     },
-                    { data: null, render: 'status.name' },
-                    { data: null, render: function ( data, type, row, meta ){
+                    {data: null, render: 'status.name'},
+                    {
+                        data: null, render: function (data, type, row, meta) {
                             let total = (data.totals) ? data.totals.total : '';
                             let currency = (data.currency) ? data.currency['iso3'] : '';
                             return total + ' ' + currency;
-                        }, orderable : false
+                        }, orderable: false
                     },
                     {
                         data: null, render: function ( data, type, row, meta ){
