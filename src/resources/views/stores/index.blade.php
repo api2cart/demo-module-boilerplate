@@ -346,8 +346,6 @@
                         }  },
                     {
                         data: null, render: function ( data, type, row, meta ){
-                            // return '<i class="far fa-file-alt"></i> ' +
-                            //     '<i class="fas fa-edit"></i> ' +
                                 return '<a href="#"  class="text-danger deleteItem" data-id="'+data.id+'" data-name="'+data.url+'" data-action="/stores/'+data.store_key+'"><i class="fas fa-trash-alt"></i></a> ';
                         }, orderable : false
                     }
