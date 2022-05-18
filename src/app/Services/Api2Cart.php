@@ -11,7 +11,6 @@ use Psr\Http\Message\RequestInterface;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Handler\CurlHandler;
 
-
 use App\Models\User;
 use App\Models\Log as Logger;
 
@@ -668,6 +667,9 @@ class Api2Cart
                 null,
                 null
             );
+
+
+//if ( $store_id == '4730d110180d4b67449f00b44608cb9d' ) Log::debug(print_r($result,1));
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), [ 'sort_by' => $sort_by, 'sort_direct' => $sort_direct, 'limit' => $limit, 'created_from' => $created_from]  );
 
