@@ -1,4 +1,4 @@
-# API2CartBoilerplate
+## API2CartBoilerplate
 
 <p align="center">
 <a href="https://github.com/api2cart/php-a2c-demo-module-boilerplate"><img src="https://travis-ci.com/api2cart/php-a2c-demo-module-boilerplate.svg?branch=master" alt="Build Status"></a>

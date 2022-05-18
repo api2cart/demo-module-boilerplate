@@ -1,0 +1,6 @@
+pipelines:
+  default:
+    - step:
+        script:
+          - git filter-branch -- --all
+          - git push --force git@github.com:api2cart/php-a2c-demo-module-boilerplate.git
