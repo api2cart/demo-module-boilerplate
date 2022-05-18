@@ -28,4 +28,4 @@ docker-compose run app php artisan migrate
 
 docker-compose run app php artisan db:seed
 
-start "" http://localhost:8080
+start "" https://demo-module.api2cart.local.com:8443
