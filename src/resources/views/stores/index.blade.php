@@ -336,8 +336,8 @@
                     } },
                     { data: null, render: function ( data, type, row, meta ){
                         let imgName = data.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
-                        return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>' +
-                        data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small>';
+                        return '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>' + '<div class="cartInfo">' +
+                        data.cart_info.cart_name+'<br><small>'+data.cart_info.cart_versions+'</small></div>';
                     }  },
                     { data: null, render: function ( data, type, row, meta ){
 
