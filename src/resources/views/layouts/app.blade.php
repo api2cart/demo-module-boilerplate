@@ -809,7 +809,7 @@
 
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm _magMenu" style="background-color: cadetblue !important; padding: 5px;margin-left: 15px;margin-right: 15px;margin-bottom: 5px;border-radius: 5px;">
-            <div class="container">
+            <div class="container-fluid">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{ asset('images/logo.png') }}"> Demo
                 </a>
@@ -863,7 +863,7 @@
                 </div>
             </div>
         </nav>
-        <main class="">
+        <main class="" style="margin-top: 15px;">
             @include('parts.messages')
 
             @yield('content')
