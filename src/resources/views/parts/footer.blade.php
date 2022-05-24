@@ -48,7 +48,7 @@
                 <div class="col-md-12 text-center text-muted">
                     <div class="copyright" >
                         <div id="footer-text" class="footer-text">
-                            <div><span>&#169; 2020</span> MagneticOne</div>
+                            <div><span>&#169; {{now()->year}}</span> MagneticOne</div>
                         </div>
                     </div>
                 </div>
