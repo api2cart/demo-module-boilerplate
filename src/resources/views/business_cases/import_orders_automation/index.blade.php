@@ -210,7 +210,7 @@
                             })
                                 .then(function (presponse) {
 
-                                    // console.log(presponse);
+                                    // console.log( presponse );
 
                                     Swal.fire(
                                         'OK!',
@@ -231,7 +231,7 @@
                                     }
 
 
-                                    if (typeof error.response.data.errors != 'undefined') {
+                                    if ( typeof error.response.data.errors != 'undefined'){
 
                                         $.each(error.response.data.errors, function (index, value) {
                                             if (typeof index !== 'undefined' || typeof value !== 'undefined') {
@@ -521,15 +521,16 @@
                                 // return moment(data.create_at.value).format('D/MM/YYYY HH:mm');
                             }, orderable: false
                     },
-                    {
-                        data: null, render:
-                            function (data, type, row, meta) {
-                                let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g, "_");
-                                return '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/' + imgName + '.png"><br>' +
-                                    '<a href="' + data.cart_id.url + '">' + data.cart_id.url + '</a><br>' +
-                                    '<small>' + data.cart_id.stores_info.store_owner_info.owner + '</small><br>' +
-                                    '<small>' + data.cart_id.stores_info.store_owner_info.email + '</small>';
-                            }, orderable: false
+                    { data: null, render:
+                            function ( data, type, row, meta ){
+                                let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+                                return '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>' +
+                                        '<div class="cartInfo">' +
+                                            '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                            '<small>'+data.cart_id.stores_info.store_owner_info.owner+'<br>'+
+                                            data.cart_id.stores_info.store_owner_info.email+'</small>' +
+                                        '</div>';
+                            }, orderable : false
                     },
                     {
                         data: null, render:
@@ -559,33 +560,34 @@
                         }, orderable: false
                     },
                     {
-                        data: null, render: function (data, type, row, meta) {
-                            return '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="' + data.order_id + '" data-name="Order #' + data.order_id + '" data-action="/orders/' + data.cart_id.store_key + '/' + data.order_id + '"><i class="fas fa-shipping-fast"></i></a> ' +
-                                '<a href="#" class="text-primary productsItem" title="Products" data-id="' + data.order_id + '" data-name="Order #' + data.order_id + '" data-action="/orders/' + data.cart_id.store_key + '/' + data.order_id + '/products"><i class="fas fa-shopping-cart"></i></a> ';
-                        }, orderable: false
+                        data: null, render: function ( data, type, row, meta ){
+                            return '<a href="#" class="text-primary infoItem" title="Shipment Information" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'"><i class="fas fa-shipping-fast"></i></a> '+
+                                '<a href="#" class="text-primary productsItem" title="Products" data-id="'+data.order_id+'" data-name="Order #'+data.order_id+'" data-action="/orders/'+data.cart_id.store_key+'/'+data.order_id+'/products"><i class="fas fa-shopping-cart"></i></a> ';
+                        }, orderable : false
                     }
                 ],
-                drawCallback: function (settings) {
+                drawCallback: function( settings ) {
                     $('[data-toggle="popover"]').popover('hide');
                     $('[data-toggle="popover"]').popover({
                         html: true
                     });
                     reinitActions();
                 }
-            });
+            } );
 
 
-            $('#_btnCreateOrder').click(function () {
+            $('#_btnCreateOrder').click(function(){
                 addOrder();
                 return false;
             });
-            $('#_btnCheckNewOrder').click(function () {
+            $('#_btnCheckNewOrder').click(function(){
                 checkNewOrders();
                 return false;
             });
 
 
-        });
+
+        } );
     </script>
 @endsection
 
@@ -603,17 +605,9 @@
                         <div class="row">
                             <div class="col">
                                 <h1>Import order automation workflow</h1>
-                                <p>Example: import customer orders from multiple stores and marketplaces into your
-                                    platform</p>
-                                <p>Setting automated order import from e-stores is probably the main challenge of ERP,
-                                    shipping, warehouse, order and inventory software owners. With API2Cart <a
-                                            target="_blank" href="https://docs.api2cart.com/order-list">order.list</a>
-                                    method and webhook for <a target="_blank"
-                                                              href="https://docs.api2cart.com/order-add">order.add</a>
-                                    event you can do it easily!</p>
-                                <p class="text-center"><img class="img-fluid"
-                                                            src="{{ asset('images/import-orders-1.jpg') }}"
-                                                            style="max-height: 300px;"></p>
+                                <p>Example: import customer orders from multiple stores and marketplaces into your platform</p>
+                                <p>Setting automated order import from e-stores is probably the main challenge of ERP, shipping, warehouse, order and inventory software owners. With API2Cart <a target="_blank" href="https://docs.api2cart.com/order-list">order.list</a> method and webhook for <a target="_blank" href="https://docs.api2cart.com/order-add">order.add</a> event you can do it easily!</p>
+                                <p class="text-center"><img class="img-fluid" src="{{ asset('images/import-orders-1.jpg') }}" style="max-height: 300px;"></p>
                             </div>
                         </div>
 
@@ -626,8 +620,7 @@
 
                         <div class="row">
                             <div class="col text-right api_log">
-                                <a href="#" id="showApiLog">Performed <span>0</span> requests with API2Cart. Click to
-                                    see details...</a><br>
+                                <a href="#" id="showApiLog" >Performed <span>0</span> requests with API2Cart. Click to see details...</a><br>
                             </div>
                         </div>
 
