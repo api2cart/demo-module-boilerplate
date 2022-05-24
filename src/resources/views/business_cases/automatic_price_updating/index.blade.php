@@ -331,8 +331,10 @@
                             $.each( data.product_stores , function( index, value ) {
 
                                 let imgName = value.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
-                                st += '<img class="cartImage" src="https://api2cart.com/wp-content/themes/api2cart/images/logos/'+imgName+'.png"><br>';
-                                st += '<small><a href="'+ data.product_stores_url[index] +'" target="_blank">'+ data.product_stores_url[index] +'</a></small><br>'
+                                st += '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>';
+                                st += '<div class="cartInfo">' +
+                                        '<small><a href="'+ data.product_stores_url[index] +'" target="_blank">'+ data.product_stores_url[index] +'</a></small>' +
+                                      '</div>';
                             });
                             return st;
                         }},
