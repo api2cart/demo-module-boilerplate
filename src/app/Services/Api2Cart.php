@@ -43,6 +43,7 @@ class Api2Cart
         $this->isTest = $isTest;
 
         $this->config = new ApiClient\Configuration();
+        $this->config->setHost(env('API2CART_URL', 'https://api.api2cart.com/v1.1'));
 
         $this->account  = new ApiClient\Api\AccountApi(null, $this->config);
         $this->cart     = new ApiClient\Api\CartApi(null, $this->config );
