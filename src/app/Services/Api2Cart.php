@@ -776,25 +776,20 @@ class Api2Cart
                 $fields
             );
 
-//            Log::debug( print_r($result,1) );
-
             $this->logApiCall( 'order.add.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() , $fields );
 
             if ( $result->getReturnCode() == 0 ){
-                return $this->mapToArray( $result->getResult() );
+                return [0, $this->mapToArray( $result->getResult() )];
             } else {
                 if ($this->debug) Log::debug( print_r($result,1) );
-                return null;
+                return [$result->getReturnCode(), $result->getReturnMessage()];
             }
 
-
         } catch (\Exception $e){
-
             Log::debug( $e->getMessage() );
             $this->logApiCall( 'order.add.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage() , $fields );
             return false;
         }
-
     }
 
     public function getProductCount($store_id=null)
