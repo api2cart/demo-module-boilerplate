@@ -41,16 +41,17 @@ docker-compose down
 #run containers in background
 docker-compose up -d
 
-if [ $? -eq 0 ];
-then
-    echo "Looks all ok, update related dependencies..."
-    docker-compose run app composer update
-    docker-compose run app php artisan migrate
-    docker-compose run app php artisan db:seed
-else
-     echo "missing start please contact support"
-     exit
-fi
+#run once for the first time
+#if [ $? -eq 0 ];
+#then
+#    echo "Looks all ok, update related dependencies..."
+#    docker-compose run app composer update
+#    docker-compose run app php artisan migrate
+#    docker-compose run app php artisan db:seed
+#else
+#     echo "missing start please contact support"
+#     exit
+#fi
 
 if ! [ -x "$(command -v xdg-open)" ]; then
     open https://demo-module.api2cart.local.com:8443
