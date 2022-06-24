@@ -27,68 +27,75 @@ class OrdersController extends Controller
     public function orderList($store_id=null,Request $request)
     {
         \Debugbar::disable();
-//        Log::debug($request->all());
 
         /**
          * get account carts & extract exact store info
          */
         $carts = collect($this->api2cart->getCartList());
-        $storeInfo = $carts->where('store_key', $store_id)->first();
+
+        $totalOrders = 0;
+        $orders = collect([]);
+        $logs = collect([]);
 
         $sort_by      = ($request->get('sort_by')) ? $request->get('sort_by') : null;
         $sort_direct  = ($request->get('sort_direct')) ? true : false;
         $created_from = ($request->get('created_from')) ? Carbon::parse($request->get('created_from'))->format("Y-m-d\TH:i:sO") : null;
-        $limit        = ($request->get('limit')) ? $request->get('limit') : null;
+        $limit        = ($request->get('limit')) ? (string)$request->get('limit') : null;
+        $length       = ($request->get('length')) ? $request->get('length') : 15;
+        $storeKeys    = ($request->get('storeKeys')) ?: ($store_id !== null ? [$store_id] : []);
 
-        $totalOrders = $this->api2cart->getOrderCount( $store_id );
 
-        $orders = collect([]);
+        foreach ($storeKeys as $store_id) {
+            $storeInfo = $carts->where('store_key', $store_id)->first();
+            $totalOrders = $this->api2cart->getOrderCount( $store_id );
 
-        //Log::debug( $created_from );
-        if ( $totalOrders ){
+            if ( $totalOrders ) {
 
-            $result = $this->api2cart->getOrderList(
-                $store_id,
-                null,
-                null,
-                null,
-                $created_from,
+                $result = $this->api2cart->getOrderList(
+                    $store_id,
+                    $sort_by,
+                    null,
+                    $limit,
+                    $created_from
             );
 
-            $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
-            // put additional information
-            if ( $newOrders->count() ){
-                foreach ($newOrders as $item){
-                    $newItem = $item;
-                    $newItem['cart_id'] = $storeInfo['cart_id'];
-                    $orders->push( $newItem );
-                }
-            }
+                $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
 
-
-            if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
-                // get next iteration to load rest orders
-                while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
-                    $result = $this->api2cart->getOrderListPage( $store_id , $result['pagination']['next']);
-                    $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
-                    // put additional information
-                    if ( $newOrders->count() ){
-                        foreach ($newOrders as $item){
-                            $newItem = $item;
-                            $newItem['cart_id'] = $storeInfo['cart_id'];
-                            $orders->push( $newItem );
-                        }
+                // put additional information
+                if ( $newOrders->count() ){
+                    foreach ($newOrders as $item){
+                        $newItem = $item;
+                        $newItem['create_at']['value'] = Carbon::parse($item['create_at']['value'])->setTimezone('UTC')->format("Y-m-d\TH:i:sO");
+                        $newItem['cart_id'] = $storeInfo['cart_id'];
+                        $orders->push( $newItem );
                     }
                 }
 
+
+                if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                    // get next iteration to load rest orders
+                    while( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
+                        $result = $this->api2cart->getOrderListPage( $store_id , $result['pagination']['next']);
+                        $newOrders = (isset($result['result']['orders_count'])) ? collect( $result['result']['order'] ) : collect([]);
+
+                        // put additional information
+                        if ( $newOrders->count() ){
+                            foreach ($newOrders as $item){
+                                $newItem = $item;
+                                $newItem['create_at']['value'] = Carbon::parse($item['create_at']['value'])->setTimezone('UTC')->format("Y-m-d\TH:i:sO");
+                                $newItem['cart_id'] = $storeInfo['cart_id'];
+                                $orders->push( $newItem );
+                            }
+                        }
+                    }
+
+                }
+
+                foreach ($this->api2cart->getLog()->all() as $item) {
+                    $logs->push($item);
+                }
             }
-
-
         }
-
-//        $result = $this->api2cart->getOrderList( $store_id , 'create_at.value', null,$limit);
-//        Log::debug('raw api result');
-//        if ( $store_id == '4730d110180d4b67449f00b44608cb9d' )  Log::debug( print_r($result,1) );
 
         if ( $sort_by  ){
             switch ($sort_by){
@@ -104,19 +111,16 @@ class OrdersController extends Controller
             $sorted = $orders->sortBy('create_at.value', null, $sort_direct );
         }
 
-
         $data = [
             "recordsTotal"      => $totalOrders,
             "recordsFiltered"   => $totalOrders,
             "start"             => 0,
-            "length"            => 10,
-            "data"              => ($limit) ? $sorted->forPage(0, $limit) : $sorted->toArray(),
-
-            'log'               => $this->api2cart->getLog(),
+            "length"            => $length,
+            "data"              => ($length) ? $sorted->forPage(0, $length) : $sorted->toArray(),
+            'log'               => $logs,
         ];
 
         return response()->json($data);
-
     }
 
 
@@ -156,22 +160,17 @@ class OrdersController extends Controller
         }
 
         return redirect( route('orders.index') );
-
     }
 
     public function abandoned($store_id=null, Request $request)
     {
         $items = collect( $this->api2cart->getAbandonedCart( $store_id ) );
-
-//        Log::debug( print_r($items,1) );
-
         $data = [
             "recordsTotal"      => (is_array($items)) ? count($items) : 0,
             "recordsFiltered"   => (is_array($items)) ? count($items) : 0,
             "start"             => 0,
             "length"            => 10,
             "data"              => collect($items),
-
             'log'               => $this->api2cart->getLog(),
         ];
 
@@ -181,12 +180,15 @@ class OrdersController extends Controller
     public function statuses($store_id=null, Request $request)
     {
         $statuses = $this->api2cart->getOrderStatuses( $store_id );
+
         if ( !$statuses ){
             return response()->json(['log' => $this->api2cart->getLog() ], 404);
         }
+
         if ( $request->ajax() ){
             return response()->json(['data' => collect($statuses['cart_order_statuses']), 'log' => $this->api2cart->getLog() ]);
         }
+
         return redirect( route('orders.index') );
     }
 
@@ -194,18 +196,15 @@ class OrdersController extends Controller
     {
         $carts = collect($this->api2cart->getCartList());
 
-//        Log::debug( print_r($carts,1) );
-
         if ( $request->ajax() ){
             return response()->json( ['data' => view('orders.form', compact('carts'))->render(), 'item' => $carts ] );
         }
+
         return redirect( route('orders.index') );
     }
 
     public function store(OrderRequest $request)
     {
-//        Log::debug( print_r($request->all(),1) );
-
         $cart = $this->api2cart->getCart( $request->get('cart_id') );
         $customer = $this->api2cart->getCustomer( $request->get('cart_id'), $request->get('customer_id') );
 
@@ -219,9 +218,6 @@ class OrdersController extends Controller
         // some customers do not have state
         if ( !isset($shipping['state']['code']) || $shipping['state']['code'] == '' ) $shipping['state']['code'] = 'AL';
 
-//        Log::debug( print_r( $address->where('type', 'billing')->first(), 1 ) );
-//        Log::debug( print_r($customer,1) );
-
         $order = [
             'store_id'          => $cart['stores_info'][0]['store_id'],
             'customer_email'    => $customer['email'],
@@ -229,25 +225,20 @@ class OrdersController extends Controller
             'subtotal_price'    => 0,
             'total_price'       => 0,
 
-            'bill_first_name'   => (isset($billing['first_name'])) ? $billing['first_name'] : $shipping['first_name'],
-            'bill_last_name'    => (isset($billing['last_name'])) ? $billing['last_name'] : $shipping['last_name'],
-            'bill_address_1'    => (isset($billing['address1'])) ? $billing['address1'] : $shipping['address1'],
-            'bill_city'         => (isset($billing['city'])) ? $billing['city'] : $shipping['city'],
-            'bill_postcode'     => (isset($billing['postcode'])) ? $billing['postcode'] : $shipping['postcode'],
+            'bill_first_name'   => $billing['first_name'] ?: $billing['first_name'] ?: $shipping['first_name'] ?: 'John',
+            'bill_last_name'    => $billing['last_name'] ?: $billing['last_name'] ?: $shipping['last_name'] ?: 'Doe',
+            'bill_address_1'    => $billing['address1'] ?: $billing['address1'] ?: $shipping['address1'] ?: '221b, Baker street',
+            'bill_city'         => $billing['city'] ?: $billing['city'] ?: $shipping['city'] ?: 'London',
+            'bill_postcode'     => $billing['postcode'] ?: $billing['postcode'] ?: $shipping['postcode'] ?: '00000',
 
             // state & country need be cleared
             'bill_state'        => (isset($billing['state']['code']) && $billing['state']['code'] != '') ? $billing['state']['code'] : $shipping['state']['code'],
-            'bill_country'      => (isset($billing['country']['code3']) && $billing['country']['code3'] != '') ? $billing['country']['code3'] : $shipping['country']['code3'],
-
-
-
+            'bill_country'      => $billing['country']['code3'] ?: $billing['country']['code3'] ?: $shipping['country']['code3'] ?: 'UK',
         ];
 
         foreach ($request->get('checked_id') as $cpi){
             $product  = $this->api2cart->getProductInfo( $request->get('cart_id'), $cpi );
             $quantity = $request->get('product_quantity')[ array_search($cpi, $request->get('product_id')) ];
-
-//            Log::debug( print_r($product,1));
 
             // check if quantity right
             if ( $product['quantity']< $quantity) continue;
@@ -264,18 +255,14 @@ class OrdersController extends Controller
             $order['total_price']       += $product['price'] * $quantity;
         }
 
-        $result = $this->api2cart->createOrder( $request->get('cart_id') , $order );
+        list($returnCode, $result) = $this->api2cart->createOrder( $request->get('cart_id') , $order );
 
-        if ($result){
-
-
-            return response()->json([ 'log' => $this->api2cart->getLog(), 'item' => $this->api2cart->getOrderInfo( $request->get('cart_id'), $result['order_id'] ) ]);
-
+        if ($returnCode == 0){
+            return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => true, 'item' => $this->api2cart->getOrderInfo( $request->get('cart_id'), $result['order_id'] ) ]);
         } else {
             // error creating order
-            return response()->json([ 'log' => $this->api2cart->getLog() ], 404);
+            return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $result ]);
         }
-
 
     }
 
