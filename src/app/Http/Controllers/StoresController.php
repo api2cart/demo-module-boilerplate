@@ -6,6 +6,7 @@ use App\Http\Requests\StoreRequest;
 use App\Services\Api2Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Cache;
 
 class StoresController extends Controller
 {
@@ -34,20 +35,23 @@ class StoresController extends Controller
          * get account carts & avialable carts
          */
         $carts = collect($this->api2cart->getCartList());
-        $allCarts = collect($this->api2cart->getCartsList());
 
-//        Log::debug( print_r($allCarts,1));
-//        if ( !$carts->count() || !$allCarts->count() ) return response()->json([],404);
-
+        $allCarts = Cache::remember('allCarts', 3600, function () {
+            return collect($this->api2cart->getCartsList());
+        });
 
         $result = $carts->map(function ($store) use ($allCarts) {
-            $info = $this->api2cart->getCart( $store['store_key'] );
+            $info = Cache::remember('cart_' . $store['store_key'], 3600, function () use ($store) {
+                return $this->api2cart->getCart( $store['store_key'] );
+            });
+
             // put additional info
             $store['stores_info']['store_owner_info']   = [
                 'owner' => ( isset($info['stores_info'][0]['store_owner_info']['owner']) ) ? $info['stores_info'][0]['store_owner_info']['owner'] : null,
                 'email' => ( isset($info['stores_info'][0]['store_owner_info']['email']) ) ? $info['stores_info'][0]['store_owner_info']['email'] : null
             ];
             $store['cart_info']     = $allCarts->where('cart_id', $store['cart_id'])->first();
+
             return $store;
         });
 
