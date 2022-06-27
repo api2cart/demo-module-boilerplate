@@ -634,3 +634,14 @@ label {
 .circle-int.mercadolibre {
     background-position: 0 -5612px
 }
+
+#dtable {
+    .table-info, .table-info>th,  .table-info>td {
+        background-color: #0074c226;
+        border-color: #444444;
+
+        thead th, tbody+tbody {
+            border-color: #444444;
+        }
+    }
+}
