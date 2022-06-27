@@ -4,16 +4,15 @@
     <script type="text/javascript">
 
         var curentProducts = [];
+        var orderItems = [];
 
         function loadData(created_from = null) {
-
-            items = [];
 
             return axios({
                 method: 'post',
                 url: '{{ route('stores.list') }}',
                 data: {
-                    length: 10,
+                    length: 15,
                     start: 0
                 }
             }).then(function (response) {
@@ -37,64 +36,67 @@
                     return;
                 }
 
+                var mappedStores = {};
+                $.each(stores, function (key, value) {
+                    mappedStores[value.cart_id] = value;
+                });
 
-                for (let i = 0; i < stores.length; i++) {
+                var datatable = $('#dtable').dataTable().api();
 
-                    blockUiStyled('<h4>Loading ' + stores[i].url + ' information.</h4>');
+                datatable.clear();
+                var storeKeys = [];
 
-                    axios({
-                        method: 'post',
-                        url: '{{ route('orders.list') }}/' + stores[i].store_key,
-                        data: {
-                            length: 10,
-                            start: 0,
-                            limit: 3,
-                            sort_by: 'create_at',
-                            sort_direct: 'desc',
-                            created_from: created_from
-                        }
-                    }).then(function (rep) {
+                $.each(stores, function ($i, value) {
+                    storeKeys.push(value.store_key);
+                });
 
-                        let orders = rep.data.data;
-                        let logs = rep.data.log;
+                blockUiStyled('<h4>Loading orders information.</h4>');
 
-                        blockUiStyled('<h4>Adding ' + stores[i].url + ' orders.</h4>');
+                axios({
+                    method: 'post',
+                    url: '{{ route('orders.list') }}',
+                    data: {
+                        storeKeys: storeKeys,
+                        length: 15,
+                        start: 0,
+                        limit: 15,
+                        sort_by: 'create_at',
+                        sort_direct: 'desc',
+                        created_from: created_from
+                    }
+                }).then(function (rep) {
 
-                        $.each(orders, function (index, value) {
-                            value.cart_id = stores[i];
-                            items.push(value);
-                        });
+                    let orders = rep.data.data;
+                    let logs = rep.data.log;
 
-                        //update log count
-                        if (rep.data.log) {
-                            for (let k = 0; k < rep.data.log.length; k++) {
-                                logItems.push(rep.data.log[k]);
-                            }
-                            calculateLog();
-                        }
+                    blockUiStyled('<h4>Adding orders.</h4>');
 
-
-                        var datatable = $('#dtable').dataTable().api();
-
-                        datatable.clear();
-                        datatable.rows.add(items);
-                        datatable.order([1, "desc"]).draw();
-
-
-                        $.unblockUI();
-
-                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
-
-
+                    $.each(orders, function (index, value) {
+                        value.cart_id = mappedStores[value.cart_id];
+                        orderItems.push(value);
                     });
 
+                    //update log count
+                    if (rep.data.log) {
+                        for (let k = 0; k < rep.data.log.length; k++) {
+                            logItems.push(rep.data.log[k]);
+                        }
+                        calculateLog();
+                    }
 
-                }
+                    var datatable = $('#dtable').dataTable().api();
 
+                    datatable.clear();
+                    datatable.rows.add(orderItems);
+                    datatable.order([1, "desc"]).draw();
+
+
+                    $.unblockUI();
+
+                    $.growlUI('Notification', 'Order data loaded successfull!', 500);
+                });
 
             }).catch(function (error) {
-                // handle error
-                // console.log(error.response);
 
                 if (error.response.data.log) {
                     for (let k = 0; k < error.response.data.log.length; k++) {
@@ -110,7 +112,6 @@
                     'Do not have store info, please check API log.',
                     'error'
                 )
-
             });
         }
 
@@ -139,9 +140,7 @@
                 }
 
                 calculateTotalPrice();
-
             });
-
         }
 
         function calculateTotalPrice() {
@@ -210,14 +209,19 @@
                             })
                                 .then(function (presponse) {
 
-                                    // console.log( presponse );
-
-                                    Swal.fire(
-                                        'OK!',
-                                        'New order created succesfully! ',
-                                        'success'
-                                    )
-
+                                    if (presponse.data.success) {
+                                        Swal.fire(
+                                            'OK!',
+                                            'New order created succesfully! ',
+                                            'success'
+                                        );
+                                    } else {
+                                        Swal.fire(
+                                            'ERROR!',
+                                            presponse.data.errormessage,
+                                            'error'
+                                        );
+                                    }
 
                                     return true;
                                 })
@@ -243,14 +247,10 @@
                                             }
 
                                         });
-
                                     }
-
 
                                     return false;
                                 });
-
-
                         },
                     });
 
@@ -325,8 +325,6 @@
 
                                 $.unblockUI();
                             }));
-
-
                     });
 
                     $('#cart_id').change(function () {
@@ -363,8 +361,7 @@
             // console.log('check for new orders');
             blockUiStyled('<h4>Loading new orders.</h4>');
 
-
-            let oldItems = items;
+            let oldItems = orderItems;
             let scount = 0;
             let isNew = false;
 
@@ -373,99 +370,94 @@
 
             $('#dtable tr').removeClass('table-info');
 
-            $.each(stores, function (i, stor) {
-                blockUiStyled('<h4>Loading ' + stor.url + ' information.</h4>');
-
-                axios({
-                    method: 'post',
-                    url: '{{ route('orders.list') }}/' + stor.store_key,
-                    data: {
-                        length: 10,
-                        start: 0,
-                        limit: 3,
-                        sort_by: 'create_at',
-                        sort_direct: 'desc',
-                        created_from: last_order
-                    }
-                }).then(function (rep) {
-
-                    //console.log( stores[i] );
-                    scount++;
-
-                    let orders = rep.data.data;
-                    let logs = rep.data.log;
-
-                    if (rep.data.log) {
-                        for (let k = 0; k < rep.data.log.length; k++) {
-                            logItems.push(rep.data.log[k]);
-                        }
-                        calculateLog();
-
-                    }
-
-                    $.each(orders, function (oi, order) {
-
-                        order.cart_id = stor;
-
-                        let elexist = items.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key);
-
-                        if (typeof elexist == 'undefined') {
-
-                            // add new order to table and highlight it
-                            items.push(order);
-
-                            datatable.clear();
-                            datatable.rows.add(items);
-                            datatable.order([1, "desc"]).draw();
-
-                            datatable.rows().every(function () {
-                                var tobj = this;
-                                var tnode = tobj.node();
-                                var tdata = tobj.data();
-                                if (tdata.cart_id.store_key == stor.store_key && tdata.id == order.id) {
-                                    $(tnode).addClass('table-info');
-                                }
-                            });
-
-                            isNew = true;
-
-                        }
-
-
-                    });
-
-                    $.unblockUI();
-                    $.growlUI('Notification', stor.url + ' data loaded successfull!', 500);
-
-                    if (scount == stores.length) {
-                        //lastone store finished - compare
-                        // console.log( items );
-                        // console.log( oldItems );
-                        if (isNew == false && JSON.stringify(items) === JSON.stringify(oldItems)) {
-
-                            Swal.fire(
-                                'Info!',
-                                'There is no new orders yet. Try bit later.',
-                                'info'
-                            )
-
-                        }
-
-                    }
-
-
-                }).catch(function (error) {
-                    // handle error
-                    console.log(error);
-                });
-
-
+            var mappedStores = {};
+            $.each(stores, function (key, value) {
+                mappedStores[value.cart_id] = value;
             });
 
+            var storeKeys = [];
+            $.each(stores, function ($i, value) {
+                storeKeys.push(value.store_key);
+            });
 
-            // $.unblockUI();
+            blockUiStyled('<h4>Loading odrers information.</h4>');
+
+            axios({
+                method: 'post',
+                url: '{{ route('orders.list') }}',
+                data: {
+                    storeKeys: storeKeys,
+                    length: 15,
+                    start: 0,
+                    limit: 15,
+                    sort_by: 'create_at',
+                    sort_direct: 'desc',
+                    created_from: last_order
+                }
+            }).then(function (rep) {
+                scount++;
+
+                let orders = rep.data.data;
+                let logs = rep.data.log;
+
+                if (rep.data.log) {
+                    for (let k = 0; k < rep.data.log.length; k++) {
+                        logItems.push(rep.data.log[k]);
+                    }
+                    calculateLog();
+
+                }
+
+                datatable.clear();
+
+                $.each(orders, function (oi, order) {
+                    let stor = mappedStores[order.cart_id];
+                    order.cart_id = stor;
+
+                    let elexist = orderItems.find(el => el.id == order.id && el.cart_id.store_key == stor.store_key);
+
+                    if (typeof elexist == 'undefined') {
+                        order.is_new = true;
+                        orderItems.push(order);
+
+                        isNew = true;
+                    }
+                });
+
+                datatable.rows.add(orderItems);
+                datatable.order([1, "desc"]).draw();
+
+                datatable.rows().every(function () {
+
+                    var tobj = this;
+                    var tnode = tobj.node();
+                    var tdata = tobj.data();
+                    if (tdata.is_new !== undefined) {
+                        $(tnode).addClass('table-info');
+                    }
+                });
+
+                $.unblockUI();
+                $.growlUI('Notification', 'Orders data loaded successfull!', 500);
+
+                if (scount == stores.length) {
+                    if (isNew == false && JSON.stringify(orderItems) === JSON.stringify(oldItems)) {
+
+                        Swal.fire(
+                            'Info!',
+                            'There is no new orders yet. Try bit later.',
+                            'info'
+                        )
+
+                    }
+
+                }
+
+            }).catch(function (error) {
+                // handle error
+                console.log(error);
+            });
         }
-
 
         var table;
 
@@ -484,8 +476,8 @@
                 processing: true,
                 serverSide: false,
                 // ordering: false,
-                data: items,
-                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col">>',
+                data: orderItems,
+                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col"p>>',
                 buttons: [
                     {
                         text: 'Reload',
@@ -503,9 +495,8 @@
                     $('#dtable_filter input').focus();
                 },
                 order: [[1, "desc"]],
-
                 // iDisplayLength: 10,
-                // bLengthChange: false,
+                bLengthChange: false,
 
                 columns: [
                     {
@@ -519,7 +510,7 @@
                             function (data, type, row, meta) {
                                 return type === 'sort' ? data.create_at.value : moment(data.create_at.value).format('lll');
                                 // return moment(data.create_at.value).format('D/MM/YYYY HH:mm');
-                            }, orderable: false
+                            }, orderable: true
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
@@ -575,7 +566,6 @@
                 }
             } );
 
-
             $('#_btnCreateOrder').click(function(){
                 addOrder();
                 return false;
@@ -584,9 +574,6 @@
                 checkNewOrders();
                 return false;
             });
-
-
-
         } );
     </script>
 @endsection
@@ -640,7 +627,6 @@
                                 </thead>
                             </table>
                         </div>
-
 
                     </div>
                 </div>
