@@ -952,8 +952,6 @@ class Api2Cart
                 return null;
             }
 
-
-
         } catch (\Exception $e){
 
 //            Log::debug( $e->getMessage() );
@@ -1012,9 +1010,6 @@ class Api2Cart
                     null
                 );
 
-//                Log::debug('edit_product_result');
-//                Log::debug( print_r($result,1));
-
                 $this->logApiCall( 'product.update.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
 
                 if ( $result->getReturnCode() == 0 ){
@@ -1025,19 +1020,14 @@ class Api2Cart
                     return null;
                 }
 
-
             } else {
                 return null;
             }
 
-
         } catch (\Exception $e){
-
-//            Log::debug( $e->getMessage() );
             $this->logApiCall( 'product.update.json', $e->getCode(), $this->account->getConfig(), null, null, null, $e->getMessage(), ['product_id' => $product_id, 'fields' => $fields]  );
             return false;
         }
-
     }
 
     public function addProduct( $store_id=null, $fields=[] ){
@@ -1056,13 +1046,13 @@ class Api2Cart
 
                 $this->logApiCall( 'product.add.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), $fields  );
 
-                if ( $result->getReturnCode() == 0 ){
 
-                    return $result;
-
+                if ($result->getReturnCode() == 0) {
+                    return [0, $result];
                 } else {
-                    if ($this->debug) Log::debug( print_r($result,1) );
-                    return null;
+                    if ($this->debug) Log::debug(print_r($result, 1));
+
+                    return [$result->getReturnCode(), $result->getReturnMessage()];
                 }
 
 
