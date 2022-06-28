@@ -10,10 +10,9 @@
             $('.editBItem').click(function(){
                 blockUiStyled('<h4>Loading products details.</h4>');
 
-                axios.get( '{{ route('businessCases.automatic_price_updating.edit') }}' )
+                axios.get( $(this).data('action') )
                     .then(function (response) {
                         // handle success
-                        // console.log(response);
                         $.unblockUI();
 
                         Swal.fire({
@@ -26,7 +25,7 @@
                             },
                             showCancelButton: true,
                             showCloseButton: true,
-                            confirmButtonText: 'Update in All Stores',
+                            confirmButtonText: 'Update',
                             width: '70%',
                             allowOutsideClick: false,
                             preConfirm: ( pconfirm ) => {
@@ -47,9 +46,6 @@
                                 }).then(function (presponse) {
 
                                     $.unblockUI();
-
-                                    // console.log( presponse );
-
                                     //update log count
                                     if ( presponse.data.log ){
                                         for (let k=0; k<presponse.data.log.length; k++){
@@ -64,14 +60,10 @@
                                         'Update all product done.',
                                         'success'
                                     ).then((result) => {
-
-                                        // console.log( 'load product details' );
                                         loadData();
-
                                     });
 
                                 }).catch(function (error) {
-                                    // console.log(error);
                                     $.unblockUI();
 
                                     if ( typeof error.response.data.errors != 'undefined'){
@@ -93,17 +85,10 @@
                                         $( $(awin).parent() ).show().fadeOut(9000);
                                     }
 
-
                                     return false;
                                 });
-
-
                             },
                         });
-
-
-
-                        // $.unblockUI();
 
                     })
                     .catch(function (error) {
@@ -116,22 +101,17 @@
                             'Looks stores do not have product scope or store reseting right now.',
                             'info'
                         ).then((result) => {
-
                             $('#_btnCreateProducts').click();
-
                         });
-
                     });
 
-
                 return false;
-
             });
         }
 
         function loadData( created_from=null , product_only=false ){
 
-            blockUiStyled('<h4>Loading products information.</h4>');
+            blockUiStyled('<h4>Loading stores information.</h4>');
 
             items = [];
 
@@ -165,58 +145,45 @@
                     return;
                 }
 
+                storeKeys = [];
+                $.each(stores, function (key, value) {
+                    storeKeys[key] = value.store_key
+                });
 
-                axios.get( '{{ route('businessCases.automatic_price_updating.products') }}' )
-                    .then(function (response) {
+                blockUiStyled('<h4>Loading products information.</h4>');
+
+                axios.get(
+                        '{{ route('businessCases.automatic_price_updating.products') }}',
+                        {params: {store_keys: storeKeys}}
+                    ).then(function (response) {
                         // handle success
-                        // console.log(response);
 
                         $.unblockUI();
 
-
                         if ( typeof response.data.items == 'undefined' || response.data.items.length < 1 ){
                             // looks not items - show message to
-
                             return;
                         }
 
-                        items[0] = response.data.items[0];
-                        items[0]['product_stores'] = [];
-                        items[0]['product_stores_url'] = [];
-
-                        $.each( response.data.items , function( index, value ) {
-
-                            let stor = stores.find(el => el.store_key === value.store_key);
-                            items[0]['product_stores'][index] = stor;
-                            items[0]['product_stores_url'][index] = value['url'];
-                            // console.log( index , value, stor );
-                        });
-
-                        // console.log( items[0] );
-
                         ptatable = $('#pdtable').dataTable().api();
                         ptatable.clear();
-                        ptatable.rows.add( items );
+
+                        $.each( response.data.items , function( index, value ) {
+                            let stor = stores.find(el => el.store_key === value.store_key);
+                            value['product_store'] = stor;
+                            ptatable.row.add( value );
+                        });
+
                         ptatable.draw();
-
-
-
                         reinitAct();
                     })
                     .catch(function (error) {
                         // handle error
-                        // console.log(error);
-
                         $('#_btnCreateProducts').click();
-
                     })
-
-
-
 
             }).catch(function (error) {
                 // handle error
-                // console.log(error.response);
 
                 if ( error.response.data.log ){
                     for (let k=0; k<error.response.data.log.length; k++){
@@ -232,10 +199,8 @@
                     'Do not have store info, please check API log.',
                     'error'
                 )
-
             });
         }
-
 
         $(document).ready(function() {
             $.ajaxSetup({
@@ -244,23 +209,20 @@
                 }
             });
 
-            // blockUiStyled('<h4>Loading stores information.</h4>');
-
             loadData();
 
             table = $('#pdtable').DataTable( {
                 processing: true,
                 serverSide: false,
-                // ordering: false,
+                ordering: true,
+                bLengthChange: false,
                 data: items,
-                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col">>',
+                dom: '<"row"<"col"bl><"col"><"col">><t><"row"<"col"i><"col"p>>',
                 buttons: [
                     {
                         text: 'Reload',
                         action: function ( e, dt, node, config ) {
-
                             window.location.reload();
-
                         }
                     }
                 ],
@@ -291,20 +253,13 @@
                                 if (product_selected.length){
                                     $(".num_selected").append( "Selected: " + product_selected.length );
                                 }
-                                // console.log( rows_selected );
-
                             },
-                            // 'selectAllCallback': function(nodes,selected){
-                            //     // console.log( nodes);
-                            //
-                            // },
                         }
                     }
                 ],
                 select: {
                     'style': 'multi',
                 },
-                order: [[1, 'desc']],
                 columns: [
                     { data: null, render:
                             function(data, type, row, meta){
@@ -328,14 +283,15 @@
                     },
                     { data: null, render: function ( data, type, row, meta ){
                             let st = '';
-                            $.each( data.product_stores , function( index, value ) {
+                            if (data.product_store !== undefined) {
 
-                                let imgName = value.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+
+                                let imgName = data.product_store.cart_info.cart_name.toLowerCase().replace(/ /g, "_");
                                 st += '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>';
                                 st += '<div class="cartInfo">' +
-                                        '<small><a href="'+ data.product_stores_url[index] +'" target="_blank">'+ data.product_stores_url[index] +'</a></small>' +
+                                        '<small><a href="' + data.product_store.url + '" target="_blank">' + data.product_store.url + '</a></small>' +
                                       '</div>';
-                            });
+                            }
                             return st;
                         }},
                     { data: null, render: function ( data, type, row, meta ){
@@ -349,7 +305,10 @@
                     },
                     { data: null, render:
                             function(data, type, row, meta){
-                                return '<a href="#"  class="text-success editBItem" data-action="{{ route('businessCases.automatic_price_updating.edit') }}" data-id="'+data.u_sku+'" ><i class="fas fa-edit"></i></a> ';
+                                return '<a href="javascript:void(0);"  class="text-success editBItem"' +
+                                         'data-action="{{ route('businessCases.automatic_price_updating.edit') }}?store_key=' + data.store_key + '&id=' + data.id + '"' +
+                                         'data-id="'+data.u_sku+'" ><i class="fas fa-edit"></i>' +
+                                       '</a> ';
                             },orderable : false,  "searchable": false,
                     },
 
@@ -360,11 +319,6 @@
                         html: true
                     });
                     // reinitActions();
-
-
-
-
-
                 }
             } );
 
@@ -373,7 +327,6 @@
                 axios.get( '{{ route('businessCases.automatic_price_updating.create') }}' )
                     .then(function (response) {
                         // handle success
-                        // console.log(response);
                         Swal.fire({
                             title: 'Create product',
                             html: response.data.data,
@@ -404,10 +357,7 @@
                                         'Content-Type': 'multipart/form-data'
                                     }
                                 }).then(function (presponse) {
-
                                     $.unblockUI();
-
-                                    // console.log( presponse );
 
                                     //update log count
                                     if ( presponse.data.log ){
@@ -417,20 +367,23 @@
                                         calculateLog();
                                     }
 
-
-                                    Swal.fire(
-                                        'Success!',
-                                        'Sample product created',
-                                        'success'
-                                    ).then((result) => {
-
-                                        // console.log( 'load product details' );
-                                        loadData();
-
-                                    });
+                                    if (presponse.data.success) {
+                                        Swal.fire(
+                                            'OK!',
+                                            'New product created succesfully! ',
+                                            'success'
+                                        ).then((result) => {
+                                            loadData();
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            'ERROR!',
+                                            presponse.data.errormessage,
+                                            'error'
+                                        );
+                                    }
 
                                 }).catch(function (error) {
-                                    // console.log(error);
                                     $.unblockUI();
 
                                     if ( typeof error.response.data.errors != 'undefined'){
@@ -441,7 +394,7 @@
                                             let msg = value.shift();
 
                                             $(err).empty().append( msg );
-                                            $(obj).addClass('is-invalid')
+                                            $(obj).addClass('is-invalid');
 
                                             err_msg += '<li>' + msg + '</li>';
                                         });
@@ -452,18 +405,10 @@
                                         $( $(awin).parent() ).show().fadeOut(9000);
                                     }
 
-
                                     return false;
                                 });
-
-
                             },
                         });
-
-
-
-                        // $.unblockUI();
-
                     })
                     .catch(function (error) {
                         // handle error
@@ -475,15 +420,10 @@
                             'Failed create ' + name,
                             'error'
                         )
-
                     });
-
 
                 return false;
             });
-
-
-
         } );
     </script>
 @endsection
@@ -542,9 +482,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
                 </div>
 
