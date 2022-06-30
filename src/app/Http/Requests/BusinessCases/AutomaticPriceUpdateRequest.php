@@ -25,10 +25,10 @@ class AutomaticPriceUpdateRequest extends FormRequest
     {
         return [
             'name'          => ['required'],
-            'sku'           => ['required'],
             'price'         => ['required'],
             'description'   => ['required'],
             'quantity'      => ['required'],
+            'cart_id'       => ['required']
         ];
     }
 }

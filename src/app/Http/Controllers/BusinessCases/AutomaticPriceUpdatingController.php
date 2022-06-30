@@ -4,10 +4,10 @@ namespace App\Http\Controllers\BusinessCases;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BusinessCases\AutomaticPriceUpdateRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-
 
 use App\Services\Api2Cart;
 
@@ -24,14 +24,6 @@ class AutomaticPriceUpdatingController extends Controller
 
     public function index()
     {
-
-//        $result = $this->api2cart->getProductList( "1316ad9a66ac871ce46a3d59005acc9c", null, null, null, null , null );
-//        session()->put('automatic_price_updating', collect( $result['result']['product'] ) );
-//
-//        $products = session()->get('automatic_price_updating');
-//
-//        print_r($products);
-
         return view('business_cases.automatic_price_updating.index');
     }
 
@@ -39,7 +31,9 @@ class AutomaticPriceUpdatingController extends Controller
     public function create(Request $request)
     {
         if ( $request->ajax() ){
-            return response()->json(['data' => view('business_cases.automatic_price_updating.form')->render(), 'log' => $this->api2cart->getLog() ]);
+            $carts = collect($this->api2cart->getCartList());
+            $isCreate = true;
+            return response()->json(['data' => view('business_cases.automatic_price_updating.form', compact('isCreate', 'carts'))->render(), 'log' => $this->api2cart->getLog() ]);
         }
 
         return redirect(route('business_cases.automatic_price_updating'));
@@ -47,22 +41,16 @@ class AutomaticPriceUpdatingController extends Controller
 
     public function store(AutomaticPriceUpdateRequest $request)
     {
-        Log::debug( $request->all() );
-
-        $products = [];
-        $carts = collect($this->api2cart->getCartList());
-
         $formData = $request->except('_hash');
         $formData['model'] = $formData['sku'];
 
-        foreach ($carts as $item){
+        list($returnCode, $result) = $this->api2cart->addProduct($formData['cart_id'], $formData);
 
-            $result = $this->api2cart->addProduct($item['store_key'], $formData);
+        if ($returnCode == 0) {
+            // add image to product
+            if ( isset($result['result']['product_id']) && $result['result']['product_id'] != '' ) {
 
-            // add image for each product
-            if ( isset($result['result']['product_id']) && $result['result']['product_id'] != '' ){
-
-                $this->api2cart->addProductImage( $item['store_key'], $result['result']['product_id'],
+                $this->api2cart->addProductImage($formData['cart_id'], $result['result']['product_id'],
                     // image data goes here
                     [
                         'type'          => 'base',
@@ -70,93 +58,74 @@ class AutomaticPriceUpdatingController extends Controller
                         'url'           => 'https://dummyimage.com/600x400/ffffff/0011ff.png'
                     ]
                 );
-
             }
 
-            if ($result['result']['product_id'] != ''){
-                $products[] = [
-                    'store_key'     => $item['store_key'],
-                    'product_id'    => $result['result']['product_id'],
-                    'sku'           => $request->get('sku'),
-                ];
-            }
-
+            return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => true, 'item' => $this->api2cart->getProductInfo( $formData['cart_id'], $result['ptoduct_id'] ) ]);
+        } else {
+            return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $result ]);
         }
-
-
-//        Log::debug( print_r($products,1) );
-
-        session()->put('automatic_price_updating', $products);
-
-        return response()->json(['items' => $products,'log' => $this->api2cart->getLog() ]);
-
-
     }
 
 
     public function products(Request $request)
     {
-        $products = [];
-        $products_ids = session()->get('automatic_price_updating');
+        $products = collect([]);
+        $limit = 5;
+        $carts = $request->get('store_keys', []);
 
-//        Log::debug( print_r($products_ids,1) );
+        foreach ($carts as $storeKey) {
+            $productsInfo = $this->api2cart->getProductList($storeKey, null, 'create_at', 'desc', $limit);
 
-        if ( !$products_ids ) return response(null, 404);
-
-        foreach ($products_ids as $item){
-            $tmp = $this->api2cart->getProductInfo( $item['store_key'], $item['product_id'] );
-            if ($tmp) {
-                $tmp['store_key'] = $item['store_key'];
-                $products[] = $tmp;
+            if ($productsInfo) {
+                foreach ($productsInfo['result']['product'] ?? [] as $productInfo) {
+                    $productInfo['store_key'] = $storeKey;
+                    $productInfo['create_at']['value'] = Carbon::parse($productInfo['create_at']['value'])->setTimezone('UTC')->format("Y-m-d\TH:i:sO");
+                    $products->push($productInfo);
+                }
             }
         }
 
-//        Log::debug( print_r($products,1) );
+        $items = [];
 
+        foreach ($products->sortBy('create_at.value', null, true)->toArray() as $item) {
+            $items[] = $item;
+        }
 
-        return response()->json(['items'=>$products]);
-
+        return response()->json(['items' => $items]);
     }
 
     public function edit(Request $request)
     {
         $this->api2cart->debug = false;
+        $isCreate = false;
+        $storeKey = $request->get('store_key', '');
+        $productId = $request->get('id', '');
 
-        $products = [];
-        $products_ids = session()->get('automatic_price_updating');
+        $product = [];
 
-        foreach ($products_ids as $item){
-            $tmp = $this->api2cart->getProductInfo( $item['store_key'], $item['product_id'] );
-            if ($tmp) {
-                $tmp['store_key'] = $item['store_key'];
-                $products[] = $tmp;
+        if ($storeKey && $productId) {
+            $res = $this->api2cart->getProductInfo($storeKey, $productId);
+
+            if ($res) {
+                $res['store_key'] = $storeKey;
+                $product = $res;
             }
         }
 
-        if ( count($products) != count($products_ids) ){
-            // looks stores reseting
-//            Log::debug( print_r($products,1) );
-            session()->flash('automatic_price_updating');
-            return response('Please create new product scope',404);
-        }
-
-        $product = $products[0];
-
         if ( $request->ajax() ){
-            return response()->json(['data' => view('business_cases.automatic_price_updating.form', compact('products','product'))->render(), 'log' => $this->api2cart->getLog() ]);
+            return response()->json([
+                'data' => view('business_cases.automatic_price_updating.form', compact('productId', 'storeKey', 'product', 'isCreate'))->render(),
+                'log' => $this->api2cart->getLog()
+            ]);
         }
     }
 
 
     public function update(AutomaticPriceUpdateRequest $request)
     {
-        $products_ids = session()->get('automatic_price_updating');
         $formData = $request->except('_token','_method');
-        $formData['model'] = $formData['sku'];
 
-        foreach ($products_ids as $item){
-            $this->api2cart->updateProduct( $item['store_key'], $item['product_id'], $formData );
-        }
+        $this->api2cart->updateProduct($formData['cart_id'], $formData['product_id'], $formData);
 
         return response()->json(['log' => $this->api2cart->getLog()]);
 
