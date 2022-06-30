@@ -11,6 +11,24 @@
     <div id="_form_errors" class="text-left"></div>
 </div>
 
+@if (isset($carts))
+<div class="form-group row">
+    <label for="name" class="col-4 col-form-label">Store Type</label>
+    <div class="col-8">
+        <select class="custom-select" id="cart_id" name="cart_id" required >
+            <option selected disabled value="">Choose your cart...</option>
+            @foreach($carts as $item)
+                <option value="{!! $item['store_key'] !!}">{{ $item['cart_id'] }} [ {{ $item['url'] }} ] </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback"></div>
+    </div>
+</div>
+@elseif (isset($storeKey))
+    <input type="hidden" name="cart_id" value="{{ $storeKey }}" required>
+    <input type="hidden" name="product_id" value="{{ $productId }}" required>
+@endif
+
 <div class="row">
     <div class="col-12">
         <div class="form-group row">
@@ -23,6 +41,7 @@
     </div>
 </div>
 
+@if ($isCreate)
 <div class="row">
     <div class="col-12">
         <div class="form-group row">
@@ -34,6 +53,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <div class="row">
     <div class="col-12">
