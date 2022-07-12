@@ -164,15 +164,50 @@ class OrdersController extends Controller
 
     public function abandoned($store_id=null, Request $request)
     {
-        $items = collect( $this->api2cart->getAbandonedCart( $store_id ) );
         $data = [
-            "recordsTotal"      => (is_array($items)) ? count($items) : 0,
-            "recordsFiltered"   => (is_array($items)) ? count($items) : 0,
-            "start"             => 0,
-            "length"            => 10,
-            "data"              => collect($items),
-            'log'               => $this->api2cart->getLog(),
+            "recordsTotal" => 0,
+            "recordsFiltered" => 0,
+            "start" => 0,
+            "length" => 10,
+            "data" => collect([]),
+            'log' => $this->api2cart->getLog(),
         ];
+
+        if ($store_id) {
+            $items = collect($this->api2cart->getAbandonedCart($store_id));
+            $data = [
+                "recordsTotal" => (is_array($items)) ? count($items) : 0,
+                "recordsFiltered" => (is_array($items)) ? count($items) : 0,
+                "start" => 0,
+                "length" => 10,
+                "data" => collect($items),
+                'log' => $this->api2cart->getLog(),
+            ];
+        } elseif ($storeIds = $request->get('storeKeys', [])) {
+            $orders = collect([]);
+
+            foreach ($storeIds as $store_id) {
+                $items = collect($this->api2cart->getAbandonedCart($store_id));
+
+                if ($items->count()) {
+                    foreach ($items as $item) {
+                        $newItem = $item;
+                        $newItem['cart_id'] = $store_id;
+                        $newItem['created_at']['value'] = Carbon::parse($item['created_at']['value'])->setTimezone('UTC')->format("Y-m-d\TH:i:sO");
+                        $orders->push($newItem);
+                    }
+                }
+            }
+
+            $data = [
+                "recordsTotal" => $orders->count(),
+                "recordsFiltered" => $orders->count(),
+                "start" => 0,
+                "length" => 10,
+                "data" => $orders->sortBy('created_at.value', null, true)->toArray(),
+                'log' => $this->api2cart->getLog(),
+            ];
+        }
 
         return response()->json($data);
     }
