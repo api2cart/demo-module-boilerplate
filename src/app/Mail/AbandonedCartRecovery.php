@@ -11,7 +11,7 @@ class AbandonedCartRecovery extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $data;
+    public $abandoned;
 
     /**
      * Create a new message instance.
@@ -20,7 +20,7 @@ class AbandonedCartRecovery extends Mailable
      */
     public function __construct($data)
     {
-        $this->data = $data;
+        $this->abandoned = $data;
     }
 
     /**
