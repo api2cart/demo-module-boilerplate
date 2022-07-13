@@ -21,57 +21,64 @@ class AbandonedCartRecoveryController extends CasesController
 
     public function index()
     {
-//        dd( $this->api2cart->getAbandonedCart('1316ad9a66ac871ce46a3d59005acc9c') );
         return view('business_cases.abandoned_cart_recovery.index');
     }
 
     public function send(Request $request)
     {
 
-        $abandoned = [];
+        $abandoneds = [];
+        $countMail = 0;
 
-        foreach ($request->get('items') as $item){
+        foreach ($request->get('items') as $item) {
             $pid = explode(':', $item);
-            $cart = collect( $this->api2cart->getAbandonedCart( $pid[0] ) );
-            $storeInfo = $this->api2cart->getCart( $pid[0] );
+            $cart = collect($this->api2cart->getAbandonedCart($pid[0]));
+            $storeInfo = $this->api2cart->getCart($pid[0]);
 
             // adding selected abandoned carts
-            foreach ($cart as $ci){
-                if ( isset($ci['customer']['id']) && $ci['customer']['id'] == $pid[1] ) {
+            foreach ($cart as $ci) {
+                if (isset($ci['customer']['id']) && $ci['id'] == $pid[1] && !empty($ci['customer']['email'])) {
                     $ci['store_info'] = $storeInfo;
                     $ci['store_key'] = $pid[0];
-                    $abandoned[] = $ci;
+                    $abandoneds[($pid[2] ?? $ci['customer']['email'] ?? $pid[0] . $pid[1])][] = $ci;
                 }
             }
         }
 
-        foreach ($abandoned as $k=>$cart){
+        foreach ($abandoneds as $abandoned) {
+            foreach ($abandoned as $k => $cart) {
+                foreach ($cart['order_products'] as $op) {
+                    if ($productInfo = $this->api2cart->getProductInfo($cart['store_key'], $op['product_id'])) {
+                        $abandoned[$k]['products'][] = $productInfo;
+                    }
+                }
 
-            foreach ($cart['order_products'] as $op){
-                $abandoned[$k]['products'][] = $this->api2cart->getProductInfo( $cart['store_key'], $op['product_id']);
+                if (isset($cart['customer']['email'])) {
+                    try {
+                        Mail::to($cart['customer']['email'])->send(new AbandonedCartRecovery([$abandoned[$k]]));
+                        $countMail++;
+                    } catch (Throwable $e) {
+                        return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $e->getMessage()]);
+                    }
+                }
             }
-
-            Mail::to( $request->get('email') )->send( new AbandonedCartRecovery( $abandoned[$k] ) );
-
         }
 
-
+        return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => true, 'countMail' => $countMail]);
     }
 
     public function compose(Request $request)
     {
-//        Log::debug( $request->all() );
-
         $abandoned = [];
 
-        foreach ($request->get('items') as $item){
+        foreach ($request->get('items') as $item) {
             $pid = explode(':', $item);
-            $cart = collect( $this->api2cart->getAbandonedCart( $pid[0] ) );
-            $storeInfo = $this->api2cart->getCart( $pid[0] );
+            $cart = collect($this->api2cart->getAbandonedCart($pid[0]));
+            $storeInfo = $this->api2cart->getCart($pid[0]);
 
             // adding selected abandoned carts
-            foreach ($cart as $ci){
-                if ( isset($ci['customer']['id']) && $ci['customer']['id'] == $pid[1] ) {
+            foreach ($cart as $ci) {
+                if (isset($ci['customer']['id']) && $ci['id'] == $pid[1]) {
                     $ci['store_info'] = $storeInfo;
                     $ci['store_key'] = $pid[0];
                     $abandoned[] = $ci;
@@ -80,17 +87,15 @@ class AbandonedCartRecoveryController extends CasesController
         }
 
 
-            foreach ($abandoned[0]['order_products'] as $op){
-                $abandoned[0]['products'][] = $this->api2cart->getProductInfo( $abandoned[0]['store_key'], $op['product_id']);
+        foreach ($abandoned as $key => $op) {
+            foreach ($op['order_products'] as $item) {
+                if ($productInfo = $this->api2cart->getProductInfo($op['store_key'], $item['product_id'])) {
+                    $abandoned[$key]['products'][] = $productInfo;
+                }
             }
+        }
 
-//        Log::debug( print_r($abandoned[0],1) );
-
-            $data = $abandoned[0];
-
-        return view('emails.abandoned', compact('data') );
-
-
+        return view('emails.abandoned', compact('abandoned'));
     }
 
 }
