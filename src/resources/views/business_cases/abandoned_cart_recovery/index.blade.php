@@ -9,6 +9,8 @@
 
             items = [];
 
+            blockUiStyled('<h4>Loading stores information.</h4>');
+
             return axios({
                 method: 'post',
                 url: '{{ route('stores.list') }}',
@@ -37,69 +39,64 @@
                     return;
                 }
 
+                var mappedStores = {};
+                $.each(stores, function (key, value) {
+                    mappedStores[value.store_key] = value;
+                });
 
-                for (let i=0; i<stores.length; i++){
+                var datatable = $( '#dtable' ).dataTable().api();
+                var storeKeys = [];
+                datatable.clear();
 
-                    blockUiStyled('<h4>Loading '+ stores[i].url +' information.</h4>');
+                $.each(stores, function ($i, value) {
+                    storeKeys.push(value.store_key);
+                });
 
-                    axios({
-                        method: 'post',
-                        url: '{{ route('orders.abandoned') }}/'+stores[i].store_key,
-                        data: {
-                            length: 10,
-                            start: 0,
-                            limit: 3,
-                            sort_by: 'create_at',
-                            sort_direct: 'desc',
-                            created_from: created_from
-                        }
-                    }).then(function (rep) {
+                blockUiStyled('<h4>Loading abandoned orders.</h4>');
 
-
-                        let orders = rep.data.data;
-                        let logs = rep.data.log;
-
-                        blockUiStyled('<h4>Adding '+ stores[i].url +' abandoned orders.</h4>');
-
-                        $.each( orders , function( index, value ) {
-                            value.cart_id = stores[i];
-                            items.push( value );
-                        });
-
-                        //update log count
-                        if ( rep.data.log ){
-                            for (let k=0; k<rep.data.log.length; k++){
-                                logItems.push( rep.data.log[k] );
-                            }
-                            calculateLog();
-                        }
+                axios({
+                    method: 'post',
+                    url: '{{ route('orders.abandoned') }}',
+                    data: {
+                        storeKeys: storeKeys,
+                        length: 10,
+                        start: 0,
+                        limit: 3,
+                        sort_by: 'create_at',
+                        sort_direct: 'desc',
+                        created_from: created_from
+                    }
+                }).then(function (rep) {
 
 
-
-                        var datatable = $( '#dtable' ).dataTable().api();
-
-                        datatable.clear();
-                        datatable.rows.add( items );
-                        datatable.order([ 1, "desc" ]).draw();
+                    let orders = rep.data.data;
+                    let logs = rep.data.log;
 
 
-                        $.unblockUI();
-
-                        $.growlUI('Notification', stores[i].url + ' data loaded successfull!', 500);
-
-
+                    $.each(orders, function (index, value) {
+                        value.cart_id = mappedStores[value.cart_id];
+                        items.push(value);
                     });
 
+                    //update log count
+                    if ( rep.data.log ){
+                        for (let k=0; k<rep.data.log.length; k++){
+                            logItems.push( rep.data.log[k] );
+                        }
+                        calculateLog();
+                    }
 
-                }
+                    datatable.clear();
+                    datatable.rows.add( items );
+                    datatable.order([ 6, "desc" ]).draw();
 
 
+                    $.unblockUI();
 
-
+                    $.growlUI('Notification', 'Data loaded successfull!', 500);
+                });
             }).catch(function (error) {
                 // handle error
-                // console.log(error.response);
-
                 if ( error.response.data.log ){
                     for (let k=0; k<error.response.data.log.length; k++){
                         logItems.push( error.response.data.log[k] );
@@ -134,7 +131,7 @@
             table = $('#dtable').DataTable( {
                 processing: true,
                 serverSide: false,
-                // ordering: false,
+                ordering: true,
                 data: items,
                 dom: '<"row"<"col"><"col"l><"col">><t><"row"<"col"i><"col num_selected"><"col">>',
                 buttons: [
@@ -153,7 +150,7 @@
                 initComplete: function () {
                     $('#dtable_filter input').focus();
                 },
-                order: [[ 1, "desc" ]],
+                order: [[ 6, "desc" ]],
                 columnDefs: [
                     {
                         'targets': 0,
@@ -162,13 +159,12 @@
                             'selectRow': true,
                             'selectAllPages': false,
                             'selectCallback': function(nodes,selected){
-                                // console.log( nodes, selected  );
                                 rows_selected = [];
                                 table.rows().every(function(index, element ){
                                     var tnode = this.node();
 
                                     if ( $(tnode).find('input.dt-checkboxes').is(':checked') ){
-                                        rows_selected.push( $(tnode).find('input.dt-checkboxes').val() );
+                                        rows_selected.push( $(tnode).find('input.dt-checkboxes').val());
                                     }
 
                                 });
@@ -178,23 +174,22 @@
                                 if (rows_selected.length){
                                     $(".num_selected").append( "Selected: " + rows_selected.length );
                                 }
-                                // console.log( rows_selected );
 
-                            },
-                            // 'selectAllCallback': function(nodes,selected){
-                            //     // console.log( nodes);
-                            //
-                            // },
+                            }
                         }
                     }
                 ],
                 select: {
                     'style': 'multi',
                 },
+                bLengthChange: false,
                 columns: [
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return  '<input type="checkbox" class="dt-checkboxes" value="'+ data.cart_id.store_key +':'+ data.customer.id +'" class="'+ data.cart_id.store_key +':'+ data.customer.id +'">';
+                                return  '<input type="checkbox" class="dt-checkboxes"' +
+                                          'value="'+ data.cart_id.store_key +':'+ data.id + ':' + data.customer.email +
+                                          '" class="'+ data.cart_id.store_key +':'+ data.customer.id +
+                                        '">';
                             }, orderable : false
                     },
                     { data: null, render:
@@ -208,11 +203,13 @@
                                         '</div>';
                             }, orderable : false
                     },
-                    { data: null, render: function ( data, type, row, meta ){
-                            let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
-                            let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
-                            return owner+'<br><small>'+email+'</small><br><small>Store Key: '+data.cart_id.store_key+'</small>';
-                    }},
+                    { data: null, render:
+                            function ( data, type, row, meta ) {
+                                let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
+                                let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
+                                return owner+'<br><small>'+email+'</small><br><small>Store Key: '+data.cart_id.store_key+'</small>';
+                            }, orderable : false
+                    },
                     { data: null, render:
                             function ( data, type, row, meta ){
                                 var prod = '';
@@ -236,13 +233,12 @@
                                 var sumbol = ( typeof data.currency.symbol_left != 'undefined' && data.currency.symbol_left != '') ? data.currency.symbol_left : '';
                                 var curren = ( typeof data.currency.symbol_left != 'undefined' && data.currency.symbol_left == '') ? data.currency.iso3 : '';
                                 return  sumbol +' '+ data.totals.total +' '+ curren;
-                            }, orderable : false
+                            }, orderable : true
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
                                 return type === 'sort' ? data.created_at.value : moment(data.created_at.value).format('lll');
-                                // return moment(data.create_at.value).format('D/MM/YYYY HH:mm');
-                            }, orderable : false
+                            }, orderable : true
                     }
                 ],
                 drawCallback: function( settings ) {
@@ -274,49 +270,56 @@
                     return false;
                 }
 
-                Swal.fire({
-                    title: 'Submit your email address',
-                    input: 'email',
-                    inputAttributes: {
-                        autocapitalize: 'off'
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Send',
-                    showLoaderOnConfirm: true,
-                    preConfirm: (email) => {
+                blockUiStyled('<h4>Sending emails....</h4>');
 
+                axios({
+                    method: 'post',
+                    url: '{{ route('businessCases.abandoned_cart_recovery.send') }}',
+                    data: {
+                        items: rows_selected,
+                        //email: email
+                    }
+                }).then(function (rep) {
 
-                        blockUiStyled('<h4>Sending email....</h4>');
+                    $.unblockUI();
 
-                        axios({
-                            method: 'post',
-                            url: '{{ route('businessCases.abandoned_cart_recovery.send') }}',
-                            data: {
-                                items: rows_selected,
-                                email: email
-                            }
-                        }).then(function (rep) {
-
-                            $.unblockUI();
-
-                            Swal.fire(
-                                'OK!',
-                                'Email was send.',
-                                'success'
-                            );
-
-                            $('input:checkbox').prop('checked', false);
-                            rows_selected = [];
-
+                    if (rep.data.success) {
+                        Swal.fire(
+                            'OK!',
+                            rep.data.countMail + ' emails was send.',
+                            'success'
+                        ).then((result) => {
+                            loadData();
                         });
+                    } else {
+                        Swal.fire(
+                            'ERROR!',
+                            rep.data.errormessage,
+                            'error'
+                        );
+                    }
 
+                    $('input:checkbox').prop('checked', false);
+                    rows_selected = [];
 
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
+                }).catch(function (error) {
+                    // handle error
+                    if ( error.response.data.log ){
+                        for (let k=0; k<error.response.data.log.length; k++){
+                            logItems.push( error.response.data.log[k] );
+                        }
+                        calculateLog();
+                    }
+
+                    $.unblockUI();
+
+                    Swal.fire(
+                        'Error!',
+                        'Do not have store info, please check API log.',
+                        'error'
+                    )
+
                 });
-
-
-                return false;
             });
 
             $('#_btnGenerateEmail').click(function(){
@@ -337,8 +340,6 @@
                 $('#template-tab').removeClass('disabled');
                 $('#template-tab').click();
 
-
-
                 $('#_mailTemplate').contents().find("body").empty();
 
                 axios({
@@ -348,15 +349,11 @@
                         items: rows_selected,
                     }
                 }).then(function (rep) {
-
-                    // console.log( rep );
                     $('#_mailTemplate').contents().find("body").append( rep.data );
-
                 });
 
                 return false;
             });
-
 
         } );
     </script>
@@ -386,7 +383,7 @@
                             <div class="col">
                                 <button class="btn btn-primary" id="_btnCheckAbandoned">Get Abandoned carts</button>
                                 <button class="btn btn-primary" id="_btnGenerateEmail">Generate Email</button>
-                                <button class="btn btn-primary" id="_btnCrateAbandonedMail">Create Abandoned cart followups</button>
+                                <button class="btn btn-primary" id="_btnCrateAbandonedMail">Send abandoned cart followups</button>
                             </div>
                         </div>
 
@@ -437,11 +434,6 @@
                                 <iframe id="_mailTemplate" src="" width="100%" height="800" frameborder="0" ></iframe>
                             </div>
                         </div>
-
-
-
-
-
                     </div>
                 </div>
 
