@@ -209,6 +209,7 @@
 </head>
 <body class="body" style="padding:0 !important; margin:0 !important; display:block !important; min-width:100% !important; width:100% !important; background:#2e57ae; -webkit-text-size-adjust:none;">
 <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#2e57ae">
+    @foreach ($abandoned as $data)
     <tr>
         <td align="center" valign="top" class="container" style="padding:50px 10px;">
             <!-- Container -->
@@ -303,7 +304,13 @@
                                                                             <th class="column-top" width="" style="font-size:0pt; line-height:0pt; padding:0; margin:0; font-weight:normal; vertical-align:top;">
                                                                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                                                     <tr>
-                                                                                        <td class="fluid-img pb30" style="font-size:0pt; line-height:0pt; text-align:left; padding-bottom:30px;"><img src="{{ collect($item['images'])->first()['http_path'] }}" style="max-width: 280px; max-height: 420px;" width="280"  border="0" alt="" /></td>
+                                                                                        <td class="fluid-img pb30" style="font-size:0pt; line-height:0pt; text-align:left; padding-bottom:30px;">
+                                                                                            @if (isset($item['images']))
+                                                                                                <img src="{{ collect($item['images'])->first()['http_path'] }}" style="max-width: 280px; max-height: 420px;" width="280"  border="0" alt="" />
+                                                                                            @else
+                                                                                                <img src="{{URL::asset('/images/placeholder-image.png')}}" style="max-width: 280px; max-height: 420px;" width="280"  border="0" alt="" />
+                                                                                            @endif
+                                                                                        </td>
                                                                                     </tr>
                                                                                     <tr>
                                                                                         <td>
@@ -528,6 +535,7 @@
             <!-- END Container -->
         </td>
     </tr>
+    @endforeach
 </table>
 </body>
 </html>
