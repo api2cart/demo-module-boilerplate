@@ -57,7 +57,7 @@ class ProductsController extends Controller
                     // collect product variants
                     if ( isset($item['type']) && $item['type'] === 'configurable' ){
                         $pv = $this->api2cart->getProductVariants($store_id, $item['id'] );
-                        $newItem['children'] = $pv['children'];
+                        $newItem['children'] = $pv['children'] ?? [];
                     }
 
                     $products->push( $newItem );
