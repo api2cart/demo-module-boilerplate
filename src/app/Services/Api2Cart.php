@@ -16,6 +16,7 @@ use App\Models\Log as Logger;
 
 use Api2Cart\Client as ApiClient;
 use Api2Cart\Client\Model\Cart;
+use Api2Cart\Client\Model\AccountCartAdd;
 
 
 class Api2Cart
@@ -240,69 +241,7 @@ class Api2Cart
         $this->setApiKey();
 
         try{
-
-
-
-            $result = $this->account->accountCartAdd(
-                (isset($fields['cart_id'])) ? $fields['cart_id'] : null,
-                (isset($fields['store_url'])) ? $fields['store_url'] : null,
-                (isset($fields['bridge_url'])) ? $fields['bridge_url'] : null,
-                (isset($fields['store_root'])) ? $fields['store_root'] : null,
-                (isset($fields['store_key'])) ? $fields['store_key'] : null,
-                (isset($fields['validate_version'])) ? $fields['validate_version'] : null,
-                (isset($fields['verify'])) ? 'false' : 'true',
-                (isset($fields['db_tables_prefix'])) ? $fields['db_tables_prefix'] : null,
-                (isset($fields['ftp_host'])) ? $fields['ftp_host'] : null,
-                (isset($fields['ftp_user'])) ? $fields['ftp_user'] : null,
-                (isset($fields['ftp_password'])) ? $fields['ftp_password'] : null,
-                (isset($fields['ftp_port']) && intval($fields['ftp_port'])) ? $fields['ftp_port'] : null,
-                (isset($fields['ftp_store_dir'])) ? $fields['ftp_store_dir'] : null,
-                (isset($fields['_3dcartapi_api_key'])) ? $fields['_3dcartapi_api_key'] : null,
-                (isset($fields['amazon_access_token'])) ? $fields['amazon_access_token'] : null,
-                (isset($fields['amazon_seller_id'])) ? $fields['amazon_seller_id'] : null,
-                (isset($fields['amazon_marketplaces_ids'])) ? $fields['amazon_marketplaces_ids'] : null,
-                (isset($fields['amazon_secret_key'])) ? $fields['amazon_secret_key'] : null,
-                (isset($fields['amazon_access_key_id'])) ? $fields['amazon_access_key_id'] : null,
-                (isset($fields['aspdotnetstorefront_api_user'])) ? $fields['aspdotnetstorefront_api_user'] : null,
-                (isset($fields['aspdotnetstorefront_api_pass'])) ? $fields['aspdotnetstorefront_api_pass'] : null,
-                (isset($fields['bigcommerceapi_admin_account'])) ? $fields['bigcommerceapi_admin_account'] : null,
-                (isset($fields['bigcommerceapi_api_path'])) ? $fields['bigcommerceapi_api_path'] : null,
-                (isset($fields['bigcommerceapi_api_key'])) ? $fields['bigcommerceapi_api_key'] : null,
-                (isset($fields['bigcommerceapi_client_id'])) ? $fields['bigcommerceapi_client_id'] : null,
-                (isset($fields['bigcommerceapi_access_token'])) ? $fields['bigcommerceapi_access_token'] : null,
-                (isset($fields['bigcommerceapi_context'])) ? $fields['bigcommerceapi_context'] : null,
-                (isset($fields['demandware_client_id'])) ? $fields['demandware_client_id'] : null,
-                (isset($fields['demandware_api_password'])) ? $fields['demandware_api_password'] : null,
-                (isset($fields['demandware_user_name'])) ? $fields['demandware_user_name'] : null,
-                (isset($fields['demandware_user_password'])) ? $fields['demandware_user_password'] : null,
-                (isset($fields['demandware_env_type'])) ? $fields['demandware_env_type'] : null,
-                (isset($fields['ebay_client_id'])) ? $fields['ebay_client_id'] : null,
-                (isset($fields['ebay_client_secret'])) ? $fields['ebay_client_secret'] : null,
-                (isset($fields['ebay_runame'])) ? $fields['ebay_runame'] : null,
-                (isset($fields['ebay_access_token'])) ? $fields['ebay_access_token'] : null,
-                (isset($fields['ebay_refresh_token'])) ? $fields['ebay_refresh_token'] : null,
-                (isset($fields['ebay_environment'])) ? $fields['ebay_environment'] : null,
-                (isset($fields['ebay_site_id'])) ? $fields['ebay_site_id'] : null,
-                (isset($fields['walmart_client_id'])) ? $fields['walmart_client_id'] : null,
-                (isset($fields['walmart_client_secret'])) ? $fields['walmart_client_secret'] : null,
-                (isset($fields['ecwid_acess_token'])) ? $fields['ecwid_acess_token'] : null,
-                (isset($fields['ecwid_store_id'])) ? $fields['ecwid_store_id'] : null,
-                (isset($fields['etsy_keystring'])) ? $fields['etsy_keystring'] : null,
-                (isset($fields['etsy_shared_secret'])) ? $fields['etsy_shared_secret'] : null,
-                (isset($fields['etsy_access_token'])) ? $fields['etsy_access_token'] : null,
-                (isset($fields['etsy_token_secret'])) ? $fields['etsy_token_secret'] : null,
-                (isset($fields['neto_api_key'])) ? $fields['neto_api_key'] : null,
-                (isset($fields['neto_api_username'])) ? $fields['neto_api_username'] : null,
-                (isset($fields['shopify_api_key'])) ? $fields['shopify_api_key'] : null,
-                (isset($fields['shopify_api_password'])) ? $fields['shopify_api_password'] : null,
-                (isset($fields['shopify_shared_secret'])) ? $fields['shopify_shared_secret'] : null,
-                (isset($fields['shopify_access_token'])) ? $fields['shopify_access_token'] : null,
-                (isset($fields['volusion_login'])) ? $fields['volusion_login'] : null,
-                (isset($fields['volusion_password'])) ? $fields['volusion_password'] : null,
-                (isset($fields['hybris_client_id'])) ? $fields['hybris_client_id'] : null,
-                (isset($fields['hybris_client_secret'])) ? $fields['hybris_client_secret'] : null,
-                (isset($fields['squarespace_api_key'])) ? $fields['squarespace_api_key'] : null
-            );
+            $result = $this->account->accountCartAdd(new AccountCartAdd($fields));
 
 //            Log::debug( print_r($result,1) );
 
@@ -645,6 +584,7 @@ class Api2Cart
                 null,
                 null,
                 null,
+                null,
                 $limit,
                 null,
                 $sort_by,
@@ -668,9 +608,6 @@ class Api2Cart
                 null,
                 null
             );
-
-
-//if ( $store_id == '4730d110180d4b67449f00b44608cb9d' ) Log::debug(print_r($result,1));
 
             $this->logApiCall( 'order.list.json', $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), [ 'sort_by' => $sort_by, 'sort_direct' => $sort_direct, 'limit' => $limit, 'created_from' => $created_from]  );
 
@@ -698,10 +635,10 @@ class Api2Cart
 
         try{
 
-
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
             $result = $this->order->orderList(
+                null,
                 null,
                 null,
                 null,
@@ -855,7 +792,6 @@ class Api2Cart
                 null,
                 null,
                 $ids,
-                null,
                 null,
                 null,
                 null,
@@ -1076,7 +1012,18 @@ class Api2Cart
         try{
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
-            $result = $this->product->productChildItemList( $product_id );
+            $result = $this->product->productChildItemList(
+                null,
+                0,
+                100,
+                'force_all',
+                null,
+                null,
+                null,
+                null,
+                null,
+                $product_id
+            );
 
             $this->logApiCall( 'product.child_item.list.json', $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage() ,['product_id'=>$product_id] );
 
