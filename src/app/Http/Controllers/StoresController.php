@@ -10,6 +10,8 @@ use Cache;
 
 class StoresController extends Controller
 {
+    const METHOD_DB           = '_method_db_';
+
     private $api2cart;
 
 
@@ -70,10 +72,31 @@ class StoresController extends Controller
     public function fields(Request $request, $id=null)
     {
         $store = collect($this->api2cart->getCartsList())->where('cart_id',$id)->first();
+        $store['db'] = false;
 
-//        Log::debug( print_r($store,1) );
+        if (isset($store['params']['required'])) {
+            foreach ($store['params']['required'] as $paramsSetKey => $params) {
+                foreach ($params as $paramKey => $param) {
+                    if (in_array($param['name'], ['store_url',])) {
+                        unset($store['params']['required'][$paramsSetKey][$paramKey]);
+                    }
+                }
+            }
+        }
 
-//        return '';
+        if (isset($store['params']['additional'])) {
+            foreach ($store['params']['additional'] as $key => $addParam) {
+                if (strpos($addParam['name'], 'ftp_') === 0 ||
+                    in_array($addParam['name'], ['cart_id', 'store_key', 'verify', 'db_tables_prefix'])
+                ) {
+                    unset($store['params']['additional'][$key]);
+                }
+            }
+        }
+
+        if (isset($store['cart_method']) && $store['cart_method'] === self::METHOD_DB) {
+            $store['db'] = true;
+        }
 
         return view('stores.store_fields', compact('store'));
 
@@ -84,12 +107,6 @@ class StoresController extends Controller
     {
         // get supported carts
         $stores = collect($this->api2cart->getCartsList());
-//            ->whereIn('cart_id',['Amazon']);
-
-
-//        Log::debug( print_r($stores,1) );
-
-
 
         if ( $request->ajax() ){
             return response()->json( ['data' => view('stores.form', compact('stores'))->render(), 'item' => $stores ] );
@@ -100,14 +117,38 @@ class StoresController extends Controller
 
     public function store(StoreRequest $request)
     {
-//        Log::debug( $request->all() );
-        //load required store info
-        $store = collect($this->api2cart->getCartsList())->where('cart_id',$request->get('cart_id'))->first();
-
         $requestData = $request->except(['_token']);
         $requestData['field']['cart_id'] = $request->get('cart_id');
 
-        $fields = (isset($requestData['custom'])) ? array_merge( $requestData['field'], $requestData['custom'] ) : $requestData['field'];
+        if (isset($requestData['field']['multicred'])) {
+            $credFields = [];
+            $filledSet = null;
+
+            foreach ($requestData['field']['multicred'] as $key => $fields) {
+                if ($filledSet !== null) {
+                    continue;
+                }
+
+                $filterFields = array_filter($fields);
+
+                if (count($fields) === count($filterFields)) {
+                    $filledSet = $key;
+
+                    foreach ($fields as $fieldName => $fieldValue) {
+                        if ($fieldValue !== null) {
+                            $credFields[$fieldName] = $fieldValue;
+                        }
+                    }
+                }
+            }
+
+            unset($requestData['field']['multicred']);
+            $credFields = array_merge($credFields, $requestData['field']);
+
+            $fields = (isset($requestData['custom'])) ? array_merge($credFields, $requestData['custom']) : $credFields;
+        } else {
+            $fields = (isset($requestData['custom'])) ? array_merge($requestData['field'], $requestData['custom']) : $requestData['field'];
+        }
 
         $result = $this->api2cart->addCart( $fields );
 
