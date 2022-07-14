@@ -186,6 +186,7 @@
                 serverSide: false,
                 // ordering: false,
                 data: items,
+                bLengthChange: false,
                 dom: '<"row"<"col"B><"col"l><"col"f>><t><"row"<"col"i><"col">p>',
                 buttons: [
                     {
