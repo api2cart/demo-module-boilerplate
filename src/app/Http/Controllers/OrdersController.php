@@ -276,7 +276,9 @@ class OrdersController extends Controller
             $quantity = $request->get('product_quantity')[ array_search($cpi, $request->get('product_id')) ];
 
             // check if quantity right
-            if ( $product['quantity']< $quantity) continue;
+            if ($product['quantity'] < $quantity && $product['is_stock_managed'] === true) {
+                continue;
+            }
 
             $order['order_item'][] = [
                 'order_item_id'         => $product['id'],
