@@ -2,9 +2,6 @@
 
 @section('script')
     <script type="text/javascript">
-
-
-
         function loadData(){
 
             items = [];
@@ -68,7 +65,6 @@
                             calculateLog();
                         }
 
-
                         var datatable = $( '#dtable' ).dataTable().api();
 
                         datatable.clear();
@@ -85,14 +81,8 @@
                         reinitActions();
 
                         initFilters();
-
                     });
-
-
                 }
-
-
-
 
             }).catch(function (error) {
                 // handle error
@@ -123,7 +113,6 @@
             var owner = getUniqueOwner();
             var store = getUniqueStore();
 
-
             yadcf.init( table , [
                 {
                     column_number: 3,
@@ -137,22 +126,13 @@
                     data: sku,
                 },
                 {
-                    column_number: 5,
-                    select_type: 'select2',
-                    data: owner,
-                    select_type_options: { width: '200px' }
-                },
-                {
-                    column_number: 6,
+                    column_number: 7,
                     select_type: 'select2',
                     data: store,
                     select_type_options: { width: '200px' }
                 },
-
             ]);
-
         }
-
 
         function getUniqueName()
         {
@@ -216,8 +196,6 @@
             return uniqueItem;
         }
 
-
-
         var rows_selected = [];
         var table;
 
@@ -232,11 +210,6 @@
             blockUiStyled('<h4>Loading stores information.</h4>');
 
             loadData();
-
-            // $.unblockUI();
-
-            // console.log( items );
-
 
             table = $('#dtable').DataTable( {
                 processing: true,
@@ -320,27 +293,13 @@
                     },
                     { data: null, render:
                             function ( data, type, row, meta ){
-                                return data.name + '<br><small class="text-muted more" data-toggle="popover" data-trigger="hover" data-content="'+data.description.escapeHTML()+'">'+data.description.trunc(80)+'</small>';
-                            }
+                                return '<a href="' + data.url + '" target="_blank">' + data.name + '</a>' +
+                                    '<br><small class="text-muted more" data-toggle="popover" data-trigger="hover" data-content="'+data.description.escapeHTML()+'">'+data.description.trunc(80)+'</small>';
+                            }, "width": "160px"
                     },
                     { data: null, render: function ( data, type, row, meta ){
                             return (typeof data.u_sku != 'undefined') ? data.u_sku : '';
                         }, "width": "160px"},
-                    { data: null, render: function ( data, type, row, meta ){
-                            let owner = (data.cart_id.stores_info.store_owner_info.owner) ? data.cart_id.stores_info.store_owner_info.owner : '';
-                            let email = (data.cart_id.stores_info.store_owner_info.email) ? data.cart_id.stores_info.store_owner_info.email : '';
-                            return owner+'<br><small>'+email+'</small><br><small>Store Key: '+data.cart_id.store_key+'</small>';
-                     }},
-                    { data: null, render: function ( data, type, row, meta ){
-                            let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
-                            return '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>' +
-                                    '<div class="cartInfo">' +
-                                        '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
-                                        '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
-                                        '<small>'+data.cart_id.cart_info.cart_versions+'</small>' +
-                                    '</div>';
-
-                    }, "width": "160px"},
                     { data: null, render: function ( data, type, row, meta ){
                             let Pprice = '';
                             if ( typeof data.children != 'undefined' && data.children.length ){
@@ -359,6 +318,17 @@
                     { data: null, render: function ( data, type, row, meta ){
                             return (typeof data.quantity != 'undefined') ? data.quantity : '';
                         }, "width": "100px"},
+                    { data: null, render: function ( data, type, row, meta ){
+                            let imgName = data.cart_id.cart_info.cart_name.toLowerCase().replace(/ /g,"_");
+                            return '<div style="float: left"><span class="cartImage circle-int ' + imgName + '"></span></div>' +
+                                    '<div class="cartInfo">' +
+                                        '<a href="'+data.cart_id.url+'">'+data.cart_id.url+'</a><br>'+
+                                        '<small>'+data.cart_id.cart_info.cart_name+'<small><br>'+
+                                        'Id: ' + data.cart_id.id + '<br>' +
+                                        'Store Key: ' + data.cart_id.store_key +
+                                    '</div>';
+
+                    }, "width": "160px"},
                     {
                         data: null, render: function ( data, type, row, meta ){
                             // return '<a href="#" aria-disabled="true" class="text-secondary disabled"><i class="far fa-file-alt"></i></a> ' +
@@ -372,17 +342,10 @@
                     $('[data-toggle="popover"]').popover({
                         html: true
                     });
+
                     reinitActions();
-
-
-
-
                 }
-            } );
-
-
-
-
+            });
             // buildSelect( table );
             // table.on( 'draw', function () {
             //     buildSelect( table );
@@ -422,10 +385,9 @@
                                     <th>Image<br></th>
                                     <th>Name/Description<br></th>
                                     <th>SKU<br></th>
-                                    <th>Store Owner<br></th>
-                                    <th>Store<br></th>
                                     <th>Price<br></th>
                                     <th>Quantity<br></th>
+                                    <th>Store<br></th>
                                     <th>Action<br></th>
                                 </tr>
                                 </thead>
