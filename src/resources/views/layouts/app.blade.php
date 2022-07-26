@@ -46,7 +46,6 @@
         let logTable;
         let stores;
 
-
         axios.defaults.headers.common = {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN' : '{{ csrf_token() }}'
@@ -111,7 +110,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-
         function calculateLog()
         {
             if ( $('.api_log').length ){
@@ -169,12 +167,7 @@
                                 }
                                 calculateLog();
                             }
-
-
-
                         });
-
-
                     }
                 });
                 return false;
@@ -274,7 +267,6 @@
                                             }
                                             trdata.data( nitem ).draw();
 
-
                                         }
                                         else if ( typeof presponse.data.items != 'undefined' ){
 
@@ -297,19 +289,12 @@
                                                                 value.parent_name = tdata.parent_name;
                                                             }
                                                             tobj.data( value ).draw();
-
                                                         }
-
                                                     }
-
                                                 });
-
-
                                             });
 
                                             table.rows().columns().checkboxes.deselectAll();
-
-
 
                                         } else {
                                             $.unblockUI();
@@ -319,8 +304,6 @@
                                                 'error'
                                             );
                                         }
-
-
 
                                         return true;
                                     })
@@ -346,21 +329,14 @@
                                             $( $(awin).parent() ).show().fadeOut(9000);
                                         }
 
-
                                         return false;
                                     });
-
-
                             },
                         });
-
-
 
                         let eitem = response.data.item;
                         let initialPreview = [];
                         let initialPreviewConfig = [];
-
-                        // console.log( eitem );
 
                         if ( typeof eitem.images !== 'undefined' && eitem.images.length ){
 
@@ -386,10 +362,6 @@
                             });
 
                         }
-
-
-
-
 
                         //update log count
                         if ( response.data.log ){
@@ -462,8 +434,6 @@
 
                     });
 
-
-
                 return false;
             });
 
@@ -511,14 +481,9 @@
 
                     });
 
-
-
                 return false;
             });
-
         }
-
-
 
         $(document).ready(function() {
             // 'use strict';
@@ -562,9 +527,9 @@
                                 return mr;
                             }
                     },
-                    { data: null, render: function ( data, type, row, meta ){
-
-                            if ( data.code == 0){
+                    {
+                        data: null, render: function (data, type, row, meta) {
+                            if (data.code == 0) {
                                 return data.code;
                             } else {
 
@@ -573,6 +538,19 @@
                             }
                         }
                     },
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            return '<button type="button" name="showLog" class="btn btn-outline-info logInfo" style="line-height: 0.9rem; padding: 0.5rem;" id="' + data.id + '" ' +
+                                     'data-log="<pre>' + JSON.stringify(JSON.parse(data.response), null, 2).replace(/\"/g, '\'') + '</pre>">' +
+                                       '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">' +
+                                          '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>' +
+                                          '<path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>' +
+                                       '</svg>' +
+                                   '</button>'
+                        }
+                    }
+
                 ],
                 "drawCallback": function( settings ) {
                     // console.log( settings );
@@ -600,13 +578,25 @@
                 return false;
             });
 
+            $("#logtable").on('click', '.logInfo', function () {
+                var LogId = $(this).attr("id");
+                $('#configId').val(LogId);
+                $('#logResponse').html($(this).data('log'));
+                $('#modalLogInfo .modal-title').html("Detail Response Info #" + LogId);
+                $('#modalLogInfo').modal('show');
+                return false;
+            });
+
+            $("#modalLogInfo").on('hide.bs.modal', function(){
+                setTimeout(function () {
+                    $(document.body).addClass('modal-open');//fix main modal scroll
+                }, 400);
+            });
+
         });
 
         function displayProperties(val, out )
         {
-
-            // console.log( typeof val );
-            // console.log( val );
 
             if (typeof val === 'object') {
 
@@ -625,17 +615,11 @@
 
                 return out;
 
-            } else {
-
-                // console.log( val );
-                // console.log( out );
-
             }
 
             return out;
 
         }
-
 
         function reinitApiLogTable()
         {
@@ -656,18 +640,21 @@
                     column_number: 2,
                     select_type: 'select2',
                     data: method,
-                    select_type_options: { width: '200px' }
+                    select_type_options: { width: '200px' },
+                    style_class: "subjectFilter"
                 },
                 {
                     column_number: 1,
                     select_type: 'select2',
                     data: storeu,
-                    select_type_options: { width: '200px' }
+                    select_type_options: { width: '200px' },
+                    style_class: "subjectFilter"
                 },
                 {
                     column_number: 4,
                     select_type: 'select2',
                     data: codes,
+                    style_class: "subjectFilter"
                     // select_type_options: { width: '200px' }
                 }
             ]);
@@ -684,7 +671,6 @@
                     $(this).text('Show more');
                 }
 
-                // console.log( $(obj).css('max-height') );
             });
 
         }
@@ -773,7 +759,6 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('js/select2/css/select2.css') }}"  />
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}"/>
 
-
 {{--    <link rel="stylesheet" type="text/css" href="{{ asset('css/buttons.dataTables.min.css') }}"/>--}}
 
     <link rel="stylesheet" type="text/css" href="{{ asset('js/fontawesome/css/all.min.css') }}"/>
@@ -781,11 +766,6 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('js/jqdcheckboxes/css/dataTables.checkboxes.css') }}"  />
     <link rel="stylesheet" type="text/css" href="{{ asset('js/yadcf/jquery.dataTables.yadcf.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('js/jui/jquery-ui.min.css') }}"/>
-
-
-
-
-
 
     @yield('script')
 
@@ -893,11 +873,37 @@
                                 <th>Method<br></th>
                                 <th>Params<br></th>
                                 <th>Response Code<br></th>
+                                <th></th>
                             </tr>
                             </thead>
                         </table>
                     </div>
 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal request info -->
+    <div class="modal fade" id="modalLogInfo" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">API2Cart Requests Info</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span> Response</span>
+                        </div>
+                        <div class="panel-body" id="logResponse" style="overflow: auto;max-height: 75vh;background-color: #444;"></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
