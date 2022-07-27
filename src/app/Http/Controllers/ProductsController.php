@@ -11,33 +11,38 @@ class ProductsController extends Controller
 {
     private $api2cart;
 
+    /**
+     * ProductsController constructor.
+     * @param Api2Cart $api2Cart
+     */
     public function __construct(Api2Cart $api2Cart)
     {
         $this->api2cart = $api2Cart;
     }
 
+    /**
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
         return view('products.index');
     }
 
+    /**
+     * @param string|null $store_id Store ID
+     * @param Request     $request  Request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function productList($store_id=null,Request $request)
     {
         \Debugbar::disable();
 
-
-
-        /**
-         * get account carts & extract exact store info
-         */
-        $carts = collect($this->api2cart->getCartList());
         $storeInfo = $this->api2cart->getCart( $store_id );
 
         $sort_by      = ($request->get('sort_by')) ? 'create_at' : null;
         $sort_direct  = ($request->get('sort_direct')) ? true : false;
         $created_from = ($request->get('created_from')) ? $request->get('created_from') : null;
         $limit        = ($request->get('limit')) ? $request->get('limit') : null;
-
 
         $totalProducts = $this->api2cart->getProductCount( $store_id );
 
@@ -57,13 +62,29 @@ class ProductsController extends Controller
                     // collect product variants
                     if ( isset($item['type']) && $item['type'] === 'configurable' ){
                         $pv = $this->api2cart->getProductVariants($store_id, $item['id'] );
-                        $newItem['children'] = $pv['children'] ?? [];
+                        $newItem['children'] = [];
+
+                        if (!empty($pv['children'])) {
+                            $childrens = collect($pv['children']);
+                            $minPrice = $childrens->where('default_price', $childrens->min('default_price'))->first();
+
+                            if ($minPrice) {
+                                $newItem['children']['min'] = $minPrice;
+                            }
+
+                            $maxPrice = $childrens->where('default_price', $childrens->max('default_price'))->first();
+
+                            if ($maxPrice && isset($newItem['children']['min']) && $newItem['children']['min']['default_price'] < $maxPrice['default_price']) {
+                                $newItem['children']['max'] = $maxPrice;
+                            }
+                        }
+
+                        $newItem['children'] = array_values($newItem['children']);
                     }
 
                     $products->push( $newItem );
                 }
             }
-
 
             if ( isset($result['pagination']['next']) && strlen($result['pagination']['next']) ){
                 // get next iteration to load rest customers
@@ -77,19 +98,33 @@ class ProductsController extends Controller
                             $newItem['currency'] = ( isset($storeInfo['stores_info'][0]['currency']) ) ? $storeInfo['stores_info'][0]['currency']['iso3'] : '';
 
                             // collect product variants
-                            if ( isset($item['type']) && $item['type'] === 'configurable' ){
+                            if (isset($item['type']) && $item['type'] === 'configurable') {
                                 $pv = $this->api2cart->getProductVariants($store_id, $item['id'] );
-                                $newItem['children'] = $pv['children'];
+                                $newItem['children'] = [];
+
+                                if (!empty($pv['children'])) {
+                                    $childrens = collect($pv['children']);
+                                    $minPrice = $childrens->where('default_price', $childrens->min('default_price'))->first();
+
+                                    if ($minPrice) {
+                                        $newItem['children']['min'] = $minPrice;
+                                    }
+
+                                    $maxPrice = $childrens->where('default_price', $childrens->max('default_price'))->first();
+
+                                    if ($maxPrice && isset($newItem['children']['min']) && $newItem['children']['min']['default_price'] < $maxPrice['default_price']) {
+                                        $newItem['children']['max'] = $maxPrice;
+                                    }
+                                }
+
+                                $newItem['children'] = array_values($newItem['children']);
                             }
 
                             $products->push( $newItem );
                         }
                     }
                 }
-
             }
-
-
         }
 
         if ( $sort_by  ){
@@ -117,15 +152,16 @@ class ProductsController extends Controller
         ];
 
         return response()->json($data);
-
-
-
     }
-
 
     /**
      * Show the form for editing the specified resource.
      *
+     * @param string|null    $store_id   Store ID
+     * @param string|null    $product_id Product ID
+     * @param ProductRequest $request    Request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Throwable
      */
     public function edit($store_id=null, $product_id=null, Request $request)
     {
@@ -138,9 +174,6 @@ class ProductsController extends Controller
             $product['children'] = $pv['children'];
         }
 
-//        Log::debug( 'edit product ');
-//        Log::debug( print_r($product,1));
-
         if ( $request->ajax() ){
             return response()->json(['data' => view('products.form',compact('product','store_id', 'product_id'))->render(), 'item' => $product,'log' => $this->api2cart->getLog() ]);
         }
@@ -148,6 +181,13 @@ class ProductsController extends Controller
         return redirect(route('products.index'));
     }
 
+    /**
+     * @param string|null    $store_id   Store ID
+     * @param string|null    $product_id Product ID
+     * @param ProductRequest $request    Request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update($store_id=null, $product_id=null, ProductRequest $request)
     {
         \Debugbar::disable();
@@ -225,21 +265,15 @@ class ProductsController extends Controller
             }
 
             return response()->json(['item' => $result, 'log' => $this->api2cart->getLog()]);
-
         }
-
-
-
     }
-
-
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @param string|null $store_id   Store ID
+     * @param string|null $product_id Product ID
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($store_id=null, $product_id=null)
     {
@@ -248,18 +282,6 @@ class ProductsController extends Controller
         } else {
             return response()->json([ 'log' => $this->api2cart->getLog() ], 404);
         }
-
-    }
-
-    public function destroyImage($store_id=null, $product_id=null, Request $request)
-    {
-
-//        Log::debug("{$store_id} {$product_id}");
-//        Log::debug( $request->all() );
-
-        // use image url as key, cause different store have different info
-//        $this->api2cart->deleteProductImage($store_id, $product_id, $request->get('key') );
-
     }
 
 }
