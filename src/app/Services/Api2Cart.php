@@ -665,7 +665,7 @@ class Api2Cart
         try{
 
             $this->order->getConfig()->setApiKey('store_key', $store_id);
-            $result = $this->order->orderInfo( $order_id ,'force_all');
+            $result = $this->order->orderInfo( $order_id , null, 'force_all');
             $this->logApiCall( 'order.info.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() ,['order_id'=>$order_id] );
 
             if ($result->getReturnCode() == 0) {
@@ -901,6 +901,7 @@ class Api2Cart
                 $result = $this->product->productUpdate(
                     $product_id,
                     null,
+                    null,
                     (isset($fields['price'])) ? $fields['price'] : null,
                     null,
                     null,
@@ -914,15 +915,14 @@ class Api2Cart
                     null,
                     null,
                     null,
+                    null,
                     (isset($fields['name'])) ? $fields['name'] : null,
                     null,
                     null,
                     null,
                     null,
+                    null,
                     (isset($fields['description'])) ? $fields['description'] : null,
-                    null,
-                    null,
-                    null,
                     null,
                     null,
                     null,
@@ -1190,19 +1190,12 @@ class Api2Cart
             $this->order->getConfig()->setApiKey('store_key', $store_id);
 
             if ($fields) {
-                $result = $this->product->productImageAdd(
-                    $product_id,
-                    $fields['image_name'],
-                    $fields['type'],
-                    $fields['url'],
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                );
+                $model = new \Api2Cart\Client\Model\ProductImageAdd();
+                $model->setProductId($product_id)
+                    ->setType($fields['type'] ?? 'base')
+                    ->setUrl($fields['url'])
+                    ->setImageName($fields['image_name'] ?? '');
+                $result = $this->product->productImageAdd($model);
 
                 $this->logApiCall( 'product.image.add.json', $result->getResult(), $result->getReturnCode(), $this->product->getConfig(), null, null, null, $result->getReturnMessage(), array_merge(['product_id'=>$product_id],$fields)  );
 

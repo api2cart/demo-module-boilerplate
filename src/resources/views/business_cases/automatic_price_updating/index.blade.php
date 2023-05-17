@@ -362,7 +362,9 @@
                                     //update log count
                                     if ( presponse.data.log ){
                                         for (let k=0; k<presponse.data.log.length; k++){
-                                            logItems.push( presponse.data.log[k] );
+                                            if (k < 2) {//skip product.info
+                                                logItems.push(presponse.data.log[k]);
+                                            }
                                         }
                                         calculateLog();
                                     }
@@ -386,7 +388,7 @@
                                 }).catch(function (error) {
                                     $.unblockUI();
 
-                                    if ( typeof error.response.data.errors != 'undefined'){
+                                    if ( typeof error.response != 'undefined' && typeof error.response.data.errors != 'undefined'){
                                         var err_msg = '<ul>';
                                         $.each(error.response.data.errors, function(index, value) {
                                             let obj = document.getElementById( index ); // $('#'+index)
