@@ -48,6 +48,10 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::get('/orders/{store_id?}/{order_id?}', 'OrdersController@orderInfo')->name('orders.info');
     Route::get('/orders/{store_id?}/{order_id?}/products', 'OrdersController@orderProducts')->name('orders.products');
     Route::post('/orders/abandoned/{store_id?}', 'OrdersController@abandoned')->name('orders.abandoned');
+    Route::get('/orders/{store_key?}/{order_id?}/shipments', 'OrdersController@orderShipments')->name('orders.shipments');
+    Route::get('/orders/{store_key?}/{order_id?}/shipment/add', 'OrdersController@orderShipmentAdd')->name('order.shipment.add');
+    Route::post('/orders/shipment/store', 'OrdersController@orderShipmentStore')->name('order.shipment.store');
+    Route::post('/orders/get-orders-with-shipments/{store_id?}', 'OrdersController@getOrdersWithShipments')->name('orders.get-orders-with-shipments');
 
     Route::get('/products', 'ProductsController@index')->name('products.index');
     Route::post('/products/list/{store_id?}', 'ProductsController@productList')->name('products.list');
@@ -91,6 +95,8 @@ Route::middleware(['auth', 'apikey'])->group(function () {
         Route::post('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@store")->name('automatic_price_updating.store');
         Route::put('automatic_price_updating', "BusinessCases\AutomaticPriceUpdatingController@update")->name('automatic_price_updating.update');
         Route::get('automatic_price_updating/products', "BusinessCases\AutomaticPriceUpdatingController@products")->name('automatic_price_updating.products');
+
+        Route::get('automatic_order_shipments', "BusinessCases\OrdersShipmentsController@index")->name('orders_shipments_controller');
 
     });
 
