@@ -1604,21 +1604,24 @@ class Api2Cart
     {
         $this->setApiKey();
 
-        try{
+        try {
             $this->order->getConfig()->setApiKey('store_key', $storeKey);
             $result = $this->order->orderShipmentAdd($body);
-            $this->logApiCall('order.shipment.add.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage() , $body );
+            $this->logApiCall('order.shipment.add.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), $body);
 
             if ($result->getReturnCode() == 0) {
                 return [0, $this->mapToArray($result->getResult())];
             } else {
-                if ($this->debug) Log::debug(print_r($result, 1));
+                if ($this->debug) {
+                    Log::debug(print_r($result, 1));
+                }
+
                 return [$result->getReturnCode(), $result->getReturnMessage()];
             }
 
-        } catch (\Exception $e){
-            Log::debug( $e->getMessage() );
-            $this->logApiCall( 'order.shipment.add.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage() , $body );
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            $this->logApiCall('order.shipment.add.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage(), $body);
             return false;
         }
     }
