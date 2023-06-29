@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Api2Cart\Client\Model\ModelInterface;
+use Api2Cart\Client\Model\OrderShipmentAdd;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,6 +37,12 @@ class Api2Cart
 
     private $log;
     private $isTest;
+    private static $_instance = null;
+
+    public static function getInstance(bool $isTest = false)
+    {
+        return static::$_instance ?? static::$_instance = new static($isTest);
+    }
 
     /**
      * Api2Cart constructor initiate with right API objects
@@ -1497,6 +1505,123 @@ class Api2Cart
         } catch (\Exception $e){
             Log::debug( $e->getMessage() );
 
+            return false;
+        }
+    }
+
+    /**
+     * @param string $storeKey   Store Key
+     * @param string $orderId    Order ID
+     * @param string $pageCursor Page cursor
+     * @param int    $start      Start
+     * @param int    $count      Count
+     * @param string $params     Params
+     *
+     * @return array|false|mixed|null
+     */
+    public function getOrderShipments(
+        string $storeKey,
+        string $orderId,
+        string $pageCursor = '',
+        int $start = 0,
+        int$count = 15,
+        string $params = 'force_all'
+    ) {
+        $this->setApiKey();
+        $this->order->getConfig()->setApiKey('store_key', $storeKey);
+
+        try {
+            if ($pageCursor) {
+                $response = $this->order->orderShipmentList($orderId, $pageCursor, $start, $count, $params);
+            } else {
+                $response = $this->order->orderShipmentList($orderId, null, $start, $count, $params);
+            }
+
+            $this->logApiCall('order.shipment.list.json', $response->getResult(), $response->getReturnCode(), $this->order->getConfig(), null, null, null, $response->getReturnMessage(), ['page_cursor' => $pageCursor]);
+
+            if ($response->getReturnCode() == 0) {
+                return $this->mapToArray($response);
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            $this->logApiCall('order.shipment.list.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage(), ['page_cursor' => $pageCursor]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param string $orderId    Order ID
+     * @param string $pageCursor Page cursor
+     * @param int    $start      Start
+     * @param int    $count      Count
+     * @param string $params     Params
+     *
+     * @return array|false
+     */
+    public function getOrderShipmentsAsync(
+        string $orderId,
+        string $pageCursor = '',
+        int $start = 0,
+        int $count = 15,
+        string $params = 'force_all'
+    ) {
+        $this->setApiKey();
+
+        try {
+            if ($pageCursor) {
+                $result = $this->order->orderShipmentListAsyncWithHttpInfo($orderId, $pageCursor, $start, $count, $params);
+            } else {
+                $result = $this->order->orderShipmentListAsyncWithHttpInfo($orderId, null, $start, $count, $params);
+            }
+
+            $callable = function (ModelInterface $response, $pageCursor = '') {
+                $this->logApiCall('order.shipment.list.json', $response->getResult(), $response->getReturnCode(), $this->order->getConfig(), null, null, null, $response->getReturnMessage(), ['page_cursor' => $pageCursor]);
+
+                if ($response->getReturnCode() == 0) {
+                    return $this->mapToArray($response);
+                } else {
+                    return false;
+                }
+            };
+
+            return [$result, $callable];
+        } catch (\Exception $e) {
+            $this->logApiCall('order.shipment.list.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage(), ['page_cursor' => $pageCursor]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param string|null      $storeKey Store Key
+     * @param OrderShipmentAdd $body     Body for shipment add
+     *
+     * @return array|false
+     */
+    public function createOrderShipment($storeKey, $body)
+    {
+        $this->setApiKey();
+
+        try {
+            $this->order->getConfig()->setApiKey('store_key', $storeKey);
+            $result = $this->order->orderShipmentAdd($body);
+            $this->logApiCall('order.shipment.add.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), $body);
+
+            if ($result->getReturnCode() == 0) {
+                return [0, $this->mapToArray($result->getResult())];
+            } else {
+                if ($this->debug) {
+                    Log::debug(print_r($result, 1));
+                }
+
+                return [$result->getReturnCode(), $result->getReturnMessage()];
+            }
+
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            $this->logApiCall('order.shipment.add.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage(), $body);
             return false;
         }
     }

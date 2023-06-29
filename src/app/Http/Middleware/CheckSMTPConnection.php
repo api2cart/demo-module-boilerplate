@@ -24,7 +24,7 @@ class CheckSMTPConnection
 
         if ( session()->get('mail_md5') === $mailMD5 ) return $next($request);
 
-        if (config('app.env') == 'testing') return $next($request);
+        if (in_array(config('app.env'), ['testing', 'development'])) return $next($request);
 
 
 

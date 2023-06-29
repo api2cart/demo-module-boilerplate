@@ -110,6 +110,14 @@
                 .replace(/'/g, "&#039;");
         }
 
+        function truncateString(str, maxLength) {
+            if (str.length > maxLength) {
+                return str.substring(0, maxLength) + '...';
+            } else {
+                return str;
+            }
+        }
+
         function calculateLog()
         {
             if ( $('.api_log').length ){
@@ -519,7 +527,7 @@
                                         });
 
                                     } else {
-                                        if ( data.code == 0 )  mr += '<small><strong>'+ index + '</strong> : ' + value.trunc(40) +'</small><br>';
+                                        if ( data.code == 0 )  mr += '<small><strong>'+ index + '</strong> : ' + truncateString(value, 40) +'</small><br>';
                                     }
 
                                 });

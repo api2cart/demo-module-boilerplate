@@ -3,13 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
+use App\Http\Requests\OrderShipmentRequest;
 use App\Services\Api2Cart;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Process;
+use Api2Cart\Client\Model\OrderShipmentAdd as OrderShipmentContainer;
+use \Api2Cart\Client\Model\OrderShipmentAddTrackingNumbers as TrackingNumbers;
+use \Api2Cart\Client\Model\OrderShipmentAddItems as ShipmentItems;
 
 class OrdersController extends Controller
 {
+    const SHIPMENT_STATUS_NOT_SHIPPED       = 0;
+    const SHIPMENT_STATUS_PARTIALLY_SHIPPED = 1;
+    const SHIPMENT_STATUS_SHIPPED           = 2;
 
     private $api2cart;
 
@@ -301,6 +312,355 @@ class OrdersController extends Controller
             return response()->json([ 'log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $result ]);
         }
 
+    }
+
+    /**
+     * @param null    $storeKeys Store keys array
+     * @param Request $request   Request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getOrdersWithShipments($storeKeys = null, Request $request)
+    {
+        $limit = ($request->get('limit')) ? (string)$request->get('limit') : 15;
+
+        if ($storeKeys === null) {
+            $stores = \Cache::remember('all_stores', 3600, function () {
+                return collect($this->api2cart->getCartList());
+            });
+
+            if ($stores->count() === 0) {//fix
+                \Cache::delete('all_stores');
+                $stores = \Cache::remember('all_stores', 3600, function () {
+                    return collect($this->api2cart->getCartList());
+                });
+            }
+        } else {
+            $cartId = ($request->get('cart_id')) ? (string)$request->get('cart_id') : null;
+            $stores = [['cart_id' => $cartId, 'store_key' => $storeKeys]];
+        }
+
+        $user = Auth::user();
+
+        if (App::environment() === 'development') {
+            $env = ['USER_ID' => $user->id, 'PHP_IDE_CONFIG' => 'serverName=API2Cart'];
+        } else {
+            $env = ['USER_ID' => $user->id];
+        }
+
+        $processes = [];
+
+        foreach ($stores as $store) {
+            $processes[] =
+                [
+                    'php',
+                    base_path('artisan'),
+                    'sendRequestToA2C',
+                    'getOrderList',
+                    base64_encode(
+                        json_encode(['cart_id' => $store['cart_id'], $store['store_key'], null, null, $limit, null])
+                    ),
+                    'order',
+                    'orders_count',
+                    '--subEntities=getOrderShipmentsAsync',
+                    '--subEntityId=order_id'
+                ];
+        }
+
+        $runningProcesses = $allProcesses = [];
+
+        foreach ($processes as $command) {
+
+            while (count($runningProcesses) >= 5) {
+                foreach ($runningProcesses as $index => $process) {
+                    if (!$process->isRunning()) {
+
+                        unset($runningProcesses[$index]);
+                        break;
+                    }
+                }
+
+                usleep(1000000);
+            }
+
+            $process = new Process($command);
+            $process->setEnv($env);
+            $process->start();
+
+            $runningProcesses[] = $process;
+            $allProcesses[] = $process;
+        }
+
+        foreach ($runningProcesses as $process) {
+            $process->wait();
+        }
+
+        $logs = collect([]);
+        $orders = collect([]);
+
+        foreach ($allProcesses as $output) {
+            if ($output->isSuccessful()) {
+                $data = json_decode($output->getOutput());
+
+                foreach (collect($data->result) as $order) {
+                    $itemsToShip = $order->order_products;
+
+                    foreach ($itemsToShip as $item) {
+                        $item->order_quantity = $item->quantity;
+                        $item->shipped_quantity = 0;
+
+                        if (!empty($order->sub_entities->result->shipment)) {
+                            foreach ($order->sub_entities->result->shipment as $shipment) {
+                                if ($shipment->items) {
+                                    foreach ($shipment->items as $shipmentItem) {
+                                        if (isset($shipmentItem->order_product_id)
+                                            && $shipmentItem->order_product_id === $item->order_product_id
+                                        ) {
+                                            $item->quantity -= $shipmentItem->quantity;
+                                            $item->shipped_quantity += $shipmentItem->quantity;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $shipmentStatus = self::SHIPMENT_STATUS_NOT_SHIPPED;
+
+                    foreach ($itemsToShip as $item) {
+                        if ($item->quantity == 0) {
+                            $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
+                        } elseif ($item->quantity < $item->order_quantity) {
+                            $shipmentStatus = self::SHIPMENT_STATUS_PARTIALLY_SHIPPED;
+                            break;
+                        }
+                    }
+
+                    $order->avail_shipment_items = $itemsToShip;
+                    $order->shipment_status = $shipmentStatus;
+                    $orders->push($order);
+                }
+
+                foreach (collect($data->logs) as $log) {
+                    $logs->push($log);
+                }
+                $res[] = ['result' => collect($data->result), 'logs' => collect($data->logs)];
+            } else {
+                $res[] = $output->getExitCodeText();
+            }
+        }
+
+        $result = [
+            "stores" => $stores,
+            "recordsTotal" => $orders->count(),
+            "recordsFiltered" => $orders->count(),
+            "start" => 0,
+            "length" => 10,
+            "data" => $orders->sortBy('created_at.value', null, true)->toArray(),
+            'log' => $logs->all(),
+        ];
+
+        if ($result['recordsTotal']) {
+            Cache::put('OrdersWithShipments' . md5(json_encode($storeKeys)), $result, 3600);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * @param string|null    $storeKey Store Key
+     * @param string|null    $orderId  OrderId
+     * @param Request $request  Request
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Throwable
+     */
+    public function orderShipments($storeKey = null, $orderId = null, Request $request)
+    {
+        $cartInfo = \Cache::remember('cartInfo' . $storeKey, 3600, function () use ($storeKey) {
+            return $this->api2cart->getCart($storeKey);
+        });
+
+        $carriers = $cartInfo['stores_info'][0]['carrier_info'] ?? [];
+
+        if ($carriers) {
+            $carriers = array_combine(array_column($carriers, 'id'), $carriers);
+        }
+
+        $shipments = $this->_getAllOrderShipments($storeKey, $orderId);
+
+        $logs = collect([]);
+
+        foreach ($this->api2cart->getLog()->all() as $item) {
+            $logs->push($item);
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['data' => view('orders.shipments.info', compact('orderId', 'shipments', 'carriers'))->render(), 'shipments' => $shipments, 'log' => $logs]);
+        }
+
+        return redirect(route('orders.get-orders-with-shipments'));
+    }
+
+    /**
+     * @param null    $storeKey Store Key
+     * @param null    $orderId  Order ID
+     * @param Request $request  Request
+     *
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Throwable
+     */
+    public function orderShipmentAdd($storeKey = null, $orderId = null, Request $request)
+    {
+        $cartInfo = \Cache::remember('cartInfo' . $storeKey, 3600, function () use ($storeKey) {
+            return $this->api2cart->getCart($storeKey);
+        });
+
+        $carriers = $cartInfo['stores_info'][0]['carrier_info'] ?? [];
+
+        if ($carriers) {
+            $carriers = array_combine(array_column($carriers, 'id'), $carriers);
+        }
+
+        list($itemsToShip, $shipmentStatus) = $this->_prepareItemsToShip($storeKey, $orderId);
+
+        if ($request->ajax()) {
+            return response()->json(
+                [
+                    'data' => view('orders.shipments.form', compact('itemsToShip', 'carriers', 'shipmentStatus', 'orderId', 'storeKey'))->render(),
+                    'shipmentStatus' => $shipmentStatus
+                ]
+            );
+        }
+
+        return redirect(route('orders.index'));
+    }
+
+    /**
+     * @param OrderShipmentRequest $request Request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderShipmentStore(OrderShipmentRequest $request)
+    {
+        $shipment = new OrderShipmentContainer();
+        $orderId = $request->get('order_id');
+        $storeKey = $request->get('store_key');
+
+        $shipment->setOrderId($orderId);
+
+        $trackingNumbers = new TrackingNumbers();
+        $trackingNumbers->setCarrierId($request->get('carrier_id'));
+        $trackingNumbers->setTrackingNumber((string)$request->get('tracking_number'));
+        $shipment->setTrackingNumbers([$trackingNumbers]);
+
+        if ($request->get('all_products') !== 'on' && $items = $request->get('items')) {
+            $shipmentItems = [];
+
+            foreach ($items as $orderProductId => $value) {
+                if ($value['quantity'] > 0) {
+                    $shipmentItem = new ShipmentItems();
+                    $shipmentItem->setOrderProductId($orderProductId);
+                    $shipmentItem->setQuantity($value['quantity']);
+                    $shipmentItems[] = $shipmentItem;
+                }
+            }
+
+            $shipment->setItems($shipmentItems);
+        }
+
+        list($returnCode, $result) = $this->api2cart->createOrderShipment($storeKey, $shipment);
+
+        if ($returnCode == 0) {
+            list($itemsToShip, $shipmentStatus) = $this->_prepareItemsToShip($storeKey, $orderId);
+
+            return response()->json(['log' => $this->api2cart->getLog(), 'success' => true, 'shipment_status' => $shipmentStatus]);
+        } else {
+            return response()->json(['log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $result]);
+        }
+    }
+
+    /**
+     * @param string $storeKey Store Key
+     * @param string $orderId  Order ID
+     *
+     * @return array
+     */
+    protected function _getAllOrderShipments($storeKey, $orderId): array
+    {
+        $shipments = collect([]);
+        $result = $this->api2cart->getOrderShipments($storeKey, $orderId);
+        $resEntities = (!empty($result['result']['shipment_count']))
+            ? collect($result['result']['shipment'])
+            : collect([]);
+
+        if ($resEntities->count()) {
+            foreach ($resEntities as $item) {
+                $shipments->push($item);
+            }
+        }
+
+        if (isset($result['pagination']['next']) && strlen($result['pagination']['next'])) {
+            while (isset($result['pagination']['next']) && strlen($result['pagination']['next'])) {
+                $result = $this->api2cart->getOrderShipments($storeKey, $orderId, $result['pagination']['next']);
+                $resEntities = (!empty($result['result']['shipment_count']))
+                    ? collect($result['result']['shipment'])
+                    : collect([]);
+
+                if ($resEntities->count()) {
+                    foreach ($resEntities as $item) {
+                        $shipments->push($item);
+                    }
+                }
+            }
+        }
+
+        return $shipments->all();
+    }
+
+    /**
+     * @param string $storeKey Store Key
+     * @param string $orderId  Order ID
+     *
+     * @return array
+     */
+    protected function _prepareItemsToShip($storeKey, $orderId): array
+    {
+        $order = $this->api2cart->getOrderInfo($storeKey, $orderId);
+        $shipments = $this->_getAllOrderShipments($storeKey, $orderId);
+        $itemsToShip = $order['order_products'];
+
+        foreach ($itemsToShip as $key => $item) {
+            $itemsToShip[$key]['order_quantity'] = $item['quantity'];
+            $itemsToShip[$key]['shipped_quantity'] = 0;
+
+            foreach ($shipments as $shipment) {
+                if ($shipment['items']) {
+                    foreach ($shipment['items'] as $shipmentItem) {
+                        if (isset($shipmentItem['order_product_id'])
+                            && $shipmentItem['order_product_id'] === $item['order_product_id']
+                        ) {
+                            $itemsToShip[$key]['quantity'] -= $shipmentItem['quantity'];
+                            $itemsToShip[$key]['shipped_quantity'] += $shipmentItem['quantity'];
+                        }
+                    }
+                }
+            }
+        }
+
+        $shipmentStatus = self::SHIPMENT_STATUS_NOT_SHIPPED;
+
+        foreach ($itemsToShip as $item) {
+            if ($item['quantity'] == 0) {
+                $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
+            } elseif ($item['quantity'] < $item['order_quantity']) {
+                $shipmentStatus = self::SHIPMENT_STATUS_PARTIALLY_SHIPPED;
+                break;
+            }
+        }
+
+        return [$itemsToShip, $shipmentStatus];
     }
 
 }
