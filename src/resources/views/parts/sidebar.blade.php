@@ -68,6 +68,11 @@
                     </a>
                 </li>
                 <li class="nav-item" >
+                    <a href="{{ route('businessCases.orders_shipments_controller') }}" class="nav-link  {{ (request()->is('businessCases/orders_shipments_controller') || request()->is('businessCases/orders_shipments_controller/*')) ? 'active' : '' }}">
+                        Automatic Creation of Shipments
+                    </a>
+                </li>
+                <li class="nav-item" >
                     <a href="https://api2cart.com/business-cases" target="_blank" class="nav-link">
                         More Cases
                     </a>
