@@ -45,7 +45,6 @@ if [ $? -eq 0 ];
 then
     echo "Looks all ok, update related dependencies..."
     docker-compose run app composer update
-    #docker-compose run app php artisan queue:table
     docker-compose run app php artisan migrate
     docker-compose run app php artisan db:seed
 else
