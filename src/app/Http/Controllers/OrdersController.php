@@ -437,6 +437,12 @@ class OrdersController extends Controller
                         }
                     }
 
+                    if (!empty($order->sub_entities->result->shipment)
+                        && $shipmentStatus === self::SHIPMENT_STATUS_NOT_SHIPPED
+                    ) {
+                        $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
+                    }
+
                     $order->avail_shipment_items = $itemsToShip;
                     $order->shipment_status = $shipmentStatus;
                     $orders->push($order);
@@ -658,6 +664,10 @@ class OrdersController extends Controller
                 $shipmentStatus = self::SHIPMENT_STATUS_PARTIALLY_SHIPPED;
                 break;
             }
+        }
+
+        if ($shipments && $shipmentStatus === self::SHIPMENT_STATUS_NOT_SHIPPED) {
+            $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
         }
 
         return [$itemsToShip, $shipmentStatus];
