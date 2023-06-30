@@ -249,6 +249,15 @@
                                     rowData.shipment_status = presponse.data.shipment_status;
                                     table.row(row).data(rowData).draw(false, false);
 
+                                    if (presponse.data.log) {
+                                        for (let k = 0; k < presponse.data.log.length; k++) {
+                                            logItems.push(presponse.data.log[k]);
+                                        }
+
+                                        calculateLog();
+
+                                    }
+
                                     Swal.fire(
                                         'OK!',
                                         'New shipment created succesfully! ',
@@ -301,6 +310,84 @@
                         'error'
                     )
                 });
+        }
+
+        function updateShipment(elem, shipmentId, trackingId) {
+            $(elem).empty().text('... Updating Tracking Number');
+            $('.swal2-content').find('.is-invalid').removeClass('is-invalid');
+            $($(document.getElementById('_form_errors')).parent()).hide();
+            let form = $('#shimpent-' + shipmentId);
+            let fact = form[0].action;
+            var formData = getFormData(form);
+
+            return axios.post(fact, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(function (presponse) {
+                if (presponse.data.success) {
+                    if (presponse.data.log) {
+                        for (let k = 0; k < presponse.data.log.length; k++) {
+                            logItems.push(presponse.data.log[k]);
+                        }
+
+                        calculateLog();
+
+                    }
+
+                    if (presponse.data.updatedItems !== undefined && presponse.data.updatedItems === 0) {
+                        return true;
+                    }
+
+                    $('#alert-' + shipmentId).addClass('alert-info').removeClass('alert-danger').show().
+                    find('#_form_errors').empty().text('Shipment id = \'' + shipmentId + '\' updated successfully!');
+                } else {
+                    if (typeof presponse.data.errormessage != 'undefined') {
+                        $('#alert-' + shipmentId).removeClass('alert-info').addClass('alert-danger').show().
+                        find('#_form_errors').empty().text(presponse.data.errormessage);
+                    }
+                }
+
+                setTimeout(function () {
+                    $('#alert-' + shipmentId)
+                        .removeClass('alert-info')
+                        .removeClass('alert-danger')
+                        .hide()
+                        .find('#_form_errors').empty()
+                    },
+                    3000
+                );
+                $(elem).empty().text('Update Tracking Number');
+
+                return true;
+            }).catch(function (error) {
+                if (typeof error.response.data.errors != 'undefined') {
+
+                    $.each(error.response.data.errors, function (index, value) {
+                        if (typeof index !== 'undefined' || typeof value !== 'undefined') {
+                            let obj = $(document.getElementById(index));
+                            let err = $(obj).parent().parent().find('.invalid-feedback');
+                            $(err).empty().append(value.shift());
+                            $(obj).addClass('is-invalid')
+                        }
+                    });
+                }
+
+                $(elem).empty().text('Update Tracking Number');
+                $('#alert-' + shipmentId).removeClass('alert-info').removeClass('alert-danger').hide().
+                find('#_form_errors').empty();
+                setTimeout(function () {
+                        $('#alert-' + shipmentId)
+                            .removeClass('alert-info')
+                            .removeClass('alert-danger')
+                            .hide()
+                            .find('#_form_errors').empty()
+                    },
+                    3000
+                );
+
+                return false;
+            });
         }
 
         $(document).ready(function () {

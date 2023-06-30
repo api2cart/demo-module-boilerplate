@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Api2Cart\Client\Model\ModelInterface;
 use Api2Cart\Client\Model\OrderShipmentAdd;
+use Api2Cart\Client\Model\OrderShipmentUpdate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
@@ -1608,6 +1609,39 @@ class Api2Cart
             $this->order->getConfig()->setApiKey('store_key', $storeKey);
             $result = $this->order->orderShipmentAdd($body);
             $this->logApiCall('order.shipment.add.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), $body);
+
+            if ($result->getReturnCode() == 0) {
+                return [0, $this->mapToArray($result->getResult())];
+            } else {
+                if ($this->debug) {
+                    Log::debug(print_r($result, 1));
+                }
+
+                return [$result->getReturnCode(), $result->getReturnMessage()];
+            }
+
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            $this->logApiCall('order.shipment.add.json', [], $e->getCode(), $this->order->getConfig(), null, null, null, $e->getMessage(), $body);
+            return false;
+        }
+    }
+
+
+    /**
+     * @param string|null      $storeKey Store Key
+     * @param OrderShipmentUpdate $body  Body for shipment update
+     *
+     * @return array|false
+     */
+    public function updateOrderShipment($storeKey, $body)
+    {
+        $this->setApiKey();
+
+        try {
+            $this->order->getConfig()->setApiKey('store_key', $storeKey);
+            $result = $this->order->orderShipmentUpdate($body);
+            $this->logApiCall('order.shipment.update.json', $result->getResult(), $result->getReturnCode(), $this->order->getConfig(), null, null, null, $result->getReturnMessage(), $body);
 
             if ($result->getReturnCode() == 0) {
                 return [0, $this->mapToArray($result->getResult())];
