@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
 use App\Http\Requests\OrderShipmentRequest;
+use App\Http\Requests\OrderShipmentUpdateRequest;
 use App\Services\Api2Cart;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
 use Api2Cart\Client\Model\OrderShipmentAdd as OrderShipmentContainer;
+use Api2Cart\Client\Model\OrderShipmentUpdate;
 use \Api2Cart\Client\Model\OrderShipmentAddTrackingNumbers as TrackingNumbers;
 use \Api2Cart\Client\Model\OrderShipmentAddItems as ShipmentItems;
 
@@ -437,6 +439,12 @@ class OrdersController extends Controller
                         }
                     }
 
+                    if (!empty($order->sub_entities->result->shipment)
+                        && $shipmentStatus === self::SHIPMENT_STATUS_NOT_SHIPPED
+                    ) {
+                        $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
+                    }
+
                     $order->avail_shipment_items = $itemsToShip;
                     $order->shipment_status = $shipmentStatus;
                     $orders->push($order);
@@ -497,7 +505,7 @@ class OrdersController extends Controller
         }
 
         if ($request->ajax()) {
-            return response()->json(['data' => view('orders.shipments.info', compact('orderId', 'shipments', 'carriers'))->render(), 'shipments' => $shipments, 'log' => $logs]);
+            return response()->json(['data' => view('orders.shipments.info', compact('orderId', 'storeKey', 'shipments', 'carriers'))->render(), 'shipments' => $shipments, 'log' => $logs]);
         }
 
         return redirect(route('orders.get-orders-with-shipments'));
@@ -575,9 +583,44 @@ class OrdersController extends Controller
         if ($returnCode == 0) {
             list($itemsToShip, $shipmentStatus) = $this->_prepareItemsToShip($storeKey, $orderId);
 
-            return response()->json(['log' => $this->api2cart->getLog(), 'success' => true, 'shipment_status' => $shipmentStatus]);
+            return response()->json(['log' => $this->api2cart->getLog()->all(), 'success' => true, 'shipment_status' => $shipmentStatus]);
         } else {
-            return response()->json(['log' => $this->api2cart->getLog(), 'success' => false, 'errormessage' => $result]);
+            return response()->json(['log' => $this->api2cart->getLog()->all(), 'success' => false, 'errormessage' => $result]);
+        }
+    }
+
+    /**
+     * @param OrderShipmentUpdateRequest $request Request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function orderShipmentUpdate(OrderShipmentUpdateRequest $request)
+    {
+        $shipment = new OrderShipmentUpdate();
+        $orderId = $request->get('order_id');
+        $shipmentId = $request->get('shipment_id');
+        $storeKey = $request->get('store_key');
+
+        $shipment->setOrderId($orderId);
+        $shipment->setShipmentId($shipmentId);
+
+        $updatedTrNumb = $request->get('tracking_numbers');
+
+        foreach ($updatedTrNumb as $item) {
+            $trackingNumbers = new TrackingNumbers();
+            $trackingNumbers->setCarrierId($item['carrier_id']);
+            $trackingNumbers->setTrackingNumber((string)$item['tracking_number']);
+            $shipment->setTrackingNumbers([$trackingNumbers]);
+        }
+
+        list($returnCode, $result) = $this->api2cart->updateOrderShipment($storeKey, $shipment);
+
+        if ($returnCode == 0) {
+            $updatedItems = $result['updated_items'] ?? 0;
+
+            return response()->json(['log' => $this->api2cart->getLog()->all(), 'success' => true, 'updatedItems' => $updatedItems]);
+        } else {
+            return response()->json(['log' => $this->api2cart->getLog()->all(), 'success' => false, 'errormessage' => $result]);
         }
     }
 
@@ -658,6 +701,10 @@ class OrdersController extends Controller
                 $shipmentStatus = self::SHIPMENT_STATUS_PARTIALLY_SHIPPED;
                 break;
             }
+        }
+
+        if ($shipments && $shipmentStatus === self::SHIPMENT_STATUS_NOT_SHIPPED) {
+            $shipmentStatus = self::SHIPMENT_STATUS_SHIPPED;
         }
 
         return [$itemsToShip, $shipmentStatus];
