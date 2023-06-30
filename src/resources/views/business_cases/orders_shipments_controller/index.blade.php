@@ -190,6 +190,8 @@
         }
 
         function checkNewOrders() {
+            orderItems = [];
+
             setTimeout(() => {
                 stores.forEach((item, index) => {
                     setTimeout(() => {
