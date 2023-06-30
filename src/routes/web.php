@@ -51,6 +51,7 @@ Route::middleware(['auth', 'apikey'])->group(function () {
     Route::get('/orders/{store_key?}/{order_id?}/shipments', 'OrdersController@orderShipments')->name('orders.shipments');
     Route::get('/orders/{store_key?}/{order_id?}/shipment/add', 'OrdersController@orderShipmentAdd')->name('order.shipment.add');
     Route::post('/orders/shipment/store', 'OrdersController@orderShipmentStore')->name('order.shipment.store');
+    Route::post('/orders/shipment/update', 'OrdersController@orderShipmentUpdate')->name('order.shipment.update');
     Route::post('/orders/get-orders-with-shipments/{store_id?}', 'OrdersController@getOrdersWithShipments')->name('orders.get-orders-with-shipments');
 
     Route::get('/products', 'ProductsController@index')->name('products.index');
